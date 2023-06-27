@@ -1,0 +1,86 @@
+---
+title: "Snow Interception Processes in the Subalpine"
+author: "Alex Cebulski & John Pomeroy"
+date: today
+date-format: long
+format: 
+  wordcount-pdf:
+    toc: false
+editor: visual
+bibliography: ../../papers/bibtex/library.bib
+csl: '../../papers/bibtex/csl-styles/apa-disable-disambiguate-add-names.csl'
+---
+
+```{r, include=FALSE}
+library(tidyverse)
+
+knitr::opts_chunk$set(message=FALSE, warning=FALSE)
+
+options(ggplot2.discrete.colour= c("#000000", "#E69F00", "#56B4E9"))
+```
+
+## Outline
+
+-   Introduction
+
+    -   The original theory has been lost over time, i.e. the increase in canopy coverage with increasing wind speed is not included in more recent parameterizations [@Clark2015, @Roth2019].
+
+    -   Updates \[@Gelfan2004\] to theory has been ignored in recent studies [e.g. @Lundquist2021].
+
+    -   While many processes are observed to occur in concert in field observations i.e. wind increasing I/P through horizontal particle trajectory and simultaneously reducing I/P due to unloading. Air temperature may increase I/P through increased cohesion but also may decrease I/P due to melt. Representing these individual processes is important for modelling subcanopy snow accumulation.
+
+    -   Recent observational studies [@Roth2019a, @Xiao2019] do not consider the possibility of subcanopy snowmelt artificially increasing their I/P values.
+
+    -   Objectives:
+
+        -   To examine the dominant processes governing snow accumulation in a subalpine forest, the initial interception of snow on the canopy and the subsequent unloading to the ground.
+
+        -   
+
+-   Methods / Study Area
+
+-   Results
+
+    -   What are the forest structure effects on snow interception?
+
+        Snow survey transects were conducted before and immediately following snowfall events of varying sizes and meteorology
+
+        -   ![](images/scatter_lai_IP_w_wind.bmp)
+
+        -   ![](images/scatter_cc_IP_w_wind.bmp)
+
+    -   What are the meteorological effects of snow interception
+
+        -   Event Snowfall
+
+            ![](images/P_vs_IP_facet_instrument.bmp)
+
+        -   Air Temperature
+
+            ![](images/P_vs_at_facet_instrument.bmp)
+
+        -   Wind Speed
+
+            ![](images/P_vs_wnd_facet_instrument.bmp)
+
+        -   @todo remove snow surveys here as they include unloading
+
+        -   could boost results here with some lidar analysis
+
+    -   What are the meteorological effects on canopy snow unloading
+
+        ![](images/fingerprint_plot_icebulb_wind_q_unl.bmp)
+
+        -   Ice Bulb Temperature
+
+            ![](images/fortress_warm_events_bin_temp_avg_unloading.bmp)
+
+        -   Within Canopy Wind Speed
+
+            ![](images/fortress_windy_events_bin_wind_pwl_wind_3cup_avg_unloading.bmp)
+
+    -   Parameterization assessment at the end if space
+
+-   Discussion
+
+-   Conclusion
