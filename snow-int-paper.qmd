@@ -23,9 +23,9 @@ options(ggplot2.discrete.colour= c("#000000", "#E69F00", "#56B4E9"))
 
 -   Introduction
 
-    -   The original theory has been lost over time, i.e. the increase in canopy coverage with increasing wind speed is not included in more recent parameterizations [@Clark2015, @Roth2019].
+    -   The original theory has been lost over time, i.e. the increase in canopy coverage with increasing wind speed is not included in more recent parameterizations [@Clark2015, @Roth2019a].
 
-    -   Updates \[@Gelfan2004\] to theory has been ignored in recent studies [e.g. @Lundquist2021].
+    -   Updates [@Gelfan2004] to theory has been ignored in recent studies [e.g. @Lundquist2021].
 
     -   While many processes are observed to occur in concert in field observations i.e. wind increasing I/P through horizontal particle trajectory and simultaneously reducing I/P due to unloading. Air temperature may increase I/P through increased cohesion but also may decrease I/P due to melt. Representing these individual processes is important for modelling subcanopy snow accumulation.
 
@@ -43,15 +43,23 @@ options(ggplot2.discrete.colour= c("#000000", "#E69F00", "#56B4E9"))
 
     -   What are the forest structure effects on snow interception?
 
-        Snow survey transects were conducted before and immediately following snowfall events of varying sizes and meteorology
+        During calm events (10 m wind speed \< 3.7 m s-1) LAI and CC forest structure metrics explained most, but not all of the variability in I/P observed across the snow survey stations. Canopy closure explains the most variability in I/P at a zenith angle of 30 degrees, while LAI has more variability explained at 35 and 60 degrees. A wider zenith angle incorporates more information about the forest surrounding the snow survey station and would be important in controlling snow interception at higher wind speeds due to horizontal particle trajectories. During high wind speed events (10 m wind speed \> 3.9 m s-1) the explanatory power of LAI and CC is reduced. In , an increase in I/P is observed at locations with low LAI and CC while reducing I/P in locations with higher LAI and CC due to wind induced unloading. Since snow survey data was used here some unloading and wind redistribution may have also affected these results.
 
-        -   ![](images/scatter_lai_IP_w_wind.bmp)
+        -   
 
-        -   ![](images/scatter_cc_IP_w_wind.bmp)
+            ![Snow interception efficiency observed across snow survey stations with differing Leaf Area Index. The observed data has been binned into calm (10 m wind speed \\\< 3.7 ms) and windy (10 m wind speed \\\> 3.9 ms) classes.](images/scatter_lai_IP_w_wind.bmp)
+
+        -   
+
+            ![Snow interception efficiency observed across snow survey stations with different canopy coverage.](images/scatter_cc_IP_w_wind.bmp){#fig-ip-cc}
+
+        -   @todo could redo this using LiDAR derived snow depth increase over a few select snow surveys.
 
     -   What are the meteorological effects of snow interception
 
         -   Event Snowfall
+
+            The weighed tree and medium density lysimeter show a decline in the I/P observed with increasing total event snowfall. The sparse forest lysimeter may not be sensitive to the snow interception capacity of the canopy as branches did not unload directly into this lysimeter. Therefore when the surrounding canopy filled with snow and began unloading additional snow did not effect the sparse trough while branches do unload directly into the medium forest lysimeter thereby reducing the I/P in the medium forest. The shape of the decline in I/P observed at the weighed tree and medium forest lysimeter follows the @Hedstrom1998a curve however at a reduced rate. This means the forest observed here may have a higher species specific snow holding capacity compared to the default value used in @Ellis2013 and shows the importance of using locally derived coefficients.
 
             ![](images/P_vs_IP_facet_instrument.bmp)
 
@@ -82,5 +90,11 @@ options(ggplot2.discrete.colour= c("#000000", "#E69F00", "#56B4E9"))
     -   Parameterization assessment at the end if space
 
 -   Discussion
+
+    -   4 m/s wind speed at 10 m is approaching the minimum threshold for blowing snow on the surface which is likely causing some unloading during the accumulation period and perhaps some blowing snow redistribution on the surface. 
+
+    -   With increased wind speed there is a corresponding increase in canopy contact area due to falling snow particle trajectories in the wind becoming more horizontal. This thoery is included in Hp98 but is often neglected, since it has yet to be confirmed with observed data
+
+    -   No evidence for initial increase in I/P with increasing event size as seen in [@Satterlund1967; @Moeser2015]
 
 -   Conclusion
