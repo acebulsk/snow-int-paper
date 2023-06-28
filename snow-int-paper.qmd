@@ -1,10 +1,14 @@
 ---
-title: "Snow Interception Processes in the Subalpine"
+title: "Paper Outline: Snow Interception Processes in the Subalpine"
 author: "Alex Cebulski & John Pomeroy"
 date: today
 date-format: long
 format: 
-  wordcount-pdf:
+  # wordcount-pdf:
+  #   toc: false
+  docx:
+    reference-doc: config/word_template.docx
+    number-sections: true
     toc: false
 editor: visual
 bibliography: ../../papers/bibtex/library.bib
@@ -14,87 +18,118 @@ csl: '../../papers/bibtex/csl-styles/apa-disable-disambiguate-add-names.csl'
 ```{r, include=FALSE}
 library(tidyverse)
 
-knitr::opts_chunk$set(message=FALSE, warning=FALSE)
+knitr::opts_chunk$set(message=FALSE, warning=FALSE, fig.align='center')
 
 options(ggplot2.discrete.colour= c("#000000", "#E69F00", "#56B4E9"))
 ```
 
-## Outline
+## Introduction
 
--   Introduction
+-   The original theory has been simplified over time, i.e. the increase in canopy coverage with increasing wind speed is not included in more recent parameterizations [@Clark2015, @Roth2019a].
 
-    -   The original theory has been lost over time, i.e. the increase in canopy coverage with increasing wind speed is not included in more recent parameterizations [@Clark2015, @Roth2019a].
+-   Updates to theory [e.g., @Gelfan2004] has been ignored in recent studies [e.g., @Lundquist2021].
 
-    -   Updates [@Gelfan2004] to theory has been ignored in recent studies [e.g. @Lundquist2021].
+-   While many processes occur simultaneously in reality i.e. high winds increasing I/P through horizontal particle trajectory and simultaneously reducing I/P due to unloading. Air temperature may increase I/P through increased cohesion but also may decrease I/P due to melt. Representing these individual processes is important for modelling subcanopy snow accumulation. However since representing all individual processes in models is not ideal it is crucial to determine which are the dominant processes important to represent
 
-    -   While many processes are observed to occur in concert in field observations i.e. wind increasing I/P through horizontal particle trajectory and simultaneously reducing I/P due to unloading. Air temperature may increase I/P through increased cohesion but also may decrease I/P due to melt. Representing these individual processes is important for modelling subcanopy snow accumulation.
+-   Recent observational studies [@Roth2019a, @Xiao2019] do not consider the possibility of subcanopy snowmelt artificially increasing their I/P values.
 
-    -   Recent observational studies [@Roth2019a, @Xiao2019] do not consider the possibility of subcanopy snowmelt artificially increasing their I/P values.
+-   Objectives:
 
-    -   Objectives:
+    -   To examine the dominant processes governing snow accumulation in a subalpine forest, that control the partitioning of snow interception in the canopy and the subsequent unloading to the ground.
 
-        -   To examine the dominant processes governing snow accumulation in a subalpine forest, the initial interception of snow on the canopy and the subsequent unloading to the ground.
+## Methods / Study Area
 
-        -   
+![Regional map of study site location (top left) and map of instrument locations and snow survey transect (bottom right)](images/Screenshot%20from%202023-06-28%2009-42-43.png){#fig-map width="326"}
 
--   Methods / Study Area
+![The mass balance of intercepted snow in a coniferous forest canopy and the subcanopy snowpack. The colours of the arrows correspond to the water phase: solid (purple), liquid (blue) and vapour (light green). The head of the arrow indicates a positive flux either into the control volume (positive) or away from the control volume (negative). Note that the fluxes may transition between positive and negative. In the case of sublimation, from the canopy or snowpack, the flux may be positive (sublimation) or negative (deposition). This figure was adapted from Pomeroy and Gray, (1995).](images/IMG_4319_bitmap_5_mass_bal_new_sym.png){#fig-mass-bal width="446"}
 
--   Results
+The change in canopy SWE storage, $W$ (mm), may be represented as:
 
-    -   What are the forest structure effects on snow interception?
+$$
+\frac{dW}{dt} = 
+q_{sf} - q_{tf}(W) - q_{unld}(W) - q_{drip}(W) - q_{wind}^{veg}(W) - q_{sub}^{veg}(W)
+$$ {#eq-canopy-mass-flux}
 
-        During calm events (10 m wind speed \< 3.7 m s-1) LAI and CC forest structure metrics explained most, but not all of the variability in I/P observed across the snow survey stations. Canopy closure explains the most variability in I/P at a zenith angle of 30 degrees, while LAI has more variability explained at 35 and 60 degrees. A wider zenith angle incorporates more information about the forest surrounding the snow survey station and would be important in controlling snow interception at higher wind speeds due to horizontal particle trajectories. During high wind speed events (10 m wind speed \> 3.9 m s-1) the explanatory power of LAI and CC is reduced. In , an increase in I/P is observed at locations with low LAI and CC while reducing I/P in locations with higher LAI and CC due to wind induced unloading. Since snow survey data was used here some unloading and wind redistribution may have also affected these results.
+where $q_{sf}$ (mm s^-1^) is the above canopy snowfall rate, $q_{tf}$ (mm s^-1^) is the throughfall rate, $q_{wind}^{veg}$ (mm s^-1^) is the wind transport rate in our out of the control volume (typically assumed to be negligible in the literature), $q_{sub}^{veg}$ (mm s^-1^) is the intercepted snow sublimation rate, $q_{unld}$ (mm s^-1^) is the canopy snow unloading rate and $q_{drip}$ (mm s^-1^) is the canopy snow drip rate due to canopy snowmelt. $q_{wind}^{veg}$ and $q_{sub}^{veg}$ may be a positive or negative flux. Where all of the above rates are a function of snow load ($W$), which is how much snow is present in the canopy.
 
-        -   
+## Results
 
-            ![Snow interception efficiency observed across snow survey stations with differing Leaf Area Index. The observed data has been binned into calm (10 m wind speed \\\< 3.7 ms) and windy (10 m wind speed \\\> 3.9 ms) classes.](images/scatter_lai_IP_w_wind.bmp)
+### Interception
 
-        -   
+#### Forest Structure
 
-            ![Snow interception efficiency observed across snow survey stations with different canopy coverage.](images/scatter_cc_IP_w_wind.bmp){#fig-ip-cc}
+During calm events (10 m wind speed \< 3.7 m s-1) I/P is strongly associated with forest structure metrics LAI and CC across all of the snow survey stations. Canopy closure explains the most variability in I/P at a zenith angle of 30 degrees, while LAI has more variability explained at 35 and 60 degrees. A wider zenith angle incorporates more information about the forest surrounding the snow survey station and may better represent the forest structure important in controlling snowpack accumulation in mountain forests with high wind speeds which lead to horizontal snowflake trajectories. During high wind speed events (10 m wind speed \> 3.9 m s-1) the explanatory power of LAI and CC is reduced and an increase in I/P is observed at locations with low LAI and CC while reducing I/P in locations with higher LAI and CC due to wind induced unloading. Since snow survey data was used here some unloading and wind redistribution may have also affected these results.
 
-        -   @todo could redo this using LiDAR derived snow depth increase over a few select snow surveys.
+![Snow interception efficiency observed across snow survey stations with differing Leaf Area Index. The observed data has been binned into calm (10 m wind speed \< 3.7 ms) and windy (10 m wind speed \> 3.9 ms) classes.](images/scatter_lai_IP_w_wind.bmp)
 
-    -   What are the meteorological effects of snow interception
+![Snow interception efficiency observed across snow survey stations with different canopy coverage. The observed data has been binned into calm (10 m wind speed \< 3.7 ms) and windy (10 m wind speed \> 3.9 ms) classes.](images/scatter_cc_IP_w_wind.bmp){#fig-ip-cc}
 
-        -   Event Snowfall
+-   @todo could add to this using LiDAR derived snow depth increase over a few select snow surveys.
 
-            The weighed tree and medium density lysimeter show a decline in the I/P observed with increasing total event snowfall. The sparse forest lysimeter may not be sensitive to the snow interception capacity of the canopy as branches did not unload directly into this lysimeter. Therefore when the surrounding canopy filled with snow and began unloading additional snow did not effect the sparse trough while branches do unload directly into the medium forest lysimeter thereby reducing the I/P in the medium forest. The shape of the decline in I/P observed at the weighed tree and medium forest lysimeter follows the @Hedstrom1998a curve however at a reduced rate. This means the forest observed here may have a higher species specific snow holding capacity compared to the default value used in @Ellis2013 and shows the importance of using locally derived coefficients.
+#### Meteorology
 
-            ![](images/P_vs_IP_facet_instrument.bmp)
+*Event Snowfall*
 
-        -   Air Temperature
+The weighed tree and medium density lysimeter show a decline in the I/P observed with increasing total event snowfall. The sparse forest lysimeter may not be sensitive to the snow interception capacity of the canopy as branches did not unload directly into this lysimeter. Therefore when the surrounding canopy filled with snow and began unloading additional snow did not effect the sparse trough. At the medium forest lysimeter branches unload into lysimeter thereby reducing the I/P in the medium forest. The shape of the decline in I/P observed at the weighed tree and medium forest lysimeter is similar to the @Hedstrom1998a curve however at a much reduced rate. This means the forest observed here may have a higher species specific snow holding capacity compared to the default value used in @Ellis2013 and shows the importance of using locally derived coefficients.
 
-            ![](images/P_vs_at_facet_instrument.bmp)
+![Interception efficiency measured using different methods across a range of snowfall event sizes.](images/P_vs_IP_facet_instrument.bmp)
 
-        -   Wind Speed
+*Air Temperature*
 
-            ![](images/P_vs_wnd_facet_instrument.bmp)
+Air temperature was observed to have little influence over interception efficiency measured using the weighed tree and lysimeters . Snow surveys were not included here due to snowpack melt and unloading which could not be accounted for. It is possible that the negative influence of warmer temperature on I/P depends on tree species and was not observed at this site which are dominated by equal parts spruce and fir. Evidence of a positive influence of warm temperatures raising I/P was observed with the snow survey data however after careful investigation of time-lapse imagery this increase was due to subcanopy snow melt and not due to snow caught in the canopy which artificially raised the I/P value.
 
-        -   @todo remove snow surveys here as they include unloading
+![Interception efficiency measured using different methods across a range of air temperatures.](images/P_vs_at_facet_instrument.bmp)
 
-        -   could boost results here with some lidar analysis
+*Wind Speed*
 
-    -   What are the meteorological effects on canopy snow unloading
+Frequent automated measurements show an increase in I/P with increasing wind speed measured with the weighed tree and lysimeters. This effect was most apparent under sparser canopy as this lysimeter was not directly affected by unloading of snow into the lysimeter which may have reduced I/P during higher wind events in the medium forest lysimeter. The increase in I/P with increasing wind speed is expected as the horizontal particle trajectory of the snowflake becomes more horizontal thereby increasing the effective canopy coverage of the forest. Since unloading and wind redistribution of snow is higher with higher wind speeds, this effect of increase I/P with wind speed was not observed in the snow survey data as they were collected over longer time periods and thus include more unloading and redistribution.
 
-        ![](images/fingerprint_plot_icebulb_wind_q_unl.bmp)
+![Interception efficiency measured using different methods across a range of wind speeds.](images/P_vs_wnd_facet_instrument.bmp)
 
-        -   Ice Bulb Temperature
+-   @todo remove snow surveys here as they include unloading
 
-            ![](images/fortress_warm_events_bin_temp_avg_unloading.bmp)
+-   could add some lidar analysis here
 
-        -   Within Canopy Wind Speed
+### Unloading
 
-            ![](images/fortress_windy_events_bin_wind_pwl_wind_3cup_avg_unloading.bmp)
+To investigate the influence of meteorology on canopy snow unloading unloading rates were calculated using the lysimeters for events with a range of wind speeds and ice bulb temperatures. Higher unloading rates were associated with high wind speed or high ice bulb temperature or a combination of both factors. Ice bulb temperature was observed to have a stronger relationship with unloading rates compared to air temperature since the ice bulb temperature is strongly related to sublimation and snowmelt rates which both influence the cohesion and adhesion of snow clumps in the canopy.
 
-    -   Parameterization assessment at the end if space
+![The unloading rate of canopy snow shown at different observed ice bulb temperatures and 5 m wind speeds.](images/fingerprint_plot_icebulb_wind_q_unl.bmp)
+
+Below is using heavily filtered data, all of the observations of the ice bulb temp plot have low wind speeds and all of the obs in the within canopy wind speed plot have low temperatures. John suggested it would be better to use a multivariate regression here if possible. 
+
+-   Ice Bulb Temperature
+
+![](images/fortress_warm_events_bin_temp_avg_unloading.bmp)
+
+-   Within Canopy Wind Speed
+
+![](images/fortress_windy_events_bin_wind_pwl_wind_3cup_avg_unloading.bmp)
+
+-   Parameterization assessment at the end if space
 
 -   Discussion
 
-    -   4 m/s wind speed at 10 m is approaching the minimum threshold for blowing snow on the surface which is likely causing some unloading during the accumulation period and perhaps some blowing snow redistribution on the surface. 
+    -   4 m/s wind speed at 10 m is approaching the minimum threshold for blowing snow on the surface which is likely causing some unloading during the accumulation period and perhaps some blowing snow redistribution on the surface.
 
     -   With increased wind speed there is a corresponding increase in canopy contact area due to falling snow particle trajectories in the wind becoming more horizontal. This thoery is included in Hp98 but is often neglected, since it has yet to be confirmed with observed data
 
     -   No evidence for initial increase in I/P with increasing event size as seen in [@Satterlund1967; @Moeser2015]
 
 -   Conclusion
+
+    -   Forest structure metrics calculated using high zenith angles better described the variability in interception efficiency.
+
+    -   Increasing wind speed reduced the association between forest structure and interception efficiency.
+
+    -   Higher wind speeds increased interception efficiency due to an associated increase in canopy contact area, while later decreasing intercepted load due to increased snow unloading.
+    
+    -   Theories derived in dense cold canopies, including the exponential decline of I/P with increasing event size and the increase in I/P with wind speeds were applicable to this subalpine forest.
+
+    -   Air temperature had little influence on interception efficiency.
+
+    -   Canopy snow unloading rates were strongly and non-linearly related to both ice bulb temperature and above canopy wind speed.
+    
+\pagebreak
+
+# References
