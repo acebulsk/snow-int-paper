@@ -92,9 +92,24 @@ Frequent automated measurements show an increase in I/P with increasing wind spe
 
 ### Unloading
 
-To investigate the influence of meteorology on canopy snow unloading unloading rates were calculated using the lysimeters for events with a range of wind speeds and ice bulb temperatures. Higher unloading rates were associated with high wind speed or high ice bulb temperature or a combination of both factors. Ice bulb temperature was observed to have a stronger relationship with unloading rates compared to air temperature since the ice bulb temperature is strongly related to sublimation and snowmelt rates which both influence the cohesion and adhesion of snow clumps in the canopy.
+Snow unloading was investigated during periods of time where snow was in the canopy and no above canopy precipitation was observed. Higher unloading rates were associated with high wind speed or high ice bulb temperature or a combination of both factors. Ice bulb temperature was observed to have a stronger relationship with unloading rates compared to air temperature since the ice bulb temperature is strongly related to sublimation and snowmelt rates which both influence the cohesion and adhesion of snow clumps in the canopy. There was also a negative association of ice-bulb temperature on wind speed. Where an increase in ice-bulb temperature reduced the effectiveness of wind removing snow from the canopy. 
 
-![The unloading rate of canopy snow shown at different observed ice bulb temperatures and 5 m wind speeds.](images/fingerprint_plot_icebulb_wind_q_unl.bmp)
+![The probability of canopy snow unloading shown at different observed ice-bulb temperatures and 5 m wind speeds. Probability of unloading was calculated as the number of unloading events divided by the total number of occurances of observed ice-bulb and wind speed within each bin.](../../analysis/unloading/figs/probability/fingerprint_plot_icebulb_wind_probability_unloading_avg_troughs.png)
+![The number of canopy snow unloading events within each ice-bulb and wind speed bin over two winter seasons.](../../analysis/unloading/figs/probability/fingerprint_plot_icebulb_wind_frequency_unloading_avg_troughs.png)
+
+![Cumulative unloaded canopy snow measured over two winter seasons.](../../analysis/unloading/figs/binned_multivariate/fingerprint_plot_icebulb_wind_cuml_unl_snow_in_canopy_avg_trough.png)
+
+To describe the reduced wind induced snow unloading at warmer temperatures we can use a multivariate regression. 
+
+f <- function(temp, wind, a, b1, b2, b3) {a * exp(temp*b1) * exp(wind*b2) * exp(wind*temp*-b3)}
+
+Here is the result on raw, unbinned unloading data:
+
+![Comparison of different non-linear least squares regression models fit to two years of canopy snow unloading meausrements.](../../analysis/unloading/figs/multivariate/multivariate_q_unld_wind_w_neg_tempwind_lm_nls_model_compare.png)
+
+Seems to make a bit more sense with the binned data:
+
+![Comparison of different non-linear least squares regression models fit to two years of binned canopy snow unloading meausrements.](../../analysis/unloading/figs/binned_multivariate/multivariate_q_unld_wind_w_neg_tempwind_lm_nls_model_compare.png)
 
 Below is using heavily filtered data, all of the observations of the ice bulb temp plot have low wind speeds and all of the obs in the within canopy wind speed plot have low temperatures. John suggested it would be better to use a multivariate regression here if possible. 
 
