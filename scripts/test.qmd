@@ -1,0 +1,14 @@
+---
+title: "Untitled"
+format: html
+editor: visual
+---
+
+::: {#fig-maps layout-ncol=2}
+
+![Image 1](https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/African_Elephant_%28Loxodonta_africana%29_male_%2817289351322%29.jpg/200px-African_Elephant_%28Loxodonta_africana%29_male_%2817289351322%29.jpg){#fig-a height="500"}
+
+![Image 2](https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/Elephas_maximus_%28Bandipur%29.jpg/200px-Elephas_maximus_%28Bandipur%29.jpg){#fig-b height="500"}
+
+Image of elephant (a) and elephant (b).
+:::
