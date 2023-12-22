@@ -49,9 +49,13 @@ knitr::opts_chunk$set(echo = FALSE, message=FALSE, warning=FALSE, fig.align='cen
 
 -   Recent observational studies [@Roth2019a, @Xiao2019] do not consider the possibility of subcanopy snowmelt artificially increasing their I/P values.
 
+- @Katsushima2023 did not have sufficent data points below -3 deg. C. Observed a decline in I/P potentially due to unloading occuring during observations but speculated that this may be due to increased particle velocity and bouncing on impact. Did not observed a maximum interception capacity within their measurement range of 0-25 mm. Although for temperatures above 0 could see a decline in I/P above 10 mm maybe due to branch bending + melt rates. Suggest air temperature and wind speed alone are insufficient to describe I/P and that particle shape may be an improved predictor. Some of the low I/P model performance may be attributed to a result of the interception measurements including unloading due to melt and wind.
+
 -   Uncertainties also arise in the scaling of point or branch scale measurements to the plot scale. 
 
 -   Forest structure governs the interception efficiency observed at a given location [@Hedstrom1998a; @Roth2019a]. Metrics used in common snow interception parameterizations [@Hedstrom1998a; @Storck2002] to describe forest structure include canopy cover and leaf area index (LAI). Leaf area index is defined by @Chen1997 as one half the total green leaf area per unit ground surface area. Canopy cover is defined in @Hedstrom1998a as the fraction of sky not visible by the instrument from under the canopy. While more detailed forest structure metrics exist derived from detailed LiDAR scans [@Roth2019a; @Helbig2020], often they are not available at regional extents required to run hydrological models.
+
+-   Novelty here is the use of high frequency automated measurements to attempt to separate out interception from ablative processes. Timelapse cameras were also used to confirm absence of unloading during interception periods. 
 
 Objective: To examine the dominant processes governing snow accumulation in a subalpine forest, that control the partitioning of snow interception in the canopy and the subsequent unloading to the ground.
 
@@ -241,6 +245,25 @@ Existing observations have suggested a relationship in the peak canopy storage c
 ![Cumulative canopy snow storage over 25 snowfall events measured using the weighed tree (Tree) and subcanopy lysimeters (SCL).](figs/interception/cuml_event_snowfall_canopy_storage_scl_tree.png){#fig-cml-w}
 
 ![Maximum canopy snow storage and the associated average event air temperature for 25 snowfall events measured using the weighed tree (Tree) and subcanopy lysimeters (SCL).](figs/interception/air_temp_w_max_scl_tree.png){#fig-wmax-obs}
+
+## Hydrometeor Type
+
+::: {.callout-warning}
+Warning: Need to pull in full parsivel dataset this is only up until Feb 2023.
+:::
+
+Hydrometeor diameter and velocity is hypothesized to have a control on the interception efficiency observed over a given time step. The hydrometeor classification shown in @fig-parsivel-class, is based on hydrometeor velocity and diameter based on suggested values in the literature [@Ishizaka2013; @Rasmussen1999]. @fig-part-vel-diam-ip shows higher interception efficiencies were associated with the dry snow class. Graupel type hydrometeors which had a lower interception efficiency on average. So far just looking at all time periods but may be a clearer effect if we limit to slower wind speeds and cold temps where unloading is not a factor. 
+
+![Hydrometeor classification based on values from the literature (precip_name) and k-means clustering (cluster_id).](figs/stats/kmeans_part_diam_vs_part_vel_colour_cluster_shape_precip_name.png){#fig-parsivel-class}
+
+::: {#fig-part-vel-diam-ip layout="[45,55]"}
+
+![](figs/stats/kmeans_part_vel_vs_ip_colour_cluster_shape_precip_name.png){#fig-part-vel-ip height=3in}
+
+![](figs/stats/kmeans_part_diam_vs_ip_colour_cluster_shape_precip_name.png){#fig-part-diam-ip height=3in}
+
+Hydrometeor velocity vs. interception efficiency (a) and Hydrometeor diameter vs. interception efficiency. The hydrometeor type is shown by shape using classification based on the literature and based on the k-means clustering using colour.
+:::
 
 # Discussion
 
