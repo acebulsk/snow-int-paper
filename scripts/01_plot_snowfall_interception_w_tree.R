@@ -65,7 +65,10 @@ event_df <- storm_dates_long |>
   mutate(cuml_snow = cumsum(p),
          q_int_troughs = p - q_tf,
          cuml_int_troughs = cumsum(q_int_troughs),
-         cuml_int_tree = cumsum(q_int_tree)) |> filter(!w_tree_event %in% bad_events)
+         cuml_int_tree = cumsum(q_int_tree),
+         IP_tree = q_int_tree/p,
+         IP_troughs = q_int_troughs/p,
+         ) |> filter(!w_tree_event %in% bad_events)
 
 class_event_met <- event_df |>
   group_by(w_tree_event) |>
@@ -135,5 +138,28 @@ event_df |>
   labs(colour = temp_ax_lab)
 
 ggsave('figs/interception/cuml_event_snowfall_canopy_storage_scl_tree.png', width = 7, height = 3)
+
+# plotly::ggplotly()
+
+sel_ip <- event_df |>
+  select(w_tree_event, datetime, Tree = IP_tree, SCL = IP_troughs) |>
+  pivot_longer(c(Tree, SCL), names_to = 'inst', values_to = 'IP')
+
+sel_W <- event_df |>
+  ungroup() |>
+  select(datetime, Tree = cuml_int_tree, SCL = cuml_int_troughs) |>
+  pivot_longer(c(Tree, SCL), names_to = 'inst', values_to = 'W')
+
+left_join(sel_ip, sel_W, by = c('datetime', 'inst')) |>
+  left_join(class_event_met |> select(w_tree_event, t)) |>
+  filter(w_tree_event %in% low_wind_events) |>
+  ggplot(aes(W, IP, colour = t, group = t)) +
+  geom_line() + scale_color_viridis_c(option = 'magma', end = .90) +
+  facet_grid(~inst) +
+  ylab('Interception Efficiency (-)') +
+  xlab('Canopy Storage (mm)') +
+  labs(colour = temp_ax_lab)
+
+ggsave('figs/interception/canopy_storage_VS_IP_scl_tree.png', width = 7, height = 3)
 
 # plotly::ggplotly()
