@@ -14,14 +14,6 @@ parsivel |>
 
 ggsave('figs/supplement/hydrometeor_classification_2021_2023.png', width = 5, height = 3)
 
-met_intercept <- readRDS('../../analysis/interception/data/storm_analysis/continuous_throughfall_data_binned_met_select_events.rds')  |>
-  filter(q_sf > 0,
-         q_sf > q_tf) |>
-  mutate(
-    q_int = q_sf - q_tf,
-    IP = q_int / q_sf) |>
-  filter(IP < 1)
-
 # seems like the dry snow / graupel / wet snow classification is being messed up by turbulence at powerline
 ggplot(met_intercept, aes(precip_name, IP)) + geom_boxplot()
 ggplot(met_intercept, aes(precip_name, t)) + geom_boxplot()
@@ -32,12 +24,15 @@ ggplot(met_intercept, aes(precip_name, t)) + geom_boxplot()
 # this metric but for now just using a wind speed threshold
 
 u_th <- 1
+wt_cl_th <- 25
+met_intercept <- met_intercept  |>
+  filter(u < u_th,
+         weighed_tree_canopy_load_mm < wt_cl_th,
+         precip_name %in% c('dry snow', 'wet snow'))
 
 # hydrometeor type ----
 
 met_intercept |>
-  filter(u < u_th,
-         precip_name %in% c('dry snow', 'wet snow')) |>
   ggplot(aes(part_diam, part_vel, colour = precip_name), size = 1) +
   geom_point(alpha = 0.4) +
   scale_color_viridis_d() +
@@ -49,16 +44,16 @@ met_intercept |>
 ggsave('figs/supplement/hydrometeor_classification_low_wind.png', width = 5, height = 3)
 
 # wet show should be warmer.. not trusting the classification scheme..
+# maybe have some large flakes at warmer temperatures due to coehsion complicating this
 met_intercept |>
-  filter(u < u_th,
-         precip_name %in% c('dry snow', 'wet snow')) |>
   ggplot(aes(precip_name, t)) + geom_boxplot(width = .1) +
-  ylab(ip_y_ax_lab) +
+  ylab("Air Temperature (°C)") +
   xlab('Hydrometeor Type')+
   theme(plot.margin = margin(0.5, 0.5, 0.5, .75, "cm"))
 
 ip_vs_hydro_type <- met_intercept |>
   filter(u < u_th,
+         weighed_tree_canopy_load_mm < wt_cl_th,
          precip_name %in% c('dry snow', 'wet snow')) |>
   ggplot(aes(precip_name, IP)) + geom_boxplot(width = .1) +
   ylab(ip_y_ax_lab) +
@@ -68,6 +63,7 @@ ip_vs_hydro_type
 
 met_intercept |>
   filter(u < u_th,
+         weighed_tree_canopy_load_mm < wt_cl_th,
          precip_name %in% c('dry snow', 'wet snow')) |>
   group_by(precip_name) |>
   summarise(IP = mean(IP, na.rm = T),
@@ -75,24 +71,35 @@ met_intercept |>
   ggplot(aes(precip_name, IP)) + geom_point() +
   ylim(c(.2, .8))
 
-
-
 # particle diameter ----
 
-met_intercept |>
-  filter(u < u_th,
-         precip_name %in% c('dry snow', 'wet snow')) |>
-  mutate(part_diam_labs = as.numeric(as.character(part_diam_labs))) |>
+smry <- met_intercept |>
   group_by(part_diam_labs) |>
-  summarise(IP = mean(IP, na.rm = T),
-            count = n()) |>
-  filter(count > 3) |>
-  ggplot(aes(part_diam_labs, IP)) + geom_point() +
+  # filter(weighed_tree_canopy_load_mm <= 5) |>
+  summarise(IP_avg = mean(IP, na.rm = T),
+            sd = sd(IP, na.rm = T),
+            sd_low = IP_avg - sd,
+            sd_hi = IP_avg + sd,
+            ci_low = quantile(IP,0.05),
+            ci_hi = quantile(IP, 0.95),
+            n = n()) |> filter(n > 3)
+
+diam_ip <- met_intercept |>
+  ggplot() +
+  geom_point(aes(x = part_diam, y = IP), colour = '#61D04F',  alpha = 0.5, size = 0.5)+
+  geom_errorbar(data = smry, aes(x = part_diam_labs, ymax = sd_hi, ymin = sd_low), width = .025)  +
+  geom_point(data = smry, aes(x = part_diam_labs, y = IP_avg), shape = 1, size = 4) +
   ylab(ip_y_ax_lab) +
-  xlab('Hydrometeor Diameter (mm)')
+  xlab(diam_ax_lab) +
+  ylim(ip_y_lims) +
+  theme(legend.title = element_blank(),
+        plot.margin = margin(0.5, 0.5, 0.5, .75, "cm"))
+diam_ip
+
 
 met_intercept |>
   filter(u < u_th,
+         weighed_tree_canopy_load_mm < wt_cl_th,
          precip_name %in% c('dry snow', 'wet snow')) |>
   mutate(part_diam_labs = as.numeric(as.character(part_diam_labs))) |>
   ggplot(aes(part_diam_labs, IP, group = part_diam_labs)) +
@@ -104,38 +111,55 @@ ggsave('figs/supplement/IP_hydrometeor_diameter.png', width = 5, height = 3)
 
 # particle velocity ----
 
-met_intercept |>
-  filter(u < u_th,
-         precip_name %in% c('dry snow', 'wet snow')) |>
-  mutate(part_vel_labs = as.numeric(as.character(part_vel_labs))) |>
+smry <- met_intercept |>
   group_by(part_vel_labs) |>
-  summarise(IP = mean(IP, na.rm = T),
-            count = n(),
-            u = mean(u)) |>
-  filter(count > 3) |>
-  ggplot(aes(part_vel_labs, IP)) + geom_point() +
+  # filter(weighed_tree_canopy_load_mm <= 5) |>
+  summarise(IP_avg = mean(IP, na.rm = T),
+            sd = sd(IP, na.rm = T),
+            sd_low = IP_avg - sd,
+            sd_hi = IP_avg + sd,
+            ci_low = quantile(IP,0.05),
+            ci_hi = quantile(IP, 0.95),
+            n = n()) |> filter(part_vel_labs < 1.2)
+
+vel_ip <- met_intercept |>
+  ggplot() +
+  geom_point(aes(x = part_vel, y = IP), colour = '#61D04F',  alpha = 0.5, size = 0.5)+
+  geom_errorbar(data = smry, aes(x = part_vel_labs, ymax = sd_hi, ymin = sd_low), width = .025)  +
+  geom_point(data = smry, aes(x = part_vel_labs, y = IP_avg), shape = 1, size = 4) +
   ylab(ip_y_ax_lab) +
-  xlab('Hydrometeor Velocity (m/s)')
+  xlab(vel_ax_lab) +
+  ylim(ip_y_lims) +
+  xlim(c(0.6, 1.3)) +
+  theme(legend.title = element_blank(),
+        plot.margin = margin(0.5, 0.5, 0.5, .75, "cm"))
+vel_ip
+
 
 met_intercept |>
-  filter(u < u_th,
-         precip_name %in% c('dry snow', 'wet snow')) |>
   mutate(part_vel_labs = as.numeric(as.character(part_vel_labs))) |>
   ggplot(aes(part_vel_labs, IP, group = part_vel_labs)) + geom_boxplot()+
   ylab(ip_y_ax_lab) +
   xlab('Hydrometeor Velocity (m/s)')
 
-ggsave('figs/supplement/IP_hydrometeor_velocity.png', width = 5, height = 3)
+# ggsave('figs/supplement/IP_hydrometeor_velocity.png', width = 5, height = 3)
 
 # fingerprints
+
 met_intercept |>
-  filter(u < u_th) |>
   ggplot(aes(x = part_diam, y = part_vel, colour = IP)) +
   geom_point() +
   scale_color_viridis_c()
 
-met_intercept |>
-  filter(u < u_th) |>
+avg_ip <- met_intercept |>
+  group_by(part_diam_labs, part_vel_labs) |>
+  summarise(IP = mean(IP, na.rm = T),
+            n = n()) |>
+  filter(n > 4)
+
+
+
+avg_ip |>
   ggplot(aes(x = part_diam_labs, y = part_vel_labs, fill = IP)) +
   geom_raster() +
   scale_fill_viridis_c()

@@ -5,73 +5,79 @@ library(ggpubr)
 
 ip_y_lims <- c(0.05, 1)
 
-met_intercept <- readRDS('../../analysis/interception/data/storm_analysis/continuous_throughfall_data_binned_met_select_events.rds')  |>
-  filter(q_sf > 0,
-         q_sf > q_tf) |>
-  mutate(
-    q_int = q_sf - q_tf,
-    IP = q_int / q_sf) |>
-  filter(IP < 1)
-
 # lysimeter data ----
 
+at_ip_smry <- met_intercept |>
+  group_by(temp_labs) |>
+  # filter(weighed_tree_canopy_load_mm <= 5) |>
+  summarise(IP_avg = mean(IP, na.rm = T),
+            sd = sd(IP, na.rm = T),
+            sd_low = IP_avg - sd,
+            sd_hi = IP_avg + sd,
+            ci_low = quantile(IP,0.05),
+            ci_hi = quantile(IP, 0.95),
+            n = n())
+
 at_ip <- met_intercept |>
-  # group_by(temp_labs) |>
-  # filter(u <= 2) |>
-  # summarise(IP_avg = mean(IP, na.rm = T),
-  #           ci_low = quantile(IP,0.05),
-  #           ci_hi = quantile(IP, 0.95),
-  #           n = n()) |>
-  # filter(n > 10) |>
-  ggplot(aes(x = temp_labs, y = IP, group = temp_labs)) +
-  # ggplot(aes(x = temp_labs, y = IP, group = temp_labs, fill = temp_labs)) +
-  # geom_point(alpha=0.2, colour = "#56B4E9")+
-  geom_boxplot(width = 1)+
-  # geom_point() +
-  # geom_errorbar(aes(ymax = ci_hi, ymin = ci_low))  +
+  # filter(weighed_tree_canopy_load_mm <= 5) |>
+  ggplot() +
+  geom_point(aes(x = t, y = IP), colour = '#61D04F',  alpha = 0.5, size = 0.5)+
+  geom_errorbar(data = at_ip_smry, aes(x = temp_labs, ymax = sd_hi, ymin = sd_low), width = .5)  +
+  geom_point(data = at_ip_smry, aes(x = temp_labs, y = IP_avg), shape = 1, size = 4) +
   ylab(ip_y_ax_lab) +
   xlab(temp_bin_ax_lab) +
   # scale_fill_viridis_c(option = 'magma')+
-  xlim(NA, 0.5) +
-  ylim(ip_y_lims) +
-  theme(legend.title = element_blank(),
+  xlim(NA, 0) +
+  # ylim(ip_y_lims) +
+  theme(legend.position = 'none',
         plot.margin = margin(0.5, 0.5, 0.5, .75, "cm"))
+at_ip
+
+ws_ip_smry <- met_intercept |>
+  group_by(wind_labs) |>
+  # filter(weighed_tree_canopy_load_mm <= 5) |>
+  summarise(IP_avg = mean(IP, na.rm = T),
+            sd = sd(IP, na.rm = T),
+            sd_low = IP_avg - sd,
+            sd_hi = IP_avg + sd,
+            ci_low = quantile(IP,0.05),
+            ci_hi = quantile(IP, 0.95),
+            n = n()) |> filter(n > 10)
 
 ws_ip <- met_intercept |>
-  group_by(wind_labs) |>
-  #   # filter(u <= 2) |>
-  # summarise(IP_avg = mean(IP, na.rm = T),
-  #           ci_low = quantile(IP,0.05),
-  #           ci_hi = quantile(IP, 0.95),
-  #           n = n()) |>
-  mutate(n = n()) |>
-  filter(n > 4) |>
-  ggplot(aes(wind_labs, IP, group = wind_labs)) +
-  # geom_point(alpha = 0.2, colour = "#56B4E9") +
-  geom_boxplot()+
-  # geom_errorbar(aes(ymax = ci_hi, ymin = ci_low))  +
+  # filter(weighed_tree_canopy_load_mm <= 5) |>
+  ggplot() +
+  geom_point(aes(x = u, y = IP), colour = '#61D04F', alpha = 0.5, size = 0.5)+
+  geom_errorbar(data = ws_ip_smry, aes(x = wind_labs, ymax = sd_hi, ymin = sd_low), width = .1)  +
+  geom_point(data = ws_ip_smry, aes(x = wind_labs, y = IP_avg), shape = 1, size = 4) +
   ylab(ip_y_ax_lab) +
   xlab(wnd_bin_ax_lab)+
   ylim(ip_y_lims)+
   theme(plot.margin = margin(0.5, 0.5, 0.5, .75, "cm"))
+ws_ip
+
+w_ip_smry <- met_intercept |>
+  group_by(tree_labs) |>
+  # filter(u <= 2) |>
+  summarise(IP_avg = mean(IP, na.rm = T),
+            sd = sd(IP, na.rm = T),
+            sd_low = IP_avg - sd,
+            sd_hi = IP_avg + sd,
+            ci_low = quantile(IP,0.05),
+            ci_hi = quantile(IP, 0.95),
+            n = n()) |> filter(n > 10)
 
 w_ip <- met_intercept |>
-  group_by(tree_labs) |>
-  # summarise(IP_avg = mean(IP, na.rm = T),
-  #           ci_low = quantile(IP,0.05),
-  #           ci_hi = quantile(IP, 0.95),
-  #           n = n()) |>
-  mutate(n = n()) |>
-  # filter(n > 10) |>
-  ggplot(aes(tree_labs, IP, group = tree_labs)) +
-  # geom_point(alpha = 0.5, colour = "#56B4E9") +
-  # geom_errorbar(aes(ymax = ci_hi, ymin = ci_low))  +
-  geom_boxplot() +
+  ggplot() +
+  geom_point(aes(x = weighed_tree_canopy_load_mm, y = IP), colour = '#61D04F', alpha = 0.5, size = 0.5) +
+  geom_errorbar(data = w_ip_smry, aes(x = tree_labs, ymax = sd_hi, ymin = sd_low), width = .5)  +
+  geom_point(data = w_ip_smry, aes(x = tree_labs, y = IP_avg), colour = 'black', shape = 1, size = 4) +
   ylab(ip_y_ax_lab) +
-  xlab('Canopy Snow Load (mm)')+
+  xlab(w_ax_lab)+
   ylim(ip_y_lims)+
   theme(plot.margin = margin(0.5, 0.5, 0.5, .75, "cm"))
 
+w_ip
 
 cowplot::plot_grid(at_ip, ws_ip, w_ip, nrow = 3, labels = 'AUTO')
 

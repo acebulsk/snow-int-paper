@@ -58,7 +58,31 @@ fsd_all_slim_low_wind <- fsd_all |>
   filter(!storm_id %in% c(outlier_events_fsd, windy_events_fsd),
          IP <= ip_filter)
 
-fsd_all_met <- left_join(fsd_all_slim, fsd_storm_summary_met |> rename(avg_IP = IP), by = 'storm_id')
+fsd_storm_summary_met_slim <- fsd_storm_summary_met |>
+  filter(!storm_id %in% outlier_events_fsd)
+
+saveRDS(fsd_storm_summary_met_slim, 'data/fsd_storm_summary_met_no_outlier.rds')
+
+fsd_all_met <- left_join(fsd_all_slim, fsd_storm_summary_met |> rename(avg_trough_IP = IP), by = 'storm_id')
+
+fsd_all_slim_smry <- fsd_all_slim |>
+  group_by(storm_id) |>
+  summarise(mean_IP = mean(IP),
+            sd_IP = sd(IP)) |>
+  left_join(fsd_storm_summary_met |> rename(avg_trough_IP = IP), by = 'storm_id')
+
+fsd_all_slim_smry |>
+  pivot_longer(c(`Air Temp. (°C)`, `Median Wind Speed (m/s)`, `Avg. Wind Speed (m/s)`, `Open Precip. (mm)`)) |>
+  ggplot(aes(value, mean_IP)) +
+  geom_point() +
+  geom_errorbar(aes(ymax = mean_IP + sd_IP, ymin = mean_IP - sd_IP, width = .1)) +
+  facet_grid(cols = vars(name), scales = 'free')
+
+ggsave('figs/interception/snow_survey_ip_w_met.png', device = png, width = 8.5, height = 4)
+
+
+# work on plotting lai vs ip ----
+
 lai_measurements <- read.csv('../../analysis/interception/data/lai/results/2023_compiled_lai_vza_15_60.csv')  |>
   select(-X)
 lai_df <- read.csv('../../analysis/interception/data/lai/lai_site_id_2023_05_04.csv') |>
@@ -97,11 +121,6 @@ fsd_ip_lai <- left_join(fsd_all_slim, lai_df, by = c('transect', 'num', 'canopy'
   mutate(wind_class = case_when(
     storm_id %in% windy_events_fsd ~ windy_name,
     TRUE ~ calm_name
-  ),
-  temp_class = case_when(
-    storm_id %in% warm_events ~ warm_name,
-    storm_id %in% cold_events ~ cold_name,
-    TRUE ~ NA
   )
   )
 
@@ -112,25 +131,28 @@ cc <- fsd_ip_lai |>
   ggplot(aes(cc, IP, colour = wind_class)) +
   geom_point() +
   # geom_smooth(method = 'lm', se = F) +
-  stat_cor(aes(colour = wind_class,label = after_stat(rr.label)), geom = "label", show.legend = F) +
+  stat_cor(aes(label = paste(..rr.label..,
+                             if_else(readr::parse_number(..p.label..) < 0.001,
+                                     "p<0.001", ..p.label..), sep = "~`, `~"), colour = wind_class), geom = "label", show.legend = F) +
   ylab(ip_y_ax_lab) +
   xlab('Canopy Coverage (-)')  +
-  ylim(c(0,1)) +
+  ylim(c(0,1.25)) +
   scale_color_manual(name = legend_title, values = c(calm_colour, windy_colour)) +
   theme(legend.position = 'none')
-
+cc
 lai <- fsd_ip_lai |>
   filter(vza == vza_select) |>
   ggplot(aes(Le, IP, colour = wind_class)) +
   geom_point() +
   # geom_smooth(method = 'lm', se = F) +
-  stat_cor(aes(colour = wind_class,label = after_stat(rr.label)), geom = "label", show.legend = F) +
-  ylab(ip_y_ax_lab) +
+  stat_cor(aes(label = paste(..rr.label..,
+                             if_else(readr::parse_number(..p.label..) < 0.001,
+                                     "p<0.001", ..p.label..), sep = "~`, `~"), colour = wind_class), geom = "label", show.legend = F) +  ylab(ip_y_ax_lab) +
   xlab('Leaf Area Index (-)')  +
-  ylim(c(0,1)) +
+  ylim(c(0,1.25)) +
   scale_color_manual(name = legend_title, values = c(calm_colour, windy_colour)) +
   theme(legend.position = 'right')
-
+lai
 
 cowplot::plot_grid(cc, lai, labels = c('A', 'B'), rel_widths = c(.65, 1))
 
@@ -160,17 +182,21 @@ stopifnot(length(labs_seq) + 1 == length(breaks))
 
 fsd_all_slim_low_wind_lai$le_binned <- cut(fsd_all_slim_low_wind_lai[,'Le', drop = TRUE], breaks, include.lowest = T)
 
-fsd_all_slim_low_wind_lai$le_labs <- as.numeric(cut(fsd_all_slim_low_wind_lai[,'Le', drop = TRUE],
+fsd_all_slim_low_wind_lai$le_labs <- cut(fsd_all_slim_low_wind_lai[,'Le', drop = TRUE],
                           breaks,
                           labels = labs_seq,
                           include.lowest = T
-))
+)
 
+fsd_all_slim_low_wind_lai$le_labs <- fsd_all_slim_low_wind_lai$le_labs |> as.character() |> as.numeric()
+
+
+# TODO MAKE NOT BOXPLOT
 lai_ip_boxplot <- fsd_all_slim_low_wind_lai |>
   ggplot(aes(le_labs, IP, group = le_labs)) +
   geom_boxplot()+
-  ylab(ip_y_ax_lab) +
-  xlab('LAI bin (-)')+
+  ylab(ip_y_ax_lab)+
+  xlab(le_ax_lab)+
   theme(plot.margin = margin(0.5, 0.5, 0.5, .75, "cm"))
 
 lai_ip_boxplot
@@ -178,8 +204,39 @@ lai_ip_boxplot
 fsd_all_slim_low_wind_lai |>
   ggplot(aes(Le, IP)) +
   geom_point()+
-  xlab('LAI (-)')
+  xlab(le_ax_lab)
 
+le_ip_smry <- fsd_all_slim_low_wind_lai |>
+  group_by(le_labs) |>
+  # filter(weighed_tree_canopy_load_mm <= 5) |>
+  summarise(IP_avg = mean(IP, na.rm = T),
+            sd = sd(IP, na.rm = T),
+            sd_low = IP_avg - sd,
+            sd_hi = IP_avg + sd,
+            ci_low = quantile(IP,0.05),
+            ci_hi = quantile(IP, 0.95),
+            n = n())
+
+le_ip <- fsd_ip_lai |>
+  filter(vza == vza_select) |>
+  # filter(weighed_tree_canopy_load_mm <= 5) |>
+  ggplot() +
+  geom_point(aes(x = Le, y = IP, colour = wind_class), size = 0.5)+
+  stat_cor(aes(x = Le, y = IP, label = paste(..rr.label..,
+                             if_else(readr::parse_number(..p.label..) < 0.001,
+                                     "p<0.001", ..p.label..), sep = "~`, `~"), colour = wind_class), label.y = c(1.17, 1.35) , geom = "label", show.legend = F) +
+  geom_errorbar(data = le_ip_smry, aes(x = le_labs, ymax = sd_hi, ymin = sd_low), width = .2)  +
+  geom_point(data = le_ip_smry, aes(x = le_labs, y = IP_avg), shape = 1, size = 4) +
+  ylab(ip_y_ax_lab) +
+  xlab(le_ax_lab) +
+  scale_color_manual(name = legend_title, values = c(calm_colour, windy_colour)) +
+  # scale_fill_viridis_c(option = 'magma')+
+  # xlim(NA, 0) +
+  ylim(0, 1.4) +
+  theme(legend.position = 'none',
+        plot.margin = margin(0.5, 0.5, 0.5, .75, "cm"))
+
+le_ip
 
 # CC boxplot like the airtemp and wind speed plots
 

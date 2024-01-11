@@ -1,12 +1,20 @@
 # combine the met plots with the fsd forest structure plots
 
+source('scripts/00_define_global_attributes.R')
+source('scripts/01_plot_binned_met_trough_IP.R')
+source('scripts/01_plot_forest_snow_survey_IP.R')
+source('scripts/01_plot_parsivel_IP.R')
+
+
 cowplot::plot_grid(
-  lai_ip_boxplot,
+  le_ip,
   at_ip,
   ws_ip,
   w_ip,
-  # ip_vs_hydro_type,
-  nrow = 4,
+  diam_ip,
+  vel_ip,
+  nrow = 3,
+  ncol = 2,
   labels = 'AUTO'
 )
 
