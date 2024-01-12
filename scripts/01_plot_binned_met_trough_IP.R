@@ -33,6 +33,112 @@ at_ip <- met_intercept |>
         plot.margin = margin(0.5, 0.5, 0.5, .75, "cm"))
 at_ip
 
+tice_ip_smry <- met_intercept |>
+  group_by(t_ice_labs) |>
+  # filter(weighed_tree_canopy_load_mm <= 5) |>
+  summarise(IP_avg = mean(IP, na.rm = T),
+            sd = sd(IP, na.rm = T),
+            sd_low = IP_avg - sd,
+            sd_hi = IP_avg + sd,
+            ci_low = quantile(IP,0.05),
+            ci_hi = quantile(IP, 0.95),
+            n = n())
+
+tice_ip <- met_intercept |>
+  # filter(weighed_tree_canopy_load_mm <= 5) |>
+  ggplot() +
+  geom_point(aes(x = t_ice_bulb, y = IP), colour = '#61D04F',  alpha = 0.5, size = 0.5)+
+  geom_errorbar(data = tice_ip_smry, aes(x = t_ice_labs, ymax = sd_hi, ymin = sd_low), width = .5)  +
+  geom_point(data = tice_ip_smry, aes(x = t_ice_labs, y = IP_avg), shape = 1, size = 4) +
+  ylab(ip_y_ax_lab) +
+  xlab("") +
+  # scale_fill_viridis_c(option = 'magma')+
+  xlim(NA, 0) +
+  # ylim(ip_y_lims) +
+  theme(legend.position = 'none',
+        plot.margin = margin(0.5, 0.5, 0.5, .75, "cm"))
+tice_ip
+
+tice_dep_ip_smry <- met_intercept |>
+  group_by(t_ice_dep_labs) |>
+  # filter(weighed_tree_canopy_load_mm <= 5) |>
+  summarise(IP_avg = mean(IP, na.rm = T),
+            sd = sd(IP, na.rm = T),
+            sd_low = IP_avg - sd,
+            sd_hi = IP_avg + sd,
+            ci_low = quantile(IP,0.05),
+            ci_hi = quantile(IP, 0.95),
+            n = n())
+
+tice_ip <- met_intercept |>
+  # filter(weighed_tree_canopy_load_mm <= 5) |>
+  ggplot() +
+  geom_point(aes(x = t_ice_dep, y = IP), colour = '#61D04F',  alpha = 0.5, size = 0.5)+
+  geom_errorbar(data = tice_dep_ip_smry, aes(x = t_ice_dep_labs, ymax = sd_hi, ymin = sd_low), width = .5)  +
+  geom_point(data = tice_dep_ip_smry, aes(x = t_ice_dep_labs, y = IP_avg), shape = 1, size = 4) +
+  ylab(ip_y_ax_lab) +
+  xlab("") +
+  # scale_fill_viridis_c(option = 'magma')+
+  # xlim(NA, 0) +
+  # ylim(ip_y_lims) +
+  theme(legend.position = 'none',
+        plot.margin = margin(0.5, 0.5, 0.5, .75, "cm"))
+tice_ip
+
+rh_ip_smry <- met_intercept |>
+  group_by(rh_labs) |>
+  # filter(weighed_tree_canopy_load_mm <= 5) |>
+  summarise(IP_avg = mean(IP, na.rm = T),
+            sd = sd(IP, na.rm = T),
+            sd_low = IP_avg - sd,
+            sd_hi = IP_avg + sd,
+            ci_low = quantile(IP,0.05),
+            ci_hi = quantile(IP, 0.95),
+            n = n()) |>
+  filter(rh_labs > 65)
+
+rh_ip <- met_intercept |>
+  # filter(weighed_tree_canopy_load_mm <= 5) |>
+  ggplot() +
+  geom_point(aes(x = rh, y = IP), colour = '#61D04F',  alpha = 0.5, size = 0.5)+
+  geom_errorbar(data = rh_ip_smry, aes(x = rh_labs, ymax = sd_hi, ymin = sd_low), width = .5)  +
+  geom_point(data = rh_ip_smry, aes(x = rh_labs, y = IP_avg), shape = 1, size = 4) +
+  ylab(ip_y_ax_lab) +
+  xlab("Relative Humidity (%)") +
+  # scale_fill_viridis_c(option = 'magma')+
+  # xlim(NA, 0) +
+  # ylim(ip_y_lims) +
+  theme(legend.position = 'none',
+        plot.margin = margin(0.5, 0.5, 0.5, .75, "cm"))
+rh_ip
+
+Qsi_ip_smry <- met_intercept |>
+  group_by(Qsi_labs) |>
+  # filter(weighed_tree_canopy_load_mm <= 5) |>
+  summarise(IP_avg = mean(IP, na.rm = T),
+            sd = sd(IP, na.rm = T),
+            sd_low = IP_avg - sd,
+            sd_hi = IP_avg + sd,
+            ci_low = quantile(IP,0.05),
+            ci_hi = quantile(IP, 0.95),
+            n = n()) |>
+  filter(Qsi_labs > 60)
+
+Qsi_ip <- met_intercept |>
+  # filter(weighed_tree_canopy_load_mm <= 5) |>
+  ggplot() +
+  geom_point(aes(x = Qsi, y = IP), colour = '#61D04F',  alpha = 0.5, size = 0.5)+
+  geom_errorbar(data = Qsi_ip_smry, aes(x = Qsi_labs, ymax = sd_hi, ymin = sd_low), width = .5)  +
+  geom_point(data = Qsi_ip_smry, aes(x = Qsi_labs, y = IP_avg), shape = 1, size = 4) +
+  ylab(ip_y_ax_lab) +
+  xlab("Relative Humidity (%)") +
+  # scale_fill_viridis_c(option = 'magma')+
+  # xlim(NA, 0) +
+  # ylim(ip_y_lims) +
+  theme(legend.position = 'none',
+        plot.margin = margin(0.5, 0.5, 0.5, .75, "cm"))
+Qsi_ip
+
 ws_ip_smry <- met_intercept |>
   group_by(wind_labs) |>
   # filter(weighed_tree_canopy_load_mm <= 5) |>
