@@ -82,7 +82,7 @@ event_df <- storm_dates_long |>
          IP_troughs = q_int_troughs/p,
          start_time = min(datetime),
          elapsed_hours = as.numeric(difftime(datetime, start_time, units = "hours"))
-         ) |> filter(w_tree_event %in% good_events)
+         )# |> filter(w_tree_event %in% good_events)
 
 class_event_met <- event_df |>
   group_by(w_tree_event) |>
