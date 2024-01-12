@@ -1,9 +1,13 @@
-# example of kmeans and how to adjust plotting
-# from: https://www.datanovia.com/en/blog/k-means-clustering-visualization-in-r-step-by-step-guide/
+# compare the precip type classification to results from a kmeans analysis
+# warning that parsivel data is at 1 min intervals here and should not be joined
+# to the interception data until aggregated to 15 mins. kept at 1 min for more data obs here.
+# based on tutorial from:
+# https://www.datanovia.com/en/blog/k-means-clustering-visualization-in-r-step-by-step-guide/
+
 library(ggpubr)
 library(factoextra)
 
-parsivel <- readRDS('../../analysis/disdrometer/data/disdro_spectrum_processed.RDS')
+parsivel <- readRDS('../../analysis/disdrometer/data/disdro_spectrum_processed_202310.RDS')
 
 n_k <- 3 # based on shouldnt have any rain so graupel, wet snow, dry snow
 
@@ -73,7 +77,7 @@ fviz_cluster(res.km, data = ip_df_tree,
 
 ip_df$cluster_id <- factor(res.km$cluster)
 
-ggplot(ip_df, aes(part_vel, IP_tree, colour = cluster_id, shape = precip_name)) +
+ggplot(ip_df, aes(part_vel, IP_troughs, colour = cluster_id, shape = precip_name)) +
   geom_point() +
   ylab(ip_y_ax_lab) +
   xlab(vel_ax_lab)+
@@ -83,7 +87,7 @@ ggplot(ip_df, aes(part_vel, IP_tree, colour = cluster_id, shape = precip_name)) 
 
 ggsave('figs/stats/kmeans_part_vel_vs_ip_colour_cluster_shape_precip_name.png', width = 4, height = 4)
 
-ggplot(ip_df, aes(part_diam, IP_tree, colour = cluster_id, shape = precip_name)) +
+ggplot(ip_df, aes(part_diam, IP_troughs, colour = cluster_id, shape = precip_name)) +
   geom_point() +
   ylab(ip_y_ax_lab) +
   xlab(diam_ax_lab) +
