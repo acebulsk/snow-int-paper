@@ -54,6 +54,10 @@ fsd_all_slim <- fsd_all |>
   filter(!storm_id %in% outlier_events_fsd,
          IP <= ip_filter)
 
+ggplot(fsd_all_slim, aes(IP)) +
+  geom_histogram() +
+  facet_wrap(~storm_id)
+
 fsd_all_slim_low_wind <- fsd_all |>
   filter(!storm_id %in% c(outlier_events_fsd, windy_events_fsd),
          IP <= ip_filter)
@@ -61,22 +65,56 @@ fsd_all_slim_low_wind <- fsd_all |>
 fsd_storm_summary_met_slim <- fsd_storm_summary_met |>
   filter(!storm_id %in% outlier_events_fsd)
 
-saveRDS(fsd_storm_summary_met_slim, 'data/fsd_storm_summary_met_no_outlier.rds')
-
 fsd_all_met <- left_join(fsd_all_slim, fsd_storm_summary_met |> rename(avg_trough_IP = IP), by = 'storm_id')
 
 fsd_all_slim_smry <- fsd_all_slim |>
   group_by(storm_id) |>
   summarise(mean_IP = mean(IP),
+            mean_I = mean(I),
             sd_IP = sd(IP)) |>
   left_join(fsd_storm_summary_met |> rename(avg_trough_IP = IP), by = 'storm_id')
 
+saveRDS(fsd_all_slim_smry, 'data/fsd_storm_summary_met_no_outlier.rds')
+
 fsd_all_slim_smry |>
-  pivot_longer(c(`Air Temp. (°C)`, `Median Wind Speed (m/s)`, `Avg. Wind Speed (m/s)`, `Open Precip. (mm)`)) |>
+  rename(
+    `Relative Humidity (%)` = `RH (%)`,
+    `Wind Speed (m/s)` = `Avg. Wind Speed (m/s)`,
+    `Snowfall (mm)` = `Open Precip. (mm)`,
+    `Hydrometeor Diameter (mm)` = part_diam,
+         `Hydrometeor Velocity (m/s)` = part_vel) |>
+  pivot_longer(
+    c(
+      `Air Temp. (°C)`,
+      `Relative Humidity (%)`,
+      # `Median Wind Speed (m/s)`,
+      `Wind Speed (m/s)`,
+      `Snowfall (mm)`,
+      `Hydrometeor Diameter (mm)`,
+      `Hydrometeor Velocity (m/s)`
+    )
+  ) |>
+  group_by(name) |>
+  mutate(
+    err_bar_width = (max(value, na.rm = T) - min(value, na.rm = T)) / 20,
+      name = factor(
+        name,
+        ordered = T,
+        levels = c(
+          'Snowfall (mm)',
+          'Air Temp. (°C)',
+          'Relative Humidity (%)',
+          'Wind Speed (m/s)',
+          'Hydrometeor Diameter (mm)',
+          'Hydrometeor Velocity (m/s)'
+        ))) |>
   ggplot(aes(value, mean_IP)) +
-  geom_point() +
-  geom_errorbar(aes(ymax = mean_IP + sd_IP, ymin = mean_IP - sd_IP, width = .1)) +
-  facet_grid(cols = vars(name), scales = 'free')
+  geom_point(shape = 1, size = 4) +
+  geom_errorbar(aes(ymax = mean_IP + sd_IP, ymin = mean_IP - sd_IP, width = err_bar_width)) +
+  # facet_grid(cols = vars(name), scales = 'free')
+  facet_wrap(~name, scales = 'free')+
+  ylab(ip_y_ax_lab) +
+  theme(axis.title.x = element_blank())
 
 ggsave('figs/interception/snow_survey_ip_w_met.png', device = png, width = 8.5, height = 4)
 
@@ -91,6 +129,14 @@ lai_df <- read.csv('../../analysis/interception/data/lai/lai_site_id_2023_05_04.
   rename(num = old_num) |>
   mutate(vza_label = paste('Max Zenith Angle (deg.):' ,vza))
 
+fsd_storm_summary_met |>
+  filter(!storm_id %in% outlier_events_fsd)|>
+  mutate(wind_class = case_when(
+    storm_id %in% windy_events_fsd ~ windy_name,
+    TRUE ~ calm_name
+  )
+  ) |> View()
+
 fsd_avg_wind <- fsd_storm_summary_met |>
   filter(!storm_id %in% outlier_events_fsd)|>
   mutate(wind_class = case_when(
@@ -100,7 +146,6 @@ fsd_avg_wind <- fsd_storm_summary_met |>
   group_by(wind_class) |>
   dplyr::summarise(avg_wind = mean(`Avg. Wind Speed (m/s)`),
                    sd_wind = mean(`St. Dev. Wind Speed (m/s)`),
-                   min_wind = min(`Min Wind Speed (m/s)`),
                    max_wind = max(`Peak Wind Speed (m/s)`),
                    min_avg_wind = min(`Avg. Wind Speed (m/s)`),
                    max_avg_wind = max(`Avg. Wind Speed (m/s)`),
@@ -115,7 +160,7 @@ calm_max_median_wind <- fsd_avg_wind$max_med_wind[fsd_avg_wind$wind_class == cal
 windy_name <- paste('High:', windy_min_median_wind, '–', windy_max_median_wind)
 calm_name <- paste('Low:', calm_min_median_wind, '–', calm_max_median_wind)
 
-fsd_ip_lai <- left_join(fsd_all_slim, lai_df, by = c('transect', 'num', 'canopy')) |>
+fsd_ip_lai <- left_join(fsd_all_slim |> filter(!storm_id %in% outlier_events_fsd), lai_df, by = c('transect', 'num', 'canopy')) |>
   # select(id, transect, num, canopy, cc, Le, IP, vza) |>
   filter(is.na(cc) == F) |>
   mutate(wind_class = case_when(
@@ -123,6 +168,10 @@ fsd_ip_lai <- left_join(fsd_all_slim, lai_df, by = c('transect', 'num', 'canopy'
     TRUE ~ calm_name
   )
   )
+
+ggplot(fsd_ip_lai, aes(Le)) +
+  geom_histogram() +
+  facet_wrap(~storm_id)
 
 fsd_ip_lai$wind_class <- factor(x = fsd_ip_lai$wind_class, levels = c("Low: 0.69 – 1.27", "High: 1.37 – 1.72"))
 
@@ -232,11 +281,13 @@ le_ip <- fsd_ip_lai |>
   scale_color_manual(name = legend_title, values = c(calm_colour, windy_colour)) +
   # scale_fill_viridis_c(option = 'magma')+
   # xlim(NA, 0) +
-  ylim(0, 1.4) +
-  theme(legend.position = 'none',
-        plot.margin = margin(0.5, 0.5, 0.5, .75, "cm"))
+  ylim(0, 1.4)
 
 le_ip
+
+ggsave('figs/interception/lai_vs_ip.png', device = png, width = 6, height = 4.5)
+
+le_ip <- le_ip + theme(legend.position = 'none', plot.margin = margin(0.5, 0.5, 0.5, .75, "cm"))
 
 # CC boxplot like the airtemp and wind speed plots
 
