@@ -7,8 +7,9 @@ source('scripts/01_plot_parsivel_IP.R')
 
 
 cowplot::plot_grid(
-  le_ip,
+  # le_ip,
   at_ip,
+  rh_ip,
   ws_ip,
   w_ip,
   diam_ip,
@@ -18,4 +19,4 @@ cowplot::plot_grid(
   labels = 'AUTO'
 )
 
-ggsave('figs/interception/troughs_met_LAI_vs_IP_bin.png', device = png, width = 8.5, height = 11)
+ggsave('figs/interception/troughs_met_vs_IP_bin.png', device = png, width = 8.5, height = 11)
