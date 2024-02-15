@@ -14,73 +14,39 @@ legend_title <- 'Wind Speed (m/s)'
 windy_name <- 'High: '
 calm_name <- 'Low: '
 
+source('scripts/snow_survey/00_load_snow_survey_data.R')
+source('scripts/snow_survey/01_avg_met_fsd_periods.R')
+source('scripts/snow_survey/02_fsd_ip_calc.R')
+
 # snow survey data ----
 
-fsd_storm_summary_met <- readRDS('../../analysis/interception/data/storm_analysis/snow_survey/fsd_ip_met_summary_T1_1_32_T2_1_32.rds')
-fsd_all <- readRDS('../../analysis/interception/data/storm_analysis/snow_survey/fsd_w_grounds_ip_all_pts.rds') |>
-  mutate(uid = paste0(transect, '_', num, canopy))
-fsd_all <- fsd_all[!(fsd_all$transect == 'T1' & fsd_all$num == 12),]
-
-# these FSD dates have suspect IP
+# these FSD dates have suspect IP also filtered some in the .csv
 
 outlier_events_fsd <- c(
-  '2022-02-14', # very small event accumulation < 5 mm so instrument error probably too high here. but maybe keep FSD since had high precision measurements on crust
-  '2022-05-06', # 3 days between surveys here in may with about 5 cm melt observed on the sr50 so erroneously high IP in open an should remove
-  '2022-05-17' # very warm in the afternoon resulted in abnormally high IP vals
-  # '2023-03-13' # windy one with some unloading observed on tree and troughs mid event
+  '2022-02-16', # very small event accumulation < 5 mm so instrument error probably too high here. but maybe keep FSD since had high precision measurements on crust
+  '2022-05-09', # 3 days between surveys here in may with about 5 cm melt observed on the sr50 so erroneously high IP in open an should remove
+  '2022-05-20' # very warm in the afternoon resulted in abnormally high IP vals
 ) |> as.Date()
 
-windy_events_fsd <- c(
-  '2022-03-31',
-  # '2023-02-15', # also highish winds but not seeing strong influence in the data
-  '2023-03-13'
-)|> as.Date()
+fsd_all |> group_by(event_id) |>
+  summarise(datetime = min(datetime), n = n())
 
-warm_events <- c(
-  '2023-03-13',
-  '2022-05-06',
-  '2022-05-17',
-  '2023-01-26'
-) |> as.Date()
+fsd_all |> group_by(event_id) |>
+  summarise(datetime = min(datetime), n = n()) |> pull(n) |> mean()
 
-cold_events <- c(
-  '2022-04-08',
-  '2023-02-15',
-  '2022-02-14',
-  '2023-03-24') |>
-  as.Date()
-
-fsd_all_slim <- fsd_all |>
-  filter(!storm_id %in% outlier_events_fsd,
-         IP <= ip_filter)
-
-ggplot(fsd_all_slim, aes(IP)) +
+ggplot(fsd_all, aes(IP)) +
   geom_histogram() +
-  facet_wrap(~storm_id)
+  facet_wrap(~event_id)
 
-fsd_all_slim_low_wind <- fsd_all |>
-  filter(!storm_id %in% c(outlier_events_fsd, windy_events_fsd),
-         IP <= ip_filter)
 
-fsd_storm_summary_met_slim <- fsd_storm_summary_met |>
-  filter(!storm_id %in% outlier_events_fsd)
-
-fsd_all_met <- left_join(fsd_all_slim, fsd_storm_summary_met |> rename(avg_trough_IP = IP), by = 'storm_id')
-
-fsd_all_slim_smry <- fsd_all_slim |>
-  group_by(storm_id) |>
-  summarise(mean_IP = mean(IP),
-            mean_I = mean(I),
-            sd_IP = sd(IP)) |>
-  left_join(fsd_storm_summary_met |> rename(avg_trough_IP = IP), by = 'storm_id')
-
-saveRDS(fsd_all_slim_smry, 'data/fsd_storm_summary_met_no_outlier.rds')
-
-fsd_all_slim_smry |>
+## ip vs met snow surveys ----
+fsd_all_avg_event |>
+  # filter(!event_id %in% outlier_events_fsd) |> # interpretation doesnt change here if we remove outliers but it does change the LAI / IP / wind calss plot below
   rename(
-    `Relative Humidity (%)` = `RH (%)`,
-    `Wind Speed (m/s)` = `Avg. Wind Speed (m/s)`,
-    `Snowfall (mm)` = `Open Precip. (mm)`,
+    `Air Temp. (°C)` = t,
+    `Relative Humidity (%)` = rh,
+    `Wind Speed (m/s)` = med_u,
+    `Snowfall (mm)` = del_sf,
     `Hydrometeor Diameter (mm)` = part_diam,
          `Hydrometeor Velocity (m/s)` = part_vel) |>
   pivot_longer(
@@ -129,51 +95,11 @@ lai_df <- read.csv('../../analysis/interception/data/lai/lai_site_id_2023_05_04.
   rename(num = old_num) |>
   mutate(vza_label = paste('Max Zenith Angle (deg.):' ,vza))
 
-fsd_storm_summary_met |>
-  filter(!storm_id %in% outlier_events_fsd)|>
-  mutate(wind_class = case_when(
-    storm_id %in% windy_events_fsd ~ windy_name,
-    TRUE ~ calm_name
-  )
-  ) |> View()
-
-fsd_avg_wind <- fsd_storm_summary_met |>
-  filter(!storm_id %in% outlier_events_fsd)|>
-  mutate(wind_class = case_when(
-    storm_id %in% windy_events_fsd ~ windy_name,
-    TRUE ~ calm_name
-  )) |>
-  group_by(wind_class) |>
-  dplyr::summarise(avg_wind = mean(`Avg. Wind Speed (m/s)`),
-                   sd_wind = mean(`St. Dev. Wind Speed (m/s)`),
-                   max_wind = max(`Peak Wind Speed (m/s)`),
-                   min_avg_wind = min(`Avg. Wind Speed (m/s)`),
-                   max_avg_wind = max(`Avg. Wind Speed (m/s)`),
-                   min_med_wind = min(`Median Wind Speed (m/s)`),
-                   max_med_wind = max(`Median Wind Speed (m/s)`))
-
-windy_min_median_wind <- fsd_avg_wind$min_med_wind[fsd_avg_wind$wind_class == windy_name]
-windy_max_median_wind <- fsd_avg_wind$max_med_wind[fsd_avg_wind$wind_class == windy_name]
-calm_min_median_wind <- fsd_avg_wind$min_med_wind[fsd_avg_wind$wind_class == calm_name]
-calm_max_median_wind <- fsd_avg_wind$max_med_wind[fsd_avg_wind$wind_class == calm_name]
-
-windy_name <- paste('High:', windy_min_median_wind, '–', windy_max_median_wind)
-calm_name <- paste('Low:', calm_min_median_wind, '–', calm_max_median_wind)
-
-fsd_ip_lai <- left_join(fsd_all_slim |> filter(!storm_id %in% outlier_events_fsd), lai_df, by = c('transect', 'num', 'canopy')) |>
+fsd_ip_lai <- left_join(fsd_all, lai_df, by = c('transect', 'num', 'canopy')) |>
+  left_join(ffr_met_avg_event) |>
   # select(id, transect, num, canopy, cc, Le, IP, vza) |>
-  filter(is.na(cc) == F) |>
-  mutate(wind_class = case_when(
-    storm_id %in% windy_events_fsd ~ windy_name,
-    TRUE ~ calm_name
-  )
-  )
-
-ggplot(fsd_ip_lai, aes(Le)) +
-  geom_histogram() +
-  facet_wrap(~storm_id)
-
-fsd_ip_lai$wind_class <- factor(x = fsd_ip_lai$wind_class, levels = c("Low: 0.69 – 1.27", "High: 1.37 – 1.72"))
+  filter(is.na(cc) == F,
+         !event_id %in% outlier_events_fsd)
 
 cc <- fsd_ip_lai |>
   filter(vza == vza_select) |>
@@ -188,6 +114,7 @@ cc <- fsd_ip_lai |>
   ylim(c(0,1.25)) +
   scale_color_manual(name = legend_title, values = c(calm_colour, windy_colour)) +
   theme(legend.position = 'none')
+
 cc
 lai <- fsd_ip_lai |>
   filter(vza == vza_select) |>
