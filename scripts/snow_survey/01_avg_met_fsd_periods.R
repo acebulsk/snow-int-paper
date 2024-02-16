@@ -27,4 +27,25 @@ ffr_met_avg_event <- ffr_met |>
 
 # classify wind
 
-ffr_met_avg_event$wind_class <- ifelse(ffr_met_avg_event$med_u > 1.1, 'High (> 1.2 m/s)', 'Low (< 1.2 m/s)')
+ffr_met_avg_event$wind_class <- ifelse(ffr_met_avg_event$med_u > 1.2, 'High (> 1.2 m/s)', 'Low (< 1.2 m/s)')
+
+#TODO output event met time series...
+# wind rose plots
+
+ffr_met_wnd_events <- ffr_met_wnd |>
+  left_join(storms_long_datetime) |>
+  filter(event_id |> is.na() == F)
+
+
+for (event in as.character(fsd_periods_wide$event_id)) {
+  ffr_met_wnd_event <- ffr_met_wnd_events[ffr_met_wnd_events$event_id == event, ]
+
+  p <- weatherdash::wind_rose(data = ffr_met_wnd_event,
+                         'datetime',
+                         'wind_speed',
+                         'wind_dir'
+                         )
+  htmltools::save_html(p, paste0('figs/interception/snow_survey/wind_rose/wind_rose_event_', event, '.html'))
+  #TODO output png
+}
+
