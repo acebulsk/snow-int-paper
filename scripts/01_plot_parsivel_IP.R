@@ -1,8 +1,24 @@
 # plot parsivel data with IP
 
-parsivel <- readRDS('../../analysis/disdrometer/data/disdro_spectrum_processed_202310.RDS')
+parsivel_1min <- readRDS('../../analysis/disdrometer/data/disdro_spectrum_processed_202310.RDS')
 
-parsivel |>
+# parsivel_1min |>
+#   filter(is.na(precip_name) == F,
+#          part_diam < 4) |>
+#   ggplot(aes(part_diam, part_vel, colour = precip_name), size = 1) +
+#   geom_point(alpha = 0.4) +
+#   scale_color_viridis_d() +
+#   ylab('Hydrometeor Velocity (m/s)') +
+#   xlab('Hydrometeor Diameter (mm)') +
+#   theme_bw()
+#
+# ggsave('figs/supplement/hydrometeor_classification_2021_2023.png', width = 5, height = 3)
+
+ffr_met <- readRDS('../../analysis/met-data-processing/data/ffr_crhm_modelling_obs.rds')
+parsivel_15min <- readRDS('../../analysis/disdrometer/data/disdro_spectrum_processed_agg_15_min_202310.RDS') |>
+  left_join(ffr_met)
+
+parsivel_15min |>
   filter(is.na(precip_name) == F,
          part_diam < 4) |>
   ggplot(aes(part_diam, part_vel, colour = precip_name), size = 1) +
@@ -12,7 +28,12 @@ parsivel |>
   xlab('Hydrometeor Diameter (mm)') +
   theme_bw()
 
-ggsave('figs/supplement/hydrometeor_classification_2021_2023.png', width = 5, height = 3)
+ggsave('figs/supplement/hydrometeor_classification_2021_2023_15min_agg.png', width = 5, height = 3)
+
+parsivel_15min |>
+  ggplot(aes(precip_name, t)) + geom_boxplot(width = .1) +
+  ylab("Air Temperature (°C)") +
+  xlab('Hydrometeor Type')
 
 # seems like the dry snow / graupel / wet snow classification is being messed up by turbulence at powerline
 ggplot(met_intercept, aes(precip_name, IP)) + geom_boxplot()
@@ -25,14 +46,15 @@ ggplot(met_intercept, aes(precip_name, t)) + geom_boxplot()
 
 u_th <- 1
 wt_cl_th <- 25
-met_intercept <- met_intercept  |>
-  filter(u < u_th,
-         weighed_tree_canopy_load_mm < wt_cl_th,
-         precip_name %in% c('dry snow', 'wet snow'))
+met_intercept_pv <- met_intercept |>
+  filter(#u < u_th,
+         #weighed_tree_canopy_load_mm < wt_cl_th,
+         #part_diam > 1,
+        is.na(precip_name) == F)
 
 # hydrometeor type ----
 
-met_intercept |>
+met_intercept_pv |>
   ggplot(aes(part_diam, part_vel, colour = precip_name), size = 1) +
   geom_point(alpha = 0.4) +
   scale_color_viridis_d() +
@@ -41,17 +63,19 @@ met_intercept |>
   labs(colour = '')+
   theme_bw()
 
-ggsave('figs/supplement/hydrometeor_classification_low_wind.png', width = 5, height = 3)
+ggsave('figs/supplement/hydrometeor_classification_interception_periods.png', width = 5, height = 3)
 
 # wet show should be warmer.. not trusting the classification scheme..
 # maybe have some large flakes at warmer temperatures due to coehsion complicating this
-met_intercept |>
+met_intercept_pv |>
   ggplot(aes(precip_name, t)) + geom_boxplot(width = .1) +
   ylab("Air Temperature (°C)") +
   xlab('Hydrometeor Type')+
   theme(plot.margin = margin(0.5, 0.5, 0.5, .75, "cm"))
 
-ip_vs_hydro_type <- met_intercept |>
+ggsave('figs/supplement/hydrometeor_class_vs_temperature_interception_periods.png', width = 5, height = 3)
+
+ip_vs_hydro_type <- met_intercept_pv |>
   filter(u < u_th,
          weighed_tree_canopy_load_mm < wt_cl_th,
          precip_name %in% c('dry snow', 'wet snow')) |>
@@ -61,7 +85,7 @@ ip_vs_hydro_type <- met_intercept |>
   theme(plot.margin = margin(0.5, 0.5, 0.5, .75, "cm"))
 ip_vs_hydro_type
 
-met_intercept |>
+met_intercept_pv |>
   filter(u < u_th,
          weighed_tree_canopy_load_mm < wt_cl_th,
          precip_name %in% c('dry snow', 'wet snow')) |>
@@ -73,7 +97,7 @@ met_intercept |>
 
 # particle diameter ----
 
-smry <- met_intercept |>
+smry <- met_intercept_pv |>
   group_by(part_diam_labs) |>
   # filter(weighed_tree_canopy_load_mm <= 5) |>
   summarise(IP_avg = mean(IP, na.rm = T),
@@ -84,20 +108,20 @@ smry <- met_intercept |>
             ci_hi = quantile(IP, 0.95),
             n = n()) |> filter(n > 3)
 
-diam_ip <- met_intercept |>
+diam_ip <- met_intercept_pv |>
   ggplot() +
   geom_point(aes(x = part_diam, y = IP), colour = '#61D04F',  alpha = 0.5, size = 0.5)+
   geom_errorbar(data = smry, aes(x = part_diam_labs, ymax = sd_hi, ymin = sd_low), width = .025)  +
   geom_point(data = smry, aes(x = part_diam_labs, y = IP_avg), shape = 1, size = 4) +
   ylab(ip_y_ax_lab) +
   xlab(diam_ax_lab) +
-  ylim(ip_y_lims) +
+  # ylim(ip_y_lims) +
   theme(legend.title = element_blank(),
         plot.margin = margin(0.5, 0.5, 0.5, .75, "cm"))
 diam_ip
 
 
-met_intercept |>
+met_intercept_pv |>
   filter(u < u_th,
          weighed_tree_canopy_load_mm < wt_cl_th,
          precip_name %in% c('dry snow', 'wet snow')) |>
@@ -111,7 +135,7 @@ ggsave('figs/supplement/IP_hydrometeor_diameter.png', width = 5, height = 3)
 
 # particle velocity ----
 
-smry <- met_intercept |>
+smry <- met_intercept_pv |>
   group_by(part_vel_labs) |>
   # filter(weighed_tree_canopy_load_mm <= 5) |>
   summarise(IP_avg = mean(IP, na.rm = T),
@@ -122,7 +146,7 @@ smry <- met_intercept |>
             ci_hi = quantile(IP, 0.95),
             n = n()) |> filter(part_vel_labs < 1.2)
 
-vel_ip <- met_intercept |>
+vel_ip <- met_intercept_pv |>
   ggplot() +
   geom_point(aes(x = part_vel, y = IP), colour = '#61D04F',  alpha = 0.5, size = 0.5)+
   geom_errorbar(data = smry, aes(x = part_vel_labs, ymax = sd_hi, ymin = sd_low), width = .025)  +
@@ -136,7 +160,7 @@ vel_ip <- met_intercept |>
 vel_ip
 
 
-met_intercept |>
+met_intercept_pv |>
   mutate(part_vel_labs = as.numeric(as.character(part_vel_labs))) |>
   ggplot(aes(part_vel_labs, IP, group = part_vel_labs)) + geom_boxplot()+
   ylab(ip_y_ax_lab) +
@@ -146,12 +170,12 @@ met_intercept |>
 
 # fingerprints
 
-met_intercept |>
+met_intercept_pv |>
   ggplot(aes(x = part_diam, y = part_vel, colour = IP)) +
   geom_point() +
   scale_color_viridis_c()
 
-avg_ip <- met_intercept |>
+avg_ip <- met_intercept_pv |>
   group_by(part_diam_labs, part_vel_labs) |>
   summarise(IP = mean(IP, na.rm = T),
             n = n()) |>

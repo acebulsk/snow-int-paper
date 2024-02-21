@@ -181,33 +181,33 @@ ggsave('figs/interception/select_event_cuml_snowfall_canopy_storage_scl_w_met.pn
 sel_ip <- event_df |>
   select(w_tree_event, datetime, Tree = IP_tree, SCL = IP_troughs) |>
   pivot_longer(c(Tree, SCL), names_to = 'inst', values_to = 'IP')
+#
+# event_df |>
+#   rename(Tree = cuml_int_tree, SCL = cuml_int_troughs) |>
+#   pivot_longer(c(Tree, SCL)) |>
+#   select(-t) |>
+#   left_join(class_event_met |> select(w_tree_event, t)) |>
+#   filter(w_tree_event %in% low_wind_events) |>
+#   ggplot(aes(cuml_snow, value, colour = t, group = t)) +
+#   geom_line() + scale_color_viridis_c(option = 'magma', end = .90) +
+#   facet_grid(~name) +
+#   ylab('Canopy Storage (mm)') +
+#   xlab('Snowfall (mm)') +
+#   labs(colour = temp_ax_lab)sel_W <- event_df |>
+#   ungroup() |>
+#   select(datetime, Tree = cuml_int_tree, SCL = cuml_int_troughs) |>
+#   pivot_longer(c(Tree, SCL), names_to = 'inst', values_to = 'W')
 
-event_df |>
-  rename(Tree = cuml_int_tree, SCL = cuml_int_troughs) |>
-  pivot_longer(c(Tree, SCL)) |>
-  select(-t) |>
-  left_join(class_event_met |> select(w_tree_event, t)) |>
-  filter(w_tree_event %in% low_wind_events) |>
-  ggplot(aes(cuml_snow, value, colour = t, group = t)) +
-  geom_line() + scale_color_viridis_c(option = 'magma', end = .90) +
-  facet_grid(~name) +
-  ylab('Canopy Storage (mm)') +
-  xlab('Snowfall (mm)') +
-  labs(colour = temp_ax_lab)sel_W <- event_df |>
-  ungroup() |>
-  select(datetime, Tree = cuml_int_tree, SCL = cuml_int_troughs) |>
-  pivot_longer(c(Tree, SCL), names_to = 'inst', values_to = 'W')
-
-left_join(sel_ip, sel_W, by = c('datetime', 'inst')) |>
-  left_join(class_event_met |> select(w_tree_event, t)) |>
-  filter(w_tree_event %in% low_wind_events) |>
-  ggplot(aes(W, IP, colour = t, group = t)) +
-  geom_line() + scale_color_viridis_c(option = 'magma', end = .90) +
-  facet_grid(~inst) +
-  ylab('Interception Efficiency (-)') +
-  xlab('Canopy Storage (mm)') +
-  labs(colour = temp_ax_lab)
-
-ggsave('figs/interception/canopy_storage_VS_IP_scl_tree.png', width = 7, height = 3)
+# left_join(sel_ip, sel_W, by = c('datetime', 'inst')) |>
+#   left_join(class_event_met |> select(w_tree_event, t)) |>
+#   filter(w_tree_event %in% low_wind_events) |>
+#   ggplot(aes(W, IP, colour = t, group = t)) +
+#   geom_line() + scale_color_viridis_c(option = 'magma', end = .90) +
+#   facet_grid(~inst) +
+#   ylab('Interception Efficiency (-)') +
+#   xlab('Canopy Storage (mm)') +
+#   labs(colour = temp_ax_lab)
+#
+# ggsave('figs/interception/canopy_storage_VS_IP_scl_tree.png', width = 7, height = 3)
 
 # plotly::ggplotly()

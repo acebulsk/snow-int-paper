@@ -17,6 +17,8 @@ met_intercept <- readRDS('../../analysis/interception/data/storm_analysis/contin
 parsivel <- readRDS('../../analysis/disdrometer/data/disdro_spectrum_processed_agg_15_min_202310.RDS')
 
 ffr_met <- readRDS('../../analysis/met-data-processing/data/ffr_crhm_modelling_obs.rds')
+ffr_met_wnd <- readRDS('../../analysis/met-data-processing/data/ffr_t_rh_u_qaqc_fill.rds')
+pwl_sf <- readRDS('../../analysis/met-data-processing/data/pluvio-qaqc/pwl_pluvio_15_min_qaqc_undercatch_corr_ac.rds')
 
 # theme_bw(base_size = 14)
 options(ggplot2.discrete.colour= palette.colors(palette = "R4"))

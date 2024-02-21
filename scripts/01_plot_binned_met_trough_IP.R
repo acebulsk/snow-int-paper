@@ -7,6 +7,32 @@ ip_y_lims <- c(0.05, 1)
 
 # lysimeter data ----
 
+sf_ip_smry <- met_intercept |>
+  group_by(q_sf_labs) |>
+  # filter(weighed_tree_canopy_load_mm <= 5) |>
+  summarise(IP_avg = mean(IP, na.rm = T),
+            sd = sd(IP, na.rm = T),
+            sd_low = IP_avg - sd,
+            sd_hi = IP_avg + sd,
+            ci_low = quantile(IP,0.05),
+            ci_hi = quantile(IP, 0.95),
+            n = n())
+
+sf_ip <- met_intercept |>
+  # filter(weighed_tree_canopy_load_mm <= 5) |>
+  ggplot() +
+  geom_point(aes(x = q_sf, y = IP), colour = '#61D04F',  alpha = 0.5, size = 0.5)+
+  geom_errorbar(data = sf_ip_smry, aes(x = q_sf_labs, ymax = sd_hi, ymin = sd_low), width = .5)  +
+  geom_point(data = sf_ip_smry, aes(x = q_sf_labs, y = IP_avg), shape = 1, size = 4) +
+  ylab(ip_y_ax_lab) +
+  xlab('Snowfall Rate (mm/hr)') +
+  # scale_fill_viridis_c(option = 'magma')+
+  # xlim(NA, 0) +
+  # ylim(ip_y_lims) +
+  theme(legend.position = 'none',
+        plot.margin = margin(0.5, 0.5, 0.5, .75, "cm"))
+sf_ip
+
 at_ip_smry <- met_intercept |>
   group_by(temp_labs) |>
   # filter(weighed_tree_canopy_load_mm <= 5) |>
@@ -27,7 +53,7 @@ at_ip <- met_intercept |>
   ylab(ip_y_ax_lab) +
   xlab(temp_bin_ax_lab) +
   # scale_fill_viridis_c(option = 'magma')+
-  xlim(NA, 0) +
+  xlim(-17, 1) +
   # ylim(ip_y_lims) +
   theme(legend.position = 'none',
         plot.margin = margin(0.5, 0.5, 0.5, .75, "cm"))

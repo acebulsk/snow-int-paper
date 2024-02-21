@@ -14,9 +14,9 @@ legend_title <- 'Wind Speed (m/s)'
 windy_name <- 'High: '
 calm_name <- 'Low: '
 
-source('scripts/snow_survey/00_load_snow_survey_data.R')
-source('scripts/snow_survey/01_avg_met_fsd_periods.R')
-source('scripts/snow_survey/02_fsd_ip_calc.R')
+source('scripts/fsd_snow_survey/00_load_snow_survey_data.R')
+source('scripts/fsd_snow_survey/01_avg_met_fsd_periods.R')
+source('scripts/fsd_snow_survey/02_fsd_ip_calc.R')
 
 # snow survey data ----
 
@@ -43,7 +43,7 @@ ggplot(fsd_all, aes(IP)) +
 fsd_all_avg_event |>
   # filter(!event_id %in% outlier_events_fsd) |> # interpretation doesnt change here if we remove outliers but it does change the LAI / IP / wind calss plot below
   rename(
-    `Air Temp. (°C)` = t,
+    `Air Temp. (°C)` = air_temp,
     `Relative Humidity (%)` = rh,
     `Wind Speed (m/s)` = med_u,
     `Snowfall (mm)` = del_sf,
@@ -86,6 +86,8 @@ ggsave('figs/interception/snow_survey_ip_w_met.png', device = png, width = 8.5, 
 
 
 # work on plotting lai vs ip ----
+
+# careful with windy vs not windy as evidence of inc IP w wind is based on 2022-04-06 which had substantial melt between surveys
 
 lai_measurements <- read.csv('../../analysis/interception/data/lai/results/2023_compiled_lai_vza_15_60.csv')  |>
   select(-X)
