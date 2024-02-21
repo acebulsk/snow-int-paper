@@ -12,6 +12,11 @@ fsd_all <- readRDS('../../analysis/snow-stats/data/processed/fresh_snow_densitie
 
 fsd_all <- fsd_all[!(fsd_all$transect == 'T1' & fsd_all$num == 12), ]
 
+survey_sample_type <- fsd_all |>
+  select(event_id, density_sample_type) |>
+  group_by(event_id, density_sample_type) |>
+  summarise(density_sample_type = first(density_sample_type))
+
 fsd_periods_wide <-
   read.csv('../../analysis/snow-stats/data/processed/fsd_survey_periods_w_snowfall_start_times.csv', skip = 1) |>
   mutate(
