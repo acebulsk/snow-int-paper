@@ -18,17 +18,17 @@ ffr_met <- readRDS('../../analysis/met-data-processing/data/ffr_crhm_modelling_o
 parsivel_15min <- readRDS('../../analysis/disdrometer/data/disdro_spectrum_processed_agg_15_min_202310.RDS') |>
   left_join(ffr_met)
 
-parsivel_15min |>
-  filter(is.na(precip_name) == F,
-         part_diam < 4) |>
-  ggplot(aes(part_diam, part_vel, colour = precip_name), size = 1) +
-  geom_point(alpha = 0.4) +
-  scale_color_viridis_d() +
-  ylab('Hydrometeor Velocity (m/s)') +
-  xlab('Hydrometeor Diameter (mm)') +
-  theme_bw()
-
-ggsave('figs/supplement/hydrometeor_classification_2021_2023_15min_agg.png', width = 5, height = 3)
+# parsivel_15min |>
+#   filter(is.na(precip_name) == F,
+#          part_diam < 4) |>
+#   ggplot(aes(part_diam, part_vel, colour = precip_name), size = 1) +
+#   geom_point(alpha = 0.4) +
+#   scale_color_viridis_d() +
+#   ylab('Hydrometeor Velocity (m/s)') +
+#   xlab('Hydrometeor Diameter (mm)') +
+#   theme_bw()
+#
+# ggsave('figs/supplement/hydrometeor_classification_2021_2023_15min_agg.png', width = 5, height = 3)
 
 parsivel_15min |>
   ggplot(aes(precip_name, t)) + geom_boxplot(width = .1) +

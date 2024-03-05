@@ -1,6 +1,16 @@
 source('scripts/00_define_global_attributes.R')
 
-# maddie to update this to include missing flights
+fsd_meta <-
+  read.csv('../../analysis/snow-stats/data/processed/fsd_survey_periods_w_snowfall_start_times.csv', skip = 1) |>
+  mutate(
+    snowfall_start_time = as.POSIXct(snowfall_start_time, tz = 'Etc/GMT+6'),
+    snowfall_end_time = as.POSIXct(snowfall_end_time, tz = 'Etc/GMT+6'),
+    fsd_end_time = as.POSIXct(fsd_end_time, tz = 'Etc/GMT+6'),
+    event_id = as.Date(event_id, tz = 'Etc/GMT+6')) |> select(event_id,
+                                                              snowfall_start_time,
+                                                              sample_type)
+
+# custom file from maddie
 scan_dates <- readxl::read_xlsx('../../analysis/lidar-processing/data/metadata/Harasyn_DroneProcessing2023.xlsx', sheet = 'FT') |>
   select(date = Date,
          from = `Takeoff Time`,
@@ -28,13 +38,7 @@ lidar_event_periods <- scan_dates |>
             pre_flight_id = min(flight_id),
             post_flight_id = max(flight_id)) |>
   ungroup() |>
-  left_join(fsd_periods_wide <-
-              read.csv('../../analysis/snow-stats/data/processed/fsd_survey_periods_w_snowfall_start_times.csv', skip = 1) |>
-              mutate(
-                snowfall_start_time = as.POSIXct(snowfall_start_time, tz = 'Etc/GMT+6'),
-                snowfall_end_time = as.POSIXct(snowfall_end_time, tz = 'Etc/GMT+6'),
-                fsd_end_time = as.POSIXct(fsd_end_time, tz = 'Etc/GMT+6'),
-                event_id = as.Date(event_id, tz = 'Etc/GMT+6')) |> select(event_id, snowfall_start_time), by = 'event_id')
+  left_join(fsd_meta, by = 'event_id')
 
 # currently set this so we have periods of snowfall
 # i.e., from is snowfall start time not takeoff time
