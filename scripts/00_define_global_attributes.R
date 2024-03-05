@@ -57,3 +57,11 @@ to_long <- function(from, to, event_id){
 
   return(out)
 }
+
+to_long_one_minute <- function(from, to, event_id){
+  datetime <- seq(from, to, 60)
+
+  out <- data.frame(datetime, event_id)
+
+  return(out)
+}
