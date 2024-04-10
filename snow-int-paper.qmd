@@ -200,19 +200,7 @@ Subcanopy lysimeter (a), weighed tree lysimeter loaded with snow (b) and weighed
 
 # Results
 
-## Snow Interception Observations
-
-### Snow Survey
-
-Measurements of interception efficiency conducted over two winter seasons show that for low wind speed events leaf area index (VZA of 45°) is strongly associated (R^2^ = 0.68, p < 0.001) with interception efficiency (@fig-lai-ip). For higher wind speeds (> 1.3 m s^-1^), @fig-lai-ip shows that the association between leaf area index and interception efficiency is reduced (R^2^ = 0.22, p < 0.001). Wider zenith angles, which incorporates more information about the forest surrounding the snow survey station, were found to have a stronger relationship with interception efficiency compared to narrower zenith angles of 15 degrees. Snowfall events with some wind lead to non-vertical hydrometeor trajectories where the surrounding forest structure is expected to be important in controlling snowpack accumulation to the point measurement. The event median wind speed was used when classifying the snowfall events to better reflect the sustained wind speed over the event rather than the mean which is influenced by gusts. For the high wind speed events, an increase in interception efficiency is observed at locations with low LAI while reducing interception efficiency in locations with higher LAI and CC due to wind induced unloading. Since snow survey data was used here, which had longer event intervals (@tbl-ss-met), some unloading and wind redistribution may have also affected these results.
-
-The association of interception efficiency and snowfall, air temperature, relative humidity, wind speed, hydrometeor diameter and hydrometeor velocity, shown in @fig-ss-met, shows no relationship. For some snow surveys, warm temperatures were associated with higher interception efficiency. However, after careful investigation of time-lapse imagery this increase in interception efficiency was due to subcanopy snow melt and not due to snow caught in the canopy which artificially raised the interception efficiency value. These events with subcanopy snowmelt were therefore removed from the six selected snow survey pairs used for this analysis. The snowfall events analyzed here did not experience significant riming or melt-freeze events which can result in very large intercepted snow loads, typically observed in coastal environments. The large spread of interception efficiency, shown in @fig-ss-met, for each snow survey is inferred to be a result of the varying forest structure of each snow survey station.
-
-![Scatterplot of snow survey interception efficiency based on snow surveys plotted against leaf area index of each station for six snowfall events with low (purple, 0.69-1.27 m/s) and high (orange, 1.37-1.72 m/s) median wind speed. Leaf area index shown here was measured using hemispherical photography analysis with a vertical zenith angle of 45°. The black open circles show the mean interception efficiency of each leaf area index bin and the error bars represent the standard deviations.](figs/snow_survey_periods/lai_vs_ip.png){#fig-lai-ip}
-
-![Snow survey interception efficiency plotted against meterological conditions. The black open circles show the mean of each bin and the error bars represent the standard deviations for each of the six snow surveys.](figs/snow_survey_periods/snow_survey_ip_w_met.png){#fig-ss-met}
-
-### Subcanopy Lysimeters
+## Subcanopy Lysimeters
 
 A linear increase in canopy storage with increasing snowfall, is shown in @fig-scl-w-sf for 25 snowfall events. The difference in the rate of change between the events, shown in @fig-scl-w-sf, does not show a strong connection between cold events compared to warmer events. However, this change in slope is interpreted to be a result of a combination of meteorological variables which will be explored in the following section.
 
@@ -222,14 +210,14 @@ Air temperature was observed to have little influence over interception efficien
 
 ![Scatter plots of discrete observations (green) of snow interception efficiency observed at 15 minute intervals using the subcanopy lysimeter and snowfall gauge against and binned data (black). Panels show (A) air temperature, (B) wind speed, (C) initial canopy snow load (the snow load observed at the begining of the timestep), (E) hydrometeor diameter, (F) hydrometeor velocity. The black open circles show the mean of each bin and the error bars represent the standard deviations. The data were filtered to include observations with a snowfall rate > 0 mm/hr and a snowfall rate > the subcanopy lysimeter throughfall rate to minimize observations with unloading. Periods of unloading and melt were also removed through careful analysis of the weighed tree, subcanopy lysimeters, and timelapse imagery.](figs/automated_snowfall_event_periods/troughs_met_vs_IP_bin.png){#fig-lai-met-ip}
 
-### Hydrometeor Size and Velocity 
+## Hydrometeor Size and Velocity 
 
 No relationship between wind speed and hydrometeor velocity was found between fifteen minute average measurements over the study period (@fig-ws-hv). However, above wind speeds of 2 m s^-1^ an increase in velocity was observed which was also associated with smaller hydrometeor diameters. 
 
 ![Scatter plot illustrating the relationship of wind speed and hydrometeor velocity. The dots represent the 15 minute averages of both wind speed and hydrometeor velocity coloured by their diameter (mm). The boxplots overlayed on top of the dots show the median (50th percentile), interquartile range (IQR) (25-75 percentile), smallest and largest value within 1.5 * the IQR.](figs/supplement/windspeed_vs_hydrometeor_velocity.png){#fig-ws-hv}
 
 
-### Aerial Lidar 
+## Aerial Lidar 
 
 The mean contact number was calculated for a snow-free canopy across each azimuth of the hemisphere at a 1 deg resolution and then averaged for each zenith angle for each forest plot to determine how canopy contact number is associated with increasing hydrometeor trajectory. @fig-ht-mcn shows an exponential increase in the number of canopy contacts as the trajectory becomes more horizontal (near 0 °). Forest plot PWL_SW which has a more closed canopy has a higher mean contact number at near vertical trajectories (near -90°) and increases at a slower rate compared to sparser canopies like FSR_S which start off with lower mean contact number and increase at a higher rate. 
 
