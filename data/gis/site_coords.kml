@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+<Document id="root_doc">
+<Schema name="site_coords" id="site_coords">
+	<SimpleField name="site" type="string"></SimpleField>
+	<SimpleField name="ele" type="float"></SimpleField>
+</Schema>
+<Folder><name>site_coords</name>
+  <Placemark>
+	<ExtendedData><SchemaData schemaUrl="#site_coords">
+		<SimpleData name="site">Wolf Creek</SimpleData>
+		<SimpleData name="ele">750</SimpleData>
+	</SchemaData></ExtendedData>
+      <Point><coordinates>-134.95283,60.596</coordinates></Point>
+  </Placemark>
+  <Placemark>
+	<ExtendedData><SchemaData schemaUrl="#site_coords">
+		<SimpleData name="site">Russell Creek</SimpleData>
+		<SimpleData name="ele">1000</SimpleData>
+	</SchemaData></ExtendedData>
+      <Point><coordinates>-126.309,50.371</coordinates></Point>
+  </Placemark>
+  <Placemark>
+	<ExtendedData><SchemaData schemaUrl="#site_coords">
+		<SimpleData name="site">Fortress Mountain</SimpleData>
+		<SimpleData name="ele">2100</SimpleData>
+	</SchemaData></ExtendedData>
+      <Point><coordinates>-115.1983,50.8269</coordinates></Point>
+  </Placemark>
+  <Placemark>
+	<ExtendedData><SchemaData schemaUrl="#site_coords">
+		<SimpleData name="site">Marmot Creek</SimpleData>
+		<SimpleData name="ele">1850</SimpleData>
+	</SchemaData></ExtendedData>
+      <Point><coordinates>-115.155154,50.9255877</coordinates></Point>
+  </Placemark>
+</Folder>
+</Document></kml>
