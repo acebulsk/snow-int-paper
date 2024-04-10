@@ -4,8 +4,11 @@ source('scripts/lidar_snow_survey/01_plot_lidar_met_time_series.R')
 
 # wind rose plots
 
-for (event in as.character(lidar_event_periods$event_id)) {
-  ffr_met_wnd_event <- ffr_met_wnd_lidar_events[as.character(ffr_met_wnd_lidar_events$event_id) == event, ]
+met_w_snowfall <- ffr_met_wnd_lidar_events |>
+  filter(ppt > 0.1)
+
+for (event in as.character(scan_dates$event_id)) {
+  ffr_met_wnd_event <- met_w_snowfall[as.character(met_w_snowfall$event_id) == event, ]
 
   p <- weatherdash::wind_rose(ffr_met_wnd_event,
                               'datetime',
@@ -14,15 +17,16 @@ for (event in as.character(lidar_event_periods$event_id)) {
                               dir_res = 30,
                               ws_res = 1,
                               ws_max = 5,
-                              plot_title = event
+                              plot_title = event,
+                              spd_unit = 'm/s'
   )
 
   p
 
   # reticulate::py_install('kaleido')
   # reticulate::py_install('plotly')
-  plotly::save_image(p, paste0('figs/interception/lidar_snow_survey/wind_rose/png/wind_rose_event_', event, '.png'))
-  htmltools::save_html(p, paste0('figs/interception/lidar_snow_survey/wind_rose/interactive/wind_rose_event_', event, '.html'))
+  plotly::save_image(p, paste0('figs/lidar_periods/wind_rose/png/wind_rose_event_snowing', event, '.png'))
+  # htmltools::save_html(p, paste0('figs/lidar_periods/wind_rose/interactive/wind_rose_event_snowing_', event, '.html'))
 }
 #
 # ggwindRose(ffr_met_wnd_event, 'wind_speed', 'wind_dir')

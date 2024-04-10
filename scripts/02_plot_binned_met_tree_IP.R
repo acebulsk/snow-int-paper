@@ -98,4 +98,4 @@ w_ip
 
 cowplot::plot_grid(at_ip, ws_ip, w_ip, nrow = 3, labels = 'AUTO')
 
-ggsave('figs/interception/tree_met_vs_IP_bin.png', device = png, width = 8.5, height = 7)
+ggsave('figs/automated_snowfall_event_periods/tree_met_vs_IP_bin.png', device = png, width = 8.5, height = 7)

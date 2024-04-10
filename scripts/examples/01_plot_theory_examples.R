@@ -1,4 +1,5 @@
 # script that plots the examples shown in the theory section
+theory_colours <- c("#30123BFF", "#1AE4B6FF", "#FABA39FF", "#7A0403FF") # viridis::turbo(4)
 
 ip_example <- readRDS('../../analysis/interception/data/interception_modelling/model_example_steady_temperature.rds')
 

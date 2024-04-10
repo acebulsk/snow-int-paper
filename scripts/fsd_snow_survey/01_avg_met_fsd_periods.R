@@ -21,12 +21,10 @@ ffr_met_avg_event <- ffr_met_wnd_events |>
   group_by(event_id) |>
   summarise(
     del_sf = sum(ppt),
+    med_u = median(wind_speed), # these need to be first or we are taking the median of the singular mean...
+    stdev_u = sd(wind_speed),
     across(c(air_temp:wind_dir, part_diam, part_vel), \(x) mean(x,
-                                                         na.rm = TRUE)),
-    mean_u = mean(wind_speed),
-    med_u = median(wind_speed),
-    stdev_u = sd(wind_speed)
-  )
+                                                         na.rm = TRUE))  )
 
 ffr_met_avg_event
 

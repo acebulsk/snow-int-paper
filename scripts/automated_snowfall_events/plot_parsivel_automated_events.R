@@ -1,23 +1,35 @@
-# plot PSVD matrix for each snowfall event ----
+# compute disdrometer particle size velocity distributions for snowfall periods
+# these periods were defined in the context of the automated sensors and are
+# independent of the lidar and snow survey analysis
 
-source('scripts/fsd_snow_survey/00_load_snow_survey_data.R')
+library(abind)
+
+source('../../analysis/disdrometer/scripts/00_source_functions.R')
 
 psvd_base_file <- '/media/alex/phd-data/local-usask/field-downloads/disdrometer/raw_data/Parsivel_Data_Until_20231004/Parsivel_Data/'
 
+# get periods updated to not include times where troughs are unloading
+
+event_dates_wide <- read.csv('../../analysis/interception/data/select_storms_datetime_wide_independent_snow_surveys.csv', skip = 1) |>
+  filter(quality < 4) |>
+  mutate(
+    from = as.POSIXct(from, tz = 'Etc/GMT+6'),
+    to = as.POSIXct(to, tz = 'Etc/GMT+6'),
+    event_id = as.Date(from, tz = 'Etc/GMT+6')) |>
+  select(from, to, event_id)
+
 event_dt_long <-
-  purrr::pmap_dfr(fsd_periods_wide |>
-                    select(from = snowfall_start_time,
-                           to = fsd_end_time,
+  purrr::pmap_dfr(event_dates_wide |>
+                    select(from,
+                           to,
                            event_id), to_long_one_minute) |>
   mutate(psvd_file_name = paste0(psvd_base_file,
-                                format(datetime,
-                                       '%Y%m%d%H%M%SFORTRESSPW.txt')))
+                                 format(datetime,
+                                        '%Y%m%d%H%M%SFORTRESSPW.txt')))
 
 velocity_counts_all <- data.frame()
 
-events <- fsd_periods_wide$event_id
-events <- events[!events == '2023-03-25']
-for(event in events){
+for(event in event_dates_wide$event_id){
   psvd_files <- event_dt_long$psvd_file_name[event_dt_long$event_id == event]
   # psvd_files <- c('/media/alex/phd-data/local-usask/field-downloads/disdrometer/raw_data/Parsivel_Data_Until_20231004/Parsivel_Data//20210422154700FORTRESSPW.txt',
   #                '/media/alex/phd-data/local-usask/field-downloads/disdrometer/raw_data/Parsivel_Data_Until_20231004/Parsivel_Data//20210422154700FORTRESSPW.txt')
@@ -37,53 +49,48 @@ for(event in events){
   if(!is.null(psvd_3d_mtx |> unlist())){
     psvd_3d_mtx_sum <- sum_psvd_3d_mtx(psvd_3d_mtx = psvd_3d_mtx)
 
-    velocity_counts <- colSums(psvd_3d_mtx_sum) |>
+    velocity_counts <- rowSums(psvd_3d_mtx_sum) |>
       as_tibble(rownames = 'vel_bin') |>
       mutate(across(everything(), as.numeric),
              event_id = as.Date(event))
 
     velocity_counts_all <- rbind(velocity_counts_all, velocity_counts)
 
-    vel_mean <- rep(velocity_counts$vel_bin,
-                    times = velocity_counts$value, na.rm = T) |> mean()
-
-    vel_med <- rep(velocity_counts$vel_bin,
-                   times = velocity_counts$value, na.rm = T) |> median()
-
-    line_data <- data.frame(xintercept = c(vel_mean, vel_med),
-                            color = c("red", "blue"),
-                            linetype = c("Mean", "Median"))
-
     p_vel <- ggplot(velocity_counts, aes(x = vel_bin, y = value)) +
       geom_bar(stat = "identity", fill = "skyblue") +
-      xlim(c(0,3)) +
-      geom_text(data = line_data, aes(x = 2, y = 10000, label = paste0('Mean: ',round(vel_mean, 2), '\nMedian: ', round(vel_med, 2)))) +
-      geom_vline(data = line_data, aes(xintercept = xintercept, linetype = linetype), size = 1) +
+      xlim(c(0, 15)) +
       labs(title = as.Date(event),
            x = "Velocity (m/s)",
            y = "Frequency")
 
-    ggsave(paste0('figs/snow_survey_periods/parsivel_freq_distributions/velocity/', format(as.Date(event), '%Y%m%d'), '_velocity_freq_dist.png'),
+    ggsave(paste0('figs/automated_snowfall_event_periods/parsivel_freq_distributions/velocity/frequency/', format(as.Date(event), '%Y%m%d'), '_velocity_freq_dist.png'),
+           p_vel,
+           width = 8.5, height = 4)
+
+    p_vel <- ggplot(velocity_counts, aes(x = vel_bin, y = (value/sum(velocity_counts$value))*100)) +
+      geom_bar(stat = "identity", fill = "skyblue") +
+      xlim(c(0, 15)) +
+      labs(title = as.Date(event),
+           x = "Velocity (m/s)",
+           y = "Percent (%)")
+
+    ggsave(paste0('figs/automated_snowfall_event_periods/parsivel_freq_distributions/velocity/normalised/', format(as.Date(event), '%Y%m%d'), '_velocity_freq_dist.png'),
            p_vel,
            width = 8.5, height = 4)
 
     psvd_long <- pivot_psvd_longer(psvd_3d_mtx_sum)
-
-    p_psvd <- psvd_plot(
+    p <- psvd_plot(
       psvd_long,
       model = c(
-        # 'Rain',
-        # 'P1e - Dendrite',
-        'Wet', # from rasmussern1999 wet sphere
-        'Dry', # from rasmussern1999 dry sphere
-        'R2b - Densely Rimed Stellar'
-        # 'R4c - Conical Graupel'
+        'Rain',
+        'P1e - Dendrite',
+        'R2b - Densely Rimed Stellar',
+        'R4c - Conical Graupel'
       ),
       alt = 2000
     )
-
-    ggsave(paste0('figs/snow_survey_periods/parsivel_freq_distributions/psvd/', format(as.Date(event), '%Y%m%d'), '_dia_vs_velocity_freq_distributions.png'),
-           p_psvd,
+    ggsave(paste0('figs/automated_snowfall_event_periods/parsivel_freq_distributions/psvd/', format(as.Date(event), '%Y%m%d'), '_dia_vs_velocity_freq_distributions.png'),
+           p,
            width = 7, height = 5)
 
   } else {
@@ -104,8 +111,10 @@ ggplot(velocity_counts_all, aes(x = vel_bin, y = value, fill = as.factor(event_i
        y = "Frequency") +
   xlim(0, 5)
 
-ggsave(paste0('figs/snow_survey_periods/parsivel_freq_distributions/velocity/all_dates_velocity_freq_dist.png'),
+ggsave(paste0('figs/automated_snowfall_event_periods/parsivel_freq_distributions/velocity/all_dates_velocity_freq_dist.png'),
        width = 8.5, height = 4)
+
+ggplotly()
 
 # plot normalised frequency
 
@@ -114,15 +123,13 @@ velocity_counts_normalised <- velocity_counts_all |>
   mutate(event_total = sum(value),
          percent = (value / event_total)*100)
 
-# ggplotly()
-
 ggplot(velocity_counts_normalised, aes(x = vel_bin, y = percent, fill = as.factor(event_id))) +
   geom_bar(stat = "identity", position = 'dodge') +
   labs(x = "Velocity (m/s)",
-       y = "Percent Frequency (%)") +
-  xlim(0, 5)
+       y = "Percent (%)") +
+  xlim(0, 8)
 
-# ggplotly()
+ggplotly()
 
-ggsave(paste0('figs/snow_survey_periods/parsivel_freq_distributions/velocity/all_dates_velocity_norm_freq_dist.png'),
+ggsave(paste0('figs/automated_snowfall_event_periods/parsivel_freq_distributions/velocity/all_dates_velocity_norm_freq_dist.png'),
        width = 8.5, height = 4)

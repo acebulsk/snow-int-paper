@@ -106,7 +106,7 @@ class_event_met |>
   xlab(temp_ax_lab) +
   labs(colour = 'Measurement:')
 
-ggsave('figs/interception/air_temp_w_max_scl_tree.png', width = 5, height = 4, device = png)
+ggsave('figs/automated_snowfall_event_periods/air_temp_w_max_scl_tree.png', width = 5, height = 4, device = png)
 
 # class_event_met |>
 #   pivot_longer(c(event_ip_tree, event_ip_scl)) |>
@@ -146,14 +146,14 @@ event_df |>
   select(-t) |>
   left_join(class_event_met |> select(w_tree_event, t)) |>
   # filter(w_tree_event %in% low_wind_events) |>
-  ggplot(aes(cuml_snow, SCL, colour = t, group = t)) +
-  geom_line() + scale_color_viridis_c(option = 'magma', end = .90) +
+  ggplot(aes(cuml_snow, Tree, colour = storm_id, group = storm_id)) +
+  geom_line() + scale_color_viridis_d(option = 'magma', end = .90) +
   # facet_grid(~name) +
   ylab('Canopy Storage (mm)') +
   xlab('Snowfall (mm)') +
   labs(colour = temp_ax_lab)
 
-ggsave('figs/interception/cuml_event_snowfall_canopy_storage_scl.png', width = 6, height = 4)
+ggsave('figs/automated_snowfall_event_periods/cuml_event_snowfall_canopy_storage_scl.png', width = 6, height = 4)
 
 event_df |>
   rename(Tree = cuml_int_tree, SCL = cuml_int_troughs) |>
@@ -174,7 +174,7 @@ event_df |>
   xlab('Event time elapsed (hours)') +
   labs(colour = temp_ax_lab)
 
-ggsave('figs/interception/select_event_cuml_snowfall_canopy_storage_scl_w_met.png', width = 8, height = 9)
+ggsave('figs/automated_snowfall_event_periods/select_event_cuml_snowfall_canopy_storage_scl_w_met.png', width = 8, height = 9)
 
 # plotly::ggplotly()
 

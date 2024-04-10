@@ -18,6 +18,6 @@ fsd_all_avg_event <- fsd_all |>
     sd_IP = sd(IP)) |>
   left_join(ffr_met_avg_event)
 
-ggplot(fsd_all_avg_event |> pivot_longer(c(mean_u, med_u)), aes(value, mean_IP, colour = name)) + geom_point()
-
-ggplot(fsd_all_avg_event, aes(t, IP)) + geom_point()
+# ggplot(fsd_all_avg_event |> pivot_longer(c(wind_speed, med_u)), aes(value, mean_IP, colour = name)) + geom_point()
+#
+# ggplot(fsd_all_avg_event, aes(t, IP)) + geom_point()

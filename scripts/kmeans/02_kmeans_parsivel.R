@@ -7,7 +7,7 @@
 library(ggpubr)
 library(factoextra)
 
-parsivel <- readRDS('../../analysis/disdrometer/data/disdro_spectrum_processed_202310.RDS')
+parsivel <- readRDS('../../analysis/disdrometer/data/disdro_spectrum_processed_20240409.RDS')
 
 n_k <- 3 # based on shouldnt have any rain so graupel, wet snow, dry snow
 

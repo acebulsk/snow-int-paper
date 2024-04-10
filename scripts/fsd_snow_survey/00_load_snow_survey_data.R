@@ -1,5 +1,7 @@
 # load snow survey related data
 
+source('scripts/00_define_global_attributes.R')
+
 good_canopies <- c('O', 'M') # dont include edge samples for fsd
 
 fsd_all <- readRDS('../../analysis/snow-stats/data/processed/fresh_snow_densities_with_ground_partials.rds') |>

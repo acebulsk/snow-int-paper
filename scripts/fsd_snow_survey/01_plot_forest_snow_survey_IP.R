@@ -82,7 +82,7 @@ fsd_all_avg_event |>
   ylab(ip_y_ax_lab) +
   theme(axis.title.x = element_blank())
 
-ggsave('figs/interception/snow_survey_ip_w_met.png', device = png, width = 8.5, height = 4)
+ggsave('figs/snow_survey_periods/snow_survey_ip_w_met.png', device = png, width = 8.5, height = 4)
 
 
 # work on plotting lai vs ip ----
@@ -134,7 +134,7 @@ lai
 
 cowplot::plot_grid(cc, lai, labels = c('A', 'B'), rel_widths = c(.65, 1))
 
-ggsave('figs/interception/forest_ip.png', device = png, width = 9.5, height = 4)
+ggsave('figs/snow_survey_periods/forest_ip.png', device = png, width = 9.5, height = 4)
 
 # LAI boxplot like the airtemp and wind speed plots
 
@@ -214,7 +214,7 @@ le_ip <- fsd_ip_lai |>
 
 le_ip
 
-ggsave('figs/interception/lai_vs_ip.png', device = png, width = 6, height = 4.5)
+ggsave('figs/snow_survey_periods/lai_vs_ip.png', device = png, width = 6, height = 4.5)
 
 le_ip <- le_ip + theme(legend.position = 'none', plot.margin = margin(0.5, 0.5, 0.5, .75, "cm"))
 

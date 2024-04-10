@@ -21,8 +21,8 @@ for (event in as.character(fsd_periods_wide$event_id)) {
 
   # reticulate::py_install('kaleido')
   # reticulate::py_install('plotly')
-  plotly::save_image(p, paste0('figs/interception/snow_survey/wind_rose/png/wind_rose_event_', event, '.png'))
-  htmltools::save_html(p, paste0('figs/interception/snow_survey/wind_rose/interactive/wind_rose_event_', event, '.html'))
+  plotly::save_image(p, paste0('figs/snow_survey_periods/wind_rose/png/wind_rose_event_', event, '.png'))
+  htmltools::save_html(p, paste0('figs/snow_survey_periods/wind_rose/interactive/wind_rose_event_', event, '.html'))
 }
 #
 # ggwindRose(ffr_met_wnd_event, 'wind_speed', 'wind_dir')

@@ -1,6 +1,6 @@
 # plot parsivel data with IP
 
-parsivel_1min <- readRDS('../../analysis/disdrometer/data/disdro_spectrum_processed_202310.RDS')
+# parsivel_1min <- readRDS('../../analysis/disdrometer/data/disdro_spectrum_processed_20240409.RDS')
 
 # parsivel_1min |>
 #   filter(is.na(precip_name) == F,
@@ -15,7 +15,7 @@ parsivel_1min <- readRDS('../../analysis/disdrometer/data/disdro_spectrum_proces
 # ggsave('figs/supplement/hydrometeor_classification_2021_2023.png', width = 5, height = 3)
 
 ffr_met <- readRDS('../../analysis/met-data-processing/data/ffr_crhm_modelling_obs.rds')
-parsivel_15min <- readRDS('../../analysis/disdrometer/data/disdro_spectrum_processed_agg_15_min_202310.RDS') |>
+parsivel_15min <- readRDS('../../analysis/disdrometer/data/disdro_spectrum_processed_agg_15_min.RDS') |>
   left_join(ffr_met)
 
 # parsivel_15min |>
@@ -36,8 +36,38 @@ parsivel_15min |>
   xlab('Hydrometeor Type')
 
 # seems like the dry snow / graupel / wet snow classification is being messed up by turbulence at powerline
-ggplot(met_intercept, aes(precip_name, IP)) + geom_boxplot()
+ggplot(met_intercept, aes(precip_name, IP)) +
+  geom_boxplot() +
+  geom_point(aes(x = u))
+
 ggplot(met_intercept, aes(precip_name, t)) + geom_boxplot()
+
+# show influence of wind on hydrometeor velocity
+
+ggplot(met_intercept, aes(wind_labs, part_vel, group = wind_labs)) +
+  geom_point(aes(x = u, colour = part_diam), alpha = 0.3) +
+  geom_boxplot(fill = NA, outlier.shape = NA, size = .6) +
+  scale_color_viridis_c(name = 'Hydrometeor\nDiameter (mm)') +
+  xlim(c(0, 4)) +
+  ylab('Hydrometeor Velocity (m/s)') +
+  xlab('Wind Speed (m/s)')
+
+ggsave('figs/supplement/windspeed_vs_hydrometeor_velocity.png', width = 7, height = 4)
+
+ggplot(met_intercept, aes(wind_labs, part_diam, group = wind_labs)) +
+  geom_point(aes(x = u), alpha = 0.5, colour = 'lightblue') +
+  geom_boxplot(fill = NA, outlier.shape = NA) +
+  xlim(c(0, 4)) +
+  ylab('Hydrometeor Diameter (mm)') +
+  xlab('Wind Speed (m/s)')
+
+ggsave('figs/supplement/windspeed_vs_hydrometeor_diameter.png', width = 7, height = 4)
+
+ggplot(met_intercept, aes(wind_labs, part_diam, group = wind_labs)) + geom_boxplot()
+
+ggplot(met_intercept, aes(u, part_diam)) + geom_point()
+ggplot(met_intercept, aes(u, part_vel)) + geom_point()
+
 
 # so well filter to lower wind speeds Garrett2014 suggest using turbulence
 # calculated as ((max wind speed - avg wind speed)^2)/2 = turbulence (m2/s)

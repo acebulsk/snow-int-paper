@@ -19,4 +19,4 @@ cowplot::plot_grid(
   labels = 'AUTO'
 )
 
-ggsave('figs/interception/troughs_met_vs_IP_bin.png', device = png, width = 8.5, height = 11)
+ggsave('figs/automated_snowfall_event_periods/troughs_met_vs_IP_bin.png', device = png, width = 8.5, height = 11)
