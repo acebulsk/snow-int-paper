@@ -86,7 +86,9 @@ event_df <- storm_dates_long |>
 
 class_event_met <- event_df |>
   group_by(w_tree_event) |>
-  summarise(across(c(t:Qsi), mean),
+  summarise(
+    median_u = median(u),
+    across(c(t:Qsi), mean),
             peak_canopy_load_tree = max(cuml_int_tree),
             peak_canopy_load_scl = max(cuml_int_troughs),
             total_snowfall = max(cuml_snow),
@@ -146,14 +148,33 @@ event_df |>
   select(-t) |>
   left_join(class_event_met |> select(w_tree_event, t)) |>
   # filter(w_tree_event %in% low_wind_events) |>
-  ggplot(aes(cuml_snow, Tree, colour = storm_id, group = storm_id)) +
-  geom_line() + scale_color_viridis_d(option = 'magma', end = .90) +
+  ggplot(aes(cuml_snow, Tree, colour = t, group = t)) +
+  geom_line() + scale_color_viridis_c(option = 'magma', end = .90) +
   # facet_grid(~name) +
   ylab('Canopy Storage (mm)') +
   xlab('Snowfall (mm)') +
-  labs(colour = temp_ax_lab)
+  labs(colour = temp_ax_lab) +
+  theme(legend.position = 'bottom')
 
-ggsave('figs/automated_snowfall_event_periods/cuml_event_snowfall_canopy_storage_scl.png', width = 6, height = 4)
+ggsave('figs/automated_snowfall_event_periods/cuml_event_snowfall_canopy_storage_scl_colour_temp.png',
+       width = 4, height = 6)
+
+event_df |>
+  rename(Tree = cuml_int_tree, SCL = cuml_int_troughs) |>
+  # pivot_longer(c(SCL)) |>
+  select(-u) |>
+  left_join(class_event_met |> select(w_tree_event, median_u)) |>
+  # filter(w_tree_event %in% low_wind_events) |>
+  ggplot(aes(cuml_snow, Tree, colour = median_u, group = median_u)) +
+  geom_line() + scale_color_viridis_c(option = 'viridis', end = .90) +
+  # facet_grid(~name) +
+  ylab('Canopy Storage (mm)') +
+  xlab('Snowfall (mm)') +
+  labs(colour = wind_ax_lab) +
+  theme(legend.position = 'bottom')
+
+ggsave('figs/automated_snowfall_event_periods/cuml_event_snowfall_canopy_storage_scl_colour_wind.png',
+       width = 4, height = 6)
 
 event_df |>
   rename(Tree = cuml_int_tree, SCL = cuml_int_troughs) |>
