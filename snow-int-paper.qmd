@@ -202,11 +202,18 @@ Subcanopy lysimeter (a), weighed tree lysimeter loaded with snow (b) and weighed
 
 ## Subcanopy Lysimeters
 
-A linear increase in canopy storage with increasing snowfall, is shown in @fig-scl-w-sf for 25 snowfall events. The difference in the rate of change between the events, shown in @fig-scl-w-sf, does not show a strong connection between cold events compared to warmer events. However, this change in slope is interpreted to be a result of a combination of meteorological variables which will be explored in the following section.
+A linear increase in canopy storage with increasing snowfall, is shown in @fig-scl-w-sf over 25 snowfall events. The difference in the rate of change between the events, shown in @fig-scl-w-sf, does not show a strong connection between cold events compared to warmer events. However, this change in slope is interpreted to be a result of a combination of meteorological variables which will be explored in the following section.
 
-![Cumulative canopy snow storage measured using the subcanopy lysimeters plotted against cumulative event snowfall for five selected snowfall events. The colour of each line shows the average air temperature over the duration of each event.](figs/automated_snowfall_event_periods/cuml_event_snowfall_canopy_storage_scl.png){#fig-scl-w-sf}
+::: {#fig-w-tree layout-ncol="2"}
+![](figs/automated_snowfall_event_periods/cuml_event_snowfall_canopy_storage_scl_colour_temp.png){#fig-scl-w-sf}
 
-Air temperature was observed to have little influence over interception efficiency measured using the subcanopy lysimeters and snowfall gauge for the 25 snowfall events (@fig-lai-met-ip, A & B). Relative humidity was observed to have a slight negative association with interception efficiency. However this is primarily based on the lowest relative humidity bin with relatively few observations. Wind speed was observed to increase the mean interception efficiency slightly from 0.6 to 0.63 between wind speed bins of 0.25 and 0.75 m s^-1^ (@fig-lai-met-ip, C). This is thought to be due to an associated increase in canopy contact area. The mean interception efficiency decreases wind speeds above 2 m s^-1^ to a minimum of 0.47 for the 3.75 m s^-1^ wind speed bin. The initial canopy snow load had a positive association with interception efficiency as the canopy filled with snow, increasing the mean interception efficiency from 0.57 to 0.67. Followed by a gradual decline in interception efficiency for snow loads greater than 7.5 mm to a minimum of 0.48 at snow loads above 18 mm (@fig-lai-met-ip, C). As the canopy fills with snow, interception efficiency was expected to increase due to snow bridging across the branches increasing the contact area of the canopy. Interception efficiency was also expected to decline at higher snow loads due some increase in unloading due to branch bending and a decline in the canopy contact area as branches bend down. Hydrometeor diameter and velocity did not have a strong association with interception efficiency.
+![](figs/automated_snowfall_event_periods/cuml_event_snowfall_canopy_storage_scl_colour_wind.png){#fig-scl-w-sf}
+
+Cumulative canopy snow storage measured using the subcanopy lysimeters plotted against cumulative event snowfall for five selected snowfall events. The colour of each line shows the average air temperature (a) and wind speed (b) over the duration of each event.
+:::
+
+
+Air temperature was observed to have little influence over interception efficiency measured using the subcanopy lysimeters and snowfall gauge for the 25 snowfall events (@fig-lai-met-ip, A & B). Relative humidity was observed to have a slight negative association with interception efficiency. However this is primarily based on the lowest relative humidity bin with relatively few observations. Wind speed was observed to increase the mean interception efficiency slightly from 0.56 to 0.62 between wind speed bins of 0.25 and 1.25 m s^-1^ (@fig-lai-met-ip, C). This is thought to be due to an associated increase in canopy contact area as hydrometeor trajectory becomes more horizontal with increasing wind speed. The mean interception efficiency decreases wind speeds above 2 m s^-1^ to a minimum of 0.47 for the 3.75 m s^-1^ wind speed bin. The initial canopy snow load had a positive association with interception efficiency as the canopy filled with snow, increasing the mean interception efficiency from 0.57 to 0.67. Followed by a gradual decline in interception efficiency for snow loads greater than 7.5 mm to a minimum of 0.48 at snow loads above 18 mm (@fig-lai-met-ip, C). As the canopy fills with snow, interception efficiency was expected to increase due to snow bridging across the branches increasing the contact area of the canopy. Interception efficiency was also expected to decline at higher snow loads due some increase in unloading due to branch bending and a decline in the canopy contact area as branches bend down. Hydrometeor diameter and velocity did not have a strong association with interception efficiency.
 
 ![Scatter plots of discrete observations (green) of snow interception efficiency observed at 15 minute intervals using the subcanopy lysimeter and snowfall gauge against and binned data (black). Panels show (A) air temperature, (B) wind speed, (C) initial canopy snow load (the snow load observed at the begining of the timestep), (E) hydrometeor diameter, (F) hydrometeor velocity. The black open circles show the mean of each bin and the error bars represent the standard deviations. The data were filtered to include observations with a snowfall rate > 0 mm/hr and a snowfall rate > the subcanopy lysimeter throughfall rate to minimize observations with unloading. Periods of unloading and melt were also removed through careful analysis of the weighed tree, subcanopy lysimeters, and timelapse imagery.](figs/automated_snowfall_event_periods/troughs_met_vs_IP_bin.png){#fig-lai-met-ip}
 
@@ -219,15 +226,31 @@ No relationship between wind speed and hydrometeor velocity was found between fi
 
 ## Aerial Lidar 
 
-The mean contact number was calculated for a snow-free canopy across each azimuth of the hemisphere at a 1 deg resolution and then averaged for each zenith angle for each forest plot to determine how canopy contact number is associated with increasing hydrometeor trajectory. @fig-ht-mcn shows an exponential increase in the number of canopy contacts as the trajectory becomes more horizontal (near 0 °). Forest plot PWL_SW which has a more closed canopy has a higher mean contact number at near vertical trajectories (near -90°) and increases at a slower rate compared to sparser canopies like FSR_S which start off with lower mean contact number and increase at a higher rate. 
+The mean canopy coverage across the hemisphere for each forest plot, estimated as a function of the estimated number of canopy contacts along a ray show an increase in canopy coverage with increasing horizontal hydrometeor trajectory @fig-ht-cc. Forest plot PWL_SW which has a more closed canopy has 0.4 (-) fractional closed canopy at near vertical trajectories (near -90°) and increases at a slower rate at higher trajectories above -50° compared to sparser canopies like FSR_S which has a lower canopy coverage of 0.2 (-) from nadir and increase in canopy coverage at a higher rate compared to PWL_SW. All forest plots approach completely closed canopies at for horizontal (0°) trajectories. Since hydrometeor trajectory may be estimated as a function of wind speed, assuming constant hydrometeor terminal fall velocity and horizontal velocity equal to wind speed, @fig-ws-cc shows canopy coverage as a function of wind speed. Most of the increase in canopy coverage as a result of horizontal hydrometeor trajectories occurs between wind speeds of 0 and 2 m s^-1^. However, this relationship does not consider the turbulent windflow patterns that exist within and above the canopy. 
 
-![Scatter plot showing the association of hydrometeor trajectory with mean contact number. The dots represent the mean contact number across the hemisphere for a trajectory (zenith angle) at each forest plot. The black lines show a log transformed linear regression (solid black line) and the nonlinear-least-squares regress (dashed black line). ](../../analysis/lidar-processing/figs/voxrs_ip_regressions/traj_angle_vs_contact_number_thetaby_5.png){#fig-ht-mcn}
+::: {#fig-ta-ws-cc layout-ncol="2"}
+
+![](../../analysis/lidar-processing/figs/voxrs/scatter/traj_angle_vs_canopycover_2_thetaby_5.png){#fig-ht-cc}
+
+![](../../analysis/lidar-processing/figs/voxrs/scatter/wind_vs_canopycover_2_thetaby_5.png){#fig-ws-cc}
+
+Scatter plot showing the association of hydrometeor trajectory with canopy coverage (a) and wind speed with canopy coverage (b). The dots represent the mean canopy coverage across azimuth angles of the the hemisphere for a given trajectory (zenith angle - 90°) at each forest plot.
+
+:::
 
 TODO: maybe include a second plot for the snow covered day
 
-Aerial lidar measurements of snow accumulation illustrate how hydrometeor trajectory influences effective canopy coverage and thus, interception efficiency. A 24 hr long snowfall accumulation event on March 13, 2023 was characterized by a median hydrometeor velocity of 0.9 m s^-1^, wind speed of 1.4 m s^-1^ and wind direction of 183° which resulting in a predicted average hydrometeor trajectory of -33° from 183° (South). 
+To determine if horizontal hydrometeor trajectory influences on the ground snow accumulation, aerial lidar measurements of $\Delta tf$ were collected for a 24 hr long snowfall event on March 13, 2023 with a median wind speed of 1.4 m s^-1^, median wind direction of 183°, median hydrometeor velocity of 0.9 m s^-1^ and mean air temperature of -3.5 °C. The observed wind speed and direction resulted in a predicted median hydrometeor trajectory of -33° from a horizontal plane. 
 
-For a more closed canopy (@fig-hemi-pwl-e, PWL_E), the correlation between interception efficiency and mean contact number across the hemisphere, agreegated for each grid cell, within each plot, shows that the highest Spearman's R correlation is observed between zenith angles of 0-30° and azimuth of 180-190° South. However, for more open canopy (@fig-hemi-fsr-s, FSR_S) the correlation is lower and the effect is not quite as localised around 0-30° and azimuth of 180-190°.
+```{r}
+lidr_event_met_avg <- 
+  readRDS('data/event_met/lidar_events_met_avg.rds') 
+
+lidr_event_met_avg|> 
+  knitr::kable()
+```
+
+For a more closed canopy (@fig-hemi-pwl-e, PWL_E), the correlation between interception efficiency and mean contact number across the hemisphere, aggregated for each grid cell, within each plot, shows that the highest Spearman's R correlation is observed between zenith angles of 15-30° and azimuth of 180-190° South. For more open canopy (@fig-hemi-fsr-s, FSR_S) the peak correlation slightly lower and not as localised, while still highest around zenith angles of 15-30° and azimuth angles of 180-190°South.
 
 ::: {#fig-hemis layout-ncol="2"}
 ![PWL E](../../analysis/lidar-processing/figs/voxrs/hemis/cor_cn_ip/full_hemi_rho_s_cor_mcn_ip_23_072_vox_len_0.25m__gridgen_PWL_E.png){#fig-hemi-pwl-e}
@@ -237,25 +260,11 @@ For a more closed canopy (@fig-hemi-pwl-e, PWL_E), the correlation between inter
 Spearman's Correlation of contact number and interception efficiency for Powerline South (a) and Subalpine Ridge Forest (b).
 :::
 
-Based on the zone of high correlation in @fig-hemi-pwl-e and the predicted hydrometeor trajectory using @eq-ta, the hemisphere was filtered to 13-16 deg and azimuth of 180-190 to assess the correlation between mean contact number and interception efficiency. @fig-pwl-e-mcn-ip shows a logarithmic relationship between interception efficiency and mean contact number for the PWL E plot. @fig-fsr-s-mcn-ip shows a slightly more logarithmic relationship for the FSR S plot. 
-
-::: {#fig-mcn-ip layout-ncol="2"}
-![PWL E](../../analysis/lidar-processing/figs/voxrs/scatter/PWL_E_mean_contact_number_vs_ip_phi_13_16_theta_186_190.png){#fig-pwl-e-mcn-ip}
-
-![FSR S](../../analysis/lidar-processing/figs/voxrs/scatter/FSR_S_mean_contact_number_vs_ip_phi_13_16_theta_186_190.png){#fig-fsr-s-mcn-ip}
-
-Scatterplot of contact number and interception efficiency using zenith angles of 13-16 and azimuth of 180-190 for Powerline South (a) and Subalpine Ridge Forest (b).
-:::
-
 TODO: decide on using estimated return number, contact number, or transmittance here. 
 
-```{r}
-lidr_event_met_avg <- 
-  readRDS('data/event_met/lidar_events_met_avg.rds') 
+TODO: calculate I/P over the site to introduce the event, canopy coverage for nadir vs. zenith angle with highest correlation. I/P predicted using HP98 nadir zenith angle vs HP98 wind adjusted vs. actual across sites? 
 
-lidr_event_met_avg|> 
-  knitr::kable()
-```
+
 
 # Discussion
 
