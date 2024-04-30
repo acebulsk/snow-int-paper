@@ -10,6 +10,7 @@ source('../../analysis/disdrometer/scripts/00_source_functions.R')
 
 met_intercept <- readRDS('../../analysis/interception/data/storm_analysis/continuous_throughfall_data_binned_met_select_events.rds')  |>
   filter(q_sf > 0,
+         d_tf > 0.01,
     # u <= 2,
     q_sf > q_tf) |> # if troughs > q_sf may be some unloading
   mutate(
@@ -26,7 +27,7 @@ pwl_sf <- readRDS('../../analysis/met-data-processing/data/pluvio-qaqc/pwl_pluvi
 # theme_bw(base_size = 14)
 options(ggplot2.discrete.colour= palette.colors(palette = "R4"))
 
-# "#000000" "#DF536B" "#61D04F" "#2297E6" "#28E2E5" "#CD0BBC" "#F5C710" "#9E9E9E"
+# "#000000" "#DF536B" "dodgerblue" "#2297E6" "#28E2E5" "#CD0BBC" "#F5C710" "#9E9E9E"
 
 fig_width <- 5.5
 fig_height <- 4

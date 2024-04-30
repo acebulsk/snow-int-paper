@@ -44,7 +44,7 @@ ggplot(data.frame(wind_speed, traj_angle_deg_vect), aes(wind_speed, traj_angle_d
   ylim(c(-90, 0))
 
 ggsave('figs/examples/wind_speed_vs_traj_angle.png', device = png,
-      width = 5, height = 5)
+      width = 3, height = 3)
 
 # Plot trajectory angle vs mean contact number
 

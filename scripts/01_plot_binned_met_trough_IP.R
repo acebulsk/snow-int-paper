@@ -21,7 +21,7 @@ sf_ip_smry <- met_intercept |>
 sf_ip <- met_intercept |>
   # filter(weighed_tree_canopy_load_mm <= 5) |>
   ggplot() +
-  geom_point(aes(x = q_sf, y = IP), colour = '#61D04F',  alpha = 0.5, size = 0.5)+
+  geom_point(aes(x = q_sf, y = IP), colour = 'dodgerblue',  alpha = 0.5, size = 0.5)+
   geom_errorbar(data = sf_ip_smry, aes(x = q_sf_labs, ymax = sd_hi, ymin = sd_low), width = .5)  +
   geom_point(data = sf_ip_smry, aes(x = q_sf_labs, y = IP_avg), shape = 1, size = 4) +
   ylab(ip_y_ax_lab) +
@@ -47,7 +47,7 @@ at_ip_smry <- met_intercept |>
 at_ip <- met_intercept |>
   # filter(weighed_tree_canopy_load_mm <= 5) |>
   ggplot() +
-  geom_point(aes(x = t, y = IP), colour = '#61D04F',  alpha = 0.5, size = 0.5)+
+  geom_point(aes(x = t, y = IP), colour = 'dodgerblue',  alpha = 0.5, size = 0.5)+
   geom_errorbar(data = at_ip_smry, aes(x = temp_labs, ymax = sd_hi, ymin = sd_low), width = .5)  +
   geom_point(data = at_ip_smry, aes(x = temp_labs, y = IP_avg), shape = 1, size = 4) +
   ylab(ip_y_ax_lab) +
@@ -73,7 +73,7 @@ tice_ip_smry <- met_intercept |>
 tice_ip <- met_intercept |>
   # filter(weighed_tree_canopy_load_mm <= 5) |>
   ggplot() +
-  geom_point(aes(x = t_ice_bulb, y = IP), colour = '#61D04F',  alpha = 0.5, size = 0.5)+
+  geom_point(aes(x = t_ice_bulb, y = IP), colour = 'dodgerblue',  alpha = 0.5, size = 0.5)+
   geom_errorbar(data = tice_ip_smry, aes(x = t_ice_labs, ymax = sd_hi, ymin = sd_low), width = .5)  +
   geom_point(data = tice_ip_smry, aes(x = t_ice_labs, y = IP_avg), shape = 1, size = 4) +
   ylab(ip_y_ax_lab) +
@@ -99,7 +99,7 @@ tice_dep_ip_smry <- met_intercept |>
 tice_ip <- met_intercept |>
   # filter(weighed_tree_canopy_load_mm <= 5) |>
   ggplot() +
-  geom_point(aes(x = t_ice_dep, y = IP), colour = '#61D04F',  alpha = 0.5, size = 0.5)+
+  geom_point(aes(x = t_ice_dep, y = IP), colour = 'dodgerblue',  alpha = 0.5, size = 0.5)+
   geom_errorbar(data = tice_dep_ip_smry, aes(x = t_ice_dep_labs, ymax = sd_hi, ymin = sd_low), width = .5)  +
   geom_point(data = tice_dep_ip_smry, aes(x = t_ice_dep_labs, y = IP_avg), shape = 1, size = 4) +
   ylab(ip_y_ax_lab) +
@@ -126,7 +126,7 @@ rh_ip_smry <- met_intercept |>
 rh_ip <- met_intercept |>
   # filter(weighed_tree_canopy_load_mm <= 5) |>
   ggplot() +
-  geom_point(aes(x = rh, y = IP), colour = '#61D04F',  alpha = 0.5, size = 0.5)+
+  geom_point(aes(x = rh, y = IP), colour = 'dodgerblue',  alpha = 0.5, size = 0.5)+
   geom_errorbar(data = rh_ip_smry, aes(x = rh_labs, ymax = sd_hi, ymin = sd_low), width = .5)  +
   geom_point(data = rh_ip_smry, aes(x = rh_labs, y = IP_avg), shape = 1, size = 4) +
   ylab(ip_y_ax_lab) +
@@ -153,7 +153,7 @@ Qsi_ip_smry <- met_intercept |>
 Qsi_ip <- met_intercept |>
   # filter(weighed_tree_canopy_load_mm <= 5) |>
   ggplot() +
-  geom_point(aes(x = Qsi, y = IP), colour = '#61D04F',  alpha = 0.5, size = 0.5)+
+  geom_point(aes(x = Qsi, y = IP), colour = 'dodgerblue',  alpha = 0.5, size = 0.5)+
   geom_errorbar(data = Qsi_ip_smry, aes(x = Qsi_labs, ymax = sd_hi, ymin = sd_low), width = .5)  +
   geom_point(data = Qsi_ip_smry, aes(x = Qsi_labs, y = IP_avg), shape = 1, size = 4) +
   ylab(ip_y_ax_lab) +
@@ -179,7 +179,7 @@ ws_ip_smry <- met_intercept |>
 ws_ip <- met_intercept |>
   # filter(weighed_tree_canopy_load_mm <= 5) |>
   ggplot() +
-  geom_point(aes(x = u, y = IP), colour = '#61D04F', alpha = 0.5, size = 0.5)+
+  geom_point(aes(x = u, y = IP), colour = 'dodgerblue', alpha = 0.5, size = 0.5)+
   geom_errorbar(data = ws_ip_smry, aes(x = wind_labs, ymax = sd_hi, ymin = sd_low), width = .1)  +
   geom_point(data = ws_ip_smry, aes(x = wind_labs, y = IP_avg), shape = 1, size = 4) +
   ylab(ip_y_ax_lab) +
@@ -201,7 +201,7 @@ w_ip_smry <- met_intercept |>
 
 w_ip <- met_intercept |>
   ggplot() +
-  geom_point(aes(x = weighed_tree_canopy_load_mm, y = IP), colour = '#61D04F', alpha = 0.5, size = 0.5) +
+  geom_point(aes(x = weighed_tree_canopy_load_mm, y = IP), colour = 'dodgerblue', alpha = 0.5, size = 0.5) +
   geom_errorbar(data = w_ip_smry, aes(x = tree_labs, ymax = sd_hi, ymin = sd_low), width = .5)  +
   geom_point(data = w_ip_smry, aes(x = tree_labs, y = IP_avg), colour = 'black', shape = 1, size = 4) +
   ylab(ip_y_ax_lab) +

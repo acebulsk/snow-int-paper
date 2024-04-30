@@ -2,7 +2,7 @@
 
 source('scripts/00_define_global_attributes.R')
 source('scripts/01_plot_binned_met_trough_IP.R')
-source('scripts/01_plot_forest_snow_survey_IP.R')
+# source('scripts/01_plot_forest_snow_survey_IP.R')
 source('scripts/01_plot_parsivel_IP.R')
 
 

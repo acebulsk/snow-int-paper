@@ -50,30 +50,34 @@ q_tf_scl <- load_df |>
   ungroup() |>
   filter(row_flag == F,
          is.na(q_tf) == F) |>
-  select(datetime, q_tf) |>
+  select(datetime, trough_name = name, q_tf) |>
+  ungroup()
+
+q_tf_scl_avg <- q_tf_scl |>
   group_by(datetime) |>
   summarise(q_tf = mean(q_tf, na.rm = T))
 
-bad_events <- c('2022-03-23', '2022-02-14') |> as.Date()
+# bad_events <- c('2022-03-23', '2022-02-14') |> as.Date()
 
-good_events <- c('2022-06-13',
-                 '2022-01-02',
-                 '2022-01-31',
-                 '2022-02-19',
-                 # '2022-03-01',
-                 # '2022-05-19',
-                 # '2023-01-27',
-                 # '2023-02-19',
-                 '2023-02-26',
-                 '2023-03-13')
+# good_events <- c('2022-06-13',
+#                  '2022-01-02',
+#                  '2022-01-31',
+#                  '2022-02-19',
+#                  # '2022-03-01',
+#                  # '2022-05-19',
+#                  # '2023-01-27',
+#                  # '2023-02-19',
+#                  '2023-02-26',
+#                  '2023-03-13')
 
 event_df <- storm_dates_long |>
   left_join(met_df) |>
   left_join(q_int_tree) |>
-  left_join(q_tf_scl) |>
+  left_join(q_tf_scl_avg) |>
   group_by(w_tree_event) |>
   filter(p > 0,
-         p > q_tf) |>
+         p > q_tf,
+         q_tf > 0) |>
   mutate(cuml_snow = cumsum(p),
          q_int_troughs = p - q_tf,
          cuml_int_troughs = cumsum(q_int_troughs),
@@ -84,69 +88,125 @@ event_df <- storm_dates_long |>
          elapsed_hours = as.numeric(difftime(datetime, start_time, units = "hours"))
          )# |> filter(w_tree_event %in% good_events)
 
-class_event_met <- event_df |>
+var_name_dict <-
+  data.frame(
+    name = c('t', 'rh', 'u', 'p', 'cuml_int_troughs', 'IP_troughs'),
+    pretty_name = c(
+      temp_ax_lab,
+      "Relative Humidity (%)",
+      wind_ax_lab,
+      "Snowfall Rate (mm/hr)",
+      "Canopy Load (mm)",
+      "Interception Efficiency (-)"
+    )
+  )
+
+event_df |>
+  mutate(p = p * 4) |>  # mm/15min to mm/hr
+  pivot_longer(c(t:u, p, cuml_int_troughs, IP_troughs)) |>
+  left_join(var_name_dict, by = 'name') |>
+  ggplot(aes(x = value)) +
+  geom_histogram(color = 'black', fill = 'darkgray') +
+  facet_wrap(~pretty_name, scales = 'free') +
+  xlab(element_blank())
+
+ggsave('figs/automated_snowfall_event_periods/histogram_met_ip_snowfall_periods.png', width = 6, height = 4, device = png)
+
+event_avgs <- event_df |>
   group_by(w_tree_event) |>
   summarise(
     median_u = median(u),
-    across(c(t:Qsi), mean),
+    across(c(t:Qsi, IP_tree, IP_troughs), mean),
             peak_canopy_load_tree = max(cuml_int_tree),
             peak_canopy_load_scl = max(cuml_int_troughs),
-            total_snowfall = max(cuml_snow),
-            event_ip_tree = peak_canopy_load_tree/total_snowfall,
-            event_ip_scl = peak_canopy_load_scl/total_snowfall)
+            total_snowfall = sum(p))
 
-saveRDS(class_event_met, 'data/class_event_met.rds')
+saveRDS(event_avgs, 'data/event_avgs.rds')
 
-class_event_met |>
-  rename(Tree = peak_canopy_load_tree, SCL = peak_canopy_load_scl) |>
-  pivot_longer(c(Tree, SCL)) |>
-  ggplot(aes(t, value, colour = name)) +
-  geom_smooth(method = 'lm', se = F) +
-  stat_cor(aes(colour = name,label = after_stat(rr.label)), geom = "label", show.legend = F) +
+# plot cuml canopy load using the avg of the troughs
+
+event_df |>
+  ggplot(aes(cuml_snow, cuml_int_troughs, group =w_tree_event)) +
+  geom_line(alpha = 0.7) +
+  # geom_smooth(method = 'lm', formula = y ~ x - 1, se = F, color = 'blue', linetype = 'dashed') +
+  # geom_ribbon(aes(ymin = lm_tree - (lm_tree*0.3),
+  #                 ymax = lm_tree + (lm_tree*0.3)), alpha = 0.3) +
+  # facet_grid(~name) +
+  # annotate("text", label = paste("y =", round(coef(lm)[[1]], 2), "*x"), color = "blue", parse = TRUE) +
+  ylab('Canopy Storage (mm)') +
+  xlab('Snowfall (mm)') +
+  labs(colour = temp_ax_lab) +
+  theme(legend.position = 'bottom')
+
+ggsave('figs/automated_snowfall_event_periods/cuml_event_snowfall_canopy_storage_scl.png',
+       width = 4, height = 4)
+
+# as above but separate out the troughs
+scl_lai_cc <- read.csv('~/local-usask/analysis/interception/data/lai/scl_canopy_metrics.csv') |>
+  arrange(cc) |>
+  mutate(cc = factor(round(cc, 2), levels = sort(unique(round(cc, 2)))))
+
+scl_lai_cc$trough_name <- c('sparse_forest', 'medium_density_forest', 'dense_forest')
+
+event_df_sep_troughs <- storm_dates_long |>
+  left_join(met_df) |>
+  left_join(q_tf_scl) |>
+  left_join(scl_lai_cc) |>
+  group_by(w_tree_event, trough_name) |>
+  filter(p > 0,
+         p > q_tf,
+         q_tf > 0) |>
+  mutate(cuml_snow = cumsum(p),
+         q_int_troughs = p - q_tf,
+         cuml_int_troughs = cumsum(q_int_troughs),
+         IP_troughs = q_int_troughs/p,
+         start_time = min(datetime),
+         elapsed_hours = as.numeric(difftime(datetime, start_time, units = "hours")))
+
+event_df_sep_troughs |>
+  ggplot(aes(cuml_snow, cuml_int_troughs, colour = cc, group = interaction(w_tree_event, cc))) +
+  geom_line(alpha = 0.7) +
+  # geom_smooth(method = 'lm', formula = y ~ x - 1, se = F, color = 'blue', linetype = 'dashed') +
+  # geom_ribbon(aes(ymin = lm_tree - (lm_tree*0.3),
+  #                 ymax = lm_tree + (lm_tree*0.3)), alpha = 0.3) +
+  # facet_grid(~name) +
+  # annotate("text", label = paste("y =", round(coef(lm)[[1]], 2), "*x"), color = "blue", parse = TRUE) +
+  ylab('Canopy Storage (mm)') +
+  xlab('Event Cumulative Snowfall (mm)') +
+  labs(colour = 'Lysimeter Canopy Coverage (-)') +
+  theme(legend.position = 'bottom')
+
+ggsave('figs/automated_snowfall_event_periods/cuml_event_snowfall_canopy_storage_sep_scl.png',
+       width = 4, height = 4)
+
+event_df_sep_troughs_avg <- event_df_sep_troughs |>
+  group_by(w_tree_event, trough_name) |>
+  summarise(event_del_sf = max(cuml_snow),
+            event_del_i = cuml_int_troughs[which.max(cuml_snow)],
+            IP = event_del_i/event_del_sf,
+            cc = first(cc)) |>
+  group_by(trough_name) |>
+  mutate(trough_avg_IP = mean(IP))
+
+event_df_sep_troughs_avg |>
+  ggplot(aes(event_del_sf, IP, colour = cc, group = cc)) +
   geom_point() +
-  ylab('Maximum Canopy Storage (mm)') +
-  xlab(temp_ax_lab) +
-  labs(colour = 'Measurement:')
+  geom_hline(aes(yintercept = trough_avg_IP, colour = cc), linetype = "dashed") +
+  ylab("Interception Efficiency (-)") +
+  xlab('Event Total Snowfall (mm)') +
+  labs(colour = 'Lysimeter Canopy Coverage (-)') +
+  theme(legend.position = 'bottom')
 
-ggsave('figs/automated_snowfall_event_periods/air_temp_w_max_scl_tree.png', width = 5, height = 4, device = png)
+ggsave('figs/automated_snowfall_event_periods/event_total_snowfall_vs_IP_colour_troughs.png',
+       width = 4, height = 4)
 
-# class_event_met |>
-#   pivot_longer(c(event_ip_tree, event_ip_scl)) |>
-#   ggplot(aes(t, value, colour = name)) +
-#   geom_point()
-
-low_wind_events <- class_event_met$w_tree_event[class_event_met$u < wind_threshold]
-
-# is the w tree and troughs showing the same thing?
-# event_df |>
-#   filter(w_tree_event %in% low_wind_events) |>
-#   pivot_longer(c(cuml_int_troughs, cuml_int_tree)) |>
-#   ggplot(aes(cuml_snow, value, colour = name)) +
-#   geom_line() +
-#   facet_wrap(~w_tree_event, scales = 'free')
-
-# look at all events colour by event id
-# event_df |>
-#   filter(w_tree_event %in% low_wind_events) |>
-#   ggplot(aes(cuml_snow, cuml_int_tree, colour = as.factor(w_tree_event))) +
-#   geom_line()
-
-# plotly::ggplotly()
-
-# show the change in temp over the event
-
-# event_df |>
-#   filter(w_tree_event %in% low_wind_events) |>
-#   ggplot(aes(cuml_snow, tree_mm_zeroed, colour = t)) +
-#   geom_point() + scale_color_viridis_c()
 
 # show the avg temp of the event
 
-event_df |>
-  rename(Tree = cuml_int_tree, SCL = cuml_int_troughs) |>
+event_df_sep_troughs |>
   # pivot_longer(c(SCL)) |>
   select(-t) |>
-  left_join(class_event_met |> select(w_tree_event, t)) |>
+  left_join(event_avgs |> select(w_tree_event, t)) |>
   # filter(w_tree_event %in% low_wind_events) |>
   ggplot(aes(cuml_snow, Tree, colour = t, group = t)) +
   geom_line() + scale_color_viridis_c(option = 'magma', end = .90) +
@@ -159,11 +219,10 @@ event_df |>
 ggsave('figs/automated_snowfall_event_periods/cuml_event_snowfall_canopy_storage_scl_colour_temp.png',
        width = 4, height = 6)
 
-event_df |>
-  rename(Tree = cuml_int_tree, SCL = cuml_int_troughs) |>
+event_df_sep_troughs |>
   # pivot_longer(c(SCL)) |>
   select(-u) |>
-  left_join(class_event_met |> select(w_tree_event, median_u)) |>
+  left_join(event_avgs |> select(w_tree_event, median_u)) |>
   # filter(w_tree_event %in% low_wind_events) |>
   ggplot(aes(cuml_snow, Tree, colour = median_u, group = median_u)) +
   geom_line() + scale_color_viridis_c(option = 'viridis', end = .90) +
@@ -177,7 +236,6 @@ ggsave('figs/automated_snowfall_event_periods/cuml_event_snowfall_canopy_storage
        width = 4, height = 6)
 
 event_df |>
-  rename(Tree = cuml_int_tree, SCL = cuml_int_troughs) |>
   pivot_longer(c(Tree, t, rh, u, cuml_snow)) |>
   mutate(name = factor(name, ordered = T,
                        levels = c('cuml_snow', 'Tree', 't', 'rh', 'u'),
@@ -186,7 +244,7 @@ event_df |>
                                   'Air Temperature (°C)',
                                   'Relative Humidity (%)',
                                   "Wind Speed (m/s)"))) |>
-  # left_join(class_event_met |> select(w_tree_event, t)) |>
+  # left_join(event_avgs |> select(w_tree_event, t)) |>
   # filter(w_tree_event %in% low_wind_events) |>
   ggplot(aes(elapsed_hours, value)) +
   geom_line() + scale_color_viridis_c(option = 'magma', end = .90) +
@@ -199,28 +257,28 @@ ggsave('figs/automated_snowfall_event_periods/select_event_cuml_snowfall_canopy_
 
 # plotly::ggplotly()
 
-sel_ip <- event_df |>
+sel_ip <- event_df_sep_troughs |>
   select(w_tree_event, datetime, Tree = IP_tree, SCL = IP_troughs) |>
   pivot_longer(c(Tree, SCL), names_to = 'inst', values_to = 'IP')
 #
-# event_df |>
+# event_df_sep_troughs |>
 #   rename(Tree = cuml_int_tree, SCL = cuml_int_troughs) |>
 #   pivot_longer(c(Tree, SCL)) |>
 #   select(-t) |>
-#   left_join(class_event_met |> select(w_tree_event, t)) |>
+#   left_join(event_avgs |> select(w_tree_event, t)) |>
 #   filter(w_tree_event %in% low_wind_events) |>
 #   ggplot(aes(cuml_snow, value, colour = t, group = t)) +
 #   geom_line() + scale_color_viridis_c(option = 'magma', end = .90) +
 #   facet_grid(~name) +
 #   ylab('Canopy Storage (mm)') +
 #   xlab('Snowfall (mm)') +
-#   labs(colour = temp_ax_lab)sel_W <- event_df |>
+#   labs(colour = temp_ax_lab)sel_W <- event_df_sep_troughs |>
 #   ungroup() |>
 #   select(datetime, Tree = cuml_int_tree, SCL = cuml_int_troughs) |>
 #   pivot_longer(c(Tree, SCL), names_to = 'inst', values_to = 'W')
 
 # left_join(sel_ip, sel_W, by = c('datetime', 'inst')) |>
-#   left_join(class_event_met |> select(w_tree_event, t)) |>
+#   left_join(event_avgs |> select(w_tree_event, t)) |>
 #   filter(w_tree_event %in% low_wind_events) |>
 #   ggplot(aes(W, IP, colour = t, group = t)) +
 #   geom_line() + scale_color_viridis_c(option = 'magma', end = .90) +

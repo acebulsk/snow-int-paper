@@ -17,7 +17,7 @@ ss_coords <- sf::read_sf('../../analysis/interception/data/gis/gnss/avg_gnss_coo
   select(type)
 
 stns <- data.frame(
-  name = c('Powerline', 'Forest Tower'),
+  name = c('Powerline Station', 'Forest Tower'),
   type = 'Flux Tower',
   x = c(626890.966, 627006.643),
   y = c(5632024.896, 5631995.019)) |>
@@ -89,7 +89,7 @@ tm <- tm_shape(bg_resamp, bbox = bbox) +
                 lty = 'dashed',
                 lwd = 2,
                 col = "blue",
-                labels = c("RPAS Transect"))+
+                labels = c("UAV Transect"))+
   tm_add_legend(type = 'line',
                 col = 'red',
                 labels = c("Forest Plots"))

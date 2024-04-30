@@ -23,7 +23,10 @@ for (event in as.character(fsd_periods_wide$event_id)) {
     filter(event_id == event) |>
     ggplot(aes(datetime, value, colour = name)) +
     geom_line() +
-    facet_grid(name~event_id, scales = 'free')
+    facet_grid(name~event_id, scales = 'free')+
+    ylab(element_blank()) +
+    xlab(element_blank()) +
+    theme(legend.position = 'none')
 
   ggsave(paste0('figs/snow_survey_periods/met_time_series/met_time_series_', event, '.png'),
          width = 8, height = 6)

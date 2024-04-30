@@ -38,7 +38,7 @@ at_ip_smry <- met_intercept_tree |>
 at_ip <- met_intercept_tree |>
   # filter(weighed_tree_canopy_load_mm <= 5) |>
   ggplot() +
-  geom_point(aes(x = t, y = IP), colour = '#61D04F',  alpha = 0.5, size = 0.5)+
+  geom_point(aes(x = t, y = IP), colour = 'dodgerblue',  alpha = 0.5, size = 0.5)+
   geom_errorbar(data = at_ip_smry, aes(x = temp_labs, ymax = sd_hi, ymin = sd_low), width = .5)  +
   geom_point(data = at_ip_smry, aes(x = temp_labs, y = IP_avg), shape = 1, size = 4) +
   ylab(ip_y_ax_lab) +
@@ -64,7 +64,7 @@ ws_ip_smry <- met_intercept_tree |>
 ws_ip <- met_intercept_tree |>
   # filter(weighed_tree_canopy_load_mm <= 5) |>
   ggplot() +
-  geom_point(aes(x = u, y = IP), colour = '#61D04F', alpha = 0.5, size = 0.5)+
+  geom_point(aes(x = u, y = IP), colour = 'dodgerblue', alpha = 0.5, size = 0.5)+
   geom_errorbar(data = ws_ip_smry, aes(x = wind_labs, ymax = sd_hi, ymin = sd_low), width = .1)  +
   geom_point(data = ws_ip_smry, aes(x = wind_labs, y = IP_avg), shape = 1, size = 4) +
   ylab(ip_y_ax_lab) +
@@ -86,7 +86,7 @@ w_ip_smry <- met_intercept_tree |>
 
 w_ip <- met_intercept_tree |>
   ggplot() +
-  geom_point(aes(x = lag_weighed_tree_canopy_load_mm, y = IP), colour = '#61D04F', alpha = 0.5, size = 0.5) +
+  geom_point(aes(x = lag_weighed_tree_canopy_load_mm, y = IP), colour = 'dodgerblue', alpha = 0.5, size = 0.5) +
   geom_errorbar(data = w_ip_smry, aes(x = tree_labs, ymax = sd_hi, ymin = sd_low), width = .5)  +
   geom_point(data = w_ip_smry, aes(x = tree_labs, y = IP_avg), colour = 'black', shape = 1, size = 4) +
   ylab(ip_y_ax_lab) +

@@ -140,7 +140,7 @@ smry <- met_intercept_pv |>
 
 diam_ip <- met_intercept_pv |>
   ggplot() +
-  geom_point(aes(x = part_diam, y = IP), colour = '#61D04F',  alpha = 0.5, size = 0.5)+
+  geom_point(aes(x = part_diam, y = IP), colour = 'dodgerblue',  alpha = 0.5, size = 0.5)+
   geom_errorbar(data = smry, aes(x = part_diam_labs, ymax = sd_hi, ymin = sd_low), width = .025)  +
   geom_point(data = smry, aes(x = part_diam_labs, y = IP_avg), shape = 1, size = 4) +
   ylab(ip_y_ax_lab) +
@@ -178,7 +178,7 @@ smry <- met_intercept_pv |>
 
 vel_ip <- met_intercept_pv |>
   ggplot() +
-  geom_point(aes(x = part_vel, y = IP), colour = '#61D04F',  alpha = 0.5, size = 0.5)+
+  geom_point(aes(x = part_vel, y = IP), colour = 'dodgerblue',  alpha = 0.5, size = 0.5)+
   geom_errorbar(data = smry, aes(x = part_vel_labs, ymax = sd_hi, ymin = sd_low), width = .025)  +
   geom_point(data = smry, aes(x = part_vel_labs, y = IP_avg), shape = 1, size = 4) +
   ylab(ip_y_ax_lab) +

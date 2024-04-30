@@ -21,7 +21,7 @@ ffr_met_wnd_lidar_events_fltr <- ffr_met_wnd_lidar_events |>
   rename(
     `Air Temp. (°C)` = air_temp,
     `Cuml. Snowfall (mm)` = event_cml_sf,
-    `Snowfall Rate (mm/hr)` = ppt,
+    `Snowfall (mm/hr)` = ppt,
     `RH (%)` = rh,
     `Wind Dir. (°)` = wind_dir,
     `Wind Speed (m/s)` = wind_speed
@@ -36,7 +36,7 @@ ffr_met_lidr_events_avg <- ffr_met_wnd_lidar_events_fltr |>
             `Air Temp. (°C)` = mean(`Air Temp. (°C)`),
             `Wind Dir. (°)` = median(`Wind Dir. (°)`),
             `Wind Speed (m/s)` = median(`Wind Speed (m/s)`),
-            `Cuml. Snowfall (mm)` = sum(`Snowfall Rate (mm/hr)`)/4,
+            `Cuml. Snowfall (mm)` = sum(`Snowfall (mm/hr)`)/4,
             )
 
 saveRDS(ffr_met_lidr_events_avg, 'data/event_met/lidar_events_met_avg.rds')
@@ -54,9 +54,10 @@ for (event in as.character(scan_dates$event_id)) {
     geom_line() +
     facet_grid(name~event_id, scales = 'free') +
     ylab(element_blank()) +
-    xlab(element_blank())
+    xlab(element_blank()) +
+    theme(legend.position = 'none')
 
   ggsave(paste0('figs/lidar_periods/met_time_series/met_time_series_', event, '.png'),
-         width = 10, height = 10)
+         width = 6, height = 8.75)
 
 }

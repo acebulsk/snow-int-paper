@@ -13,6 +13,8 @@ alldfs_avg_trough <- alldfs_indiv_troughs |>
     value = mean(value, na.rm = T),
     group = first(group))
 
+
+
 for (i in 1:length(events)) {
 
   alldfs_indiv_troughs |>
