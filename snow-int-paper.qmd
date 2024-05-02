@@ -1,15 +1,14 @@
 ---
-title: "Paper Outline: New Observations of Snow Interception from a Subalpine Forest"
+title: "Combined effects of wind, air temperature and snowfall on snow accumulation in a subalpine forest"
 author: "Alex Cebulski & John Pomeroy"
 date: today
 date-format: long
 format: 
-  # wordcount-pdf:
-  #   toc: false
   # docx:
   #   reference-doc: ../config/word_template.docx
   #   number-sections: true
   #   toc: false
+  # pdf
   html:
     toc: false
     self-contained: true
@@ -31,6 +30,14 @@ knitr::opts_chunk$set(echo = FALSE, message=FALSE, warning=FALSE, fig.align='cen
 # source('scripts/01_plot_snowfall_interception_w_tree.R')
 ```
 
+TODO 
+
+look at wind flow in canopy equations:
+
+- @Cionco1972
+- @Zhu2001
+- parvanians, ellis, JM thesis 
+
 # Introduction
 
 Forest cover extends over approximately half of North America’s snow-covered region, governing snowpack accumulation and ablation, thereby influencing the timing and magnitude of runoff generation from snowmelt.
@@ -43,7 +50,7 @@ Forest cover extends over approximately half of North America’s snow-covered r
 
 -   @fig-hp-storck-moeser shows the difference in the change in interception efficiency across different snowfall event sizes for three common models. Interception efficiency (interception/snowfall) declines with increasing snow load [@Hedstrom1998a; @Storck2002] or initially increases and then is followed by a decline [@Moeser2015]. The underlying theory of the @Moeser2015 parameterization stems from the @Satterlund1967 study who observed an initial increase in the rate of intercepted snow, as snowflakes bridge gaps between needles. It may also be inferred that during the small near 0°C snowfall events observed in @Satterlund1967 the majority of snow may have melted immediately due to a warm canopy resulting in low interception efficiency. The initial low interception efficiency was followed by an increase and then flattening off of the interception rate as branches bend due to the weight of snow which @Satterlund1967 represented by a numerical analytical sigmoidal function. In the observations by @Hedstrom1998a, snow interception efficiency starts high and then declines. @Hedstrom1998a hypothesis the shape of this curve is due to a decrease in canopy contact area and change in the incoming snowfall angle of impact as branches bend downward. This relationship was best represented using an inverse exponential function shown in @fig-hp-storck-moeser. The @Hedstrom1998a parameterization therefore differs from the [@Satterlund1967; @Moeser2015] sigmoidal function as it does not include a representation for the initially slow interception rate. @Andreadis2009 developed a snow interception model using data collected by @Storck2002 in dense old growth forest in the maritime climate of southwestern Oregon, USA. This method builds off the maximum canopy snow load theory proposed in @Hedstrom1998a but makes additional modifications to include a step function based on temperature. Here, snow interception efficiency, was found equal to a constant of 0.6 based on snow interception observations from @Storck2002 in southern Oregon.
 
--   Maximum interception capacity decreases [@Hedstrom1998a] or increases [@Storck2002] with increasing air temperature (@fig-example-wmax). @Hedstrom1998a proposed that fresh snow density, which may be described as a function of air temperature [@Hedstrom1998a], plays an important role in governing the interception capacity. @Storck2002 limit, $W$ as being less than or equal to the maximum interception storage $W_{max}$ using a step function of temperature based on observations of warmer snow having more cohesion to the canopy.
+-   Maximum interception capacity decreases [@Hedstrom1998a] or increases [@Storck2002] with increasing air temperature (@fig-example-wmax). @Hedstrom1998a proposed that fresh snow density, which may be described as a function of air temperature [@Hedstrom1998a], plays an important role in governing the interception capacity. @Storck2002 limit, $L$ as being less than or equal to the maximum interception storage $L_{max}$ using a step function of temperature based on observations of warmer snow having more cohesion to the canopy.
 
 -   More recent work by @Katsushima2023 collected measurements of snow interception using a weighed tree for a warm-humid coastal environment in Japan. They observed a decline in interception efficiency with increasing wind speed, they attributed to increased hydrometeor velocity and bouncing on impact. While not mentioned in this study, the decrease in interception efficiency may also be due to wind induced unloading. They did not observed a maximum interception capacity within their measurement range of 0-25 mm. Although for temperatures above 0 they could see a decline in interception efficiency above 10 mm maybe due to branch bending + melt rates. @Katsushima2023 suggest air temperature and wind speed alone are insufficient to describe interception efficiency and hypothesize that particle shape may be an improved predictor but did not have the observations to test this. Some of the limited model performance reported by @Katsushima2023 may be attributed to a result of their interception measurements including unloading due to melt and wind.
 
@@ -65,55 +72,68 @@ Forest cover extends over approximately half of North America’s snow-covered r
 
 -   The novelty of this study is the study site location in a windswept discontinuous subalpine ridge forest and the use of high temporal frequency automated measurements and discrete high spatial resolution measurements using aerial LiDAR to attempt to separate out interception from ablative processes. Timelapse cameras were also used to confirm absence of unloading during interception periods.
 
+-   Exisiting theory relies on the green smear approach or using LAI + CC which does not appropriately describe the heterogeneity of discontinuous canopies
+
 Objective: To assess the influence of canopy structure and meteorology on snow interception processes in a windswept subalpine forest.
 
 Research Questions:
 
 1.  Are the theories and assumptions of existing snow interception parameterizations true for field measurements collected in a continental subalpine forest?
-2.  What are the dominant processes that control snow interception in a subalpine forest and are these included in existing parameterizations?
+2.  What are the dominant processes that control snow interception in a subalpine forest?
 
 Specific Questions
 
-- Is the influence of meteorology important for governing I/P?
-  - have not found strong association with met vars at one location but when looking across the forest wind appears to influence hydrometeor contact angle... 
-- What is the influence of wind governing hydrometeor contact angle in sparse forest? 
-  - need to determine if the association between contact probability and I/P has an angular dependance (i.e., show hemisphere of R2 between contact probability and I/P as in @Staines2023)
-  - is this association stronger when there is snow in the canopy i.e., branches have been bridged or reduced due to branch bending? 
+- Is meteorology important for governing I/P?
+
+- How does hydrometeor trajectory angle influence apparent canopy structure?
+
+- How does the association between canopy structure and I/P vary across the hemisphere for an event with moderate wind speed?
+
+- is this association stronger when there is snow in the canopy i.e., branches have been bridged or reduced due to branch bending? 
 
 # Theory
 
 ![The mass balance of intercepted snow in a coniferous forest canopy and the subcanopy snowpack. The colours of the arrows correspond to the water phase: solid (purple), liquid (blue) and vapour (light green). The head of the arrow indicates a positive flux either into the control volume (positive) or away from the control volume (negative). Note that the fluxes may transition between positive and negative. In the case of sublimation, from the canopy or snowpack, the flux may be positive (sublimation) or negative (deposition). This figure was adapted from Pomeroy and Gray, (1995).](figs/IMG_4319_bitmap_5_mass_bal_new_sym.png){#fig-mass-bal width="800"}
 
-@fig-mass-bal shows the mass exchange of snowfall between the forest canopy and the snowpack on the ground surface. The storage of snow water equivalent (SWE) is represented here with respect to the canopy ($W$, mm) or the surface snowpack ($S$, mm). Fluxes that are repeated between the canopy and snowpack control volume have a superscript to specify what control volume they refer to (i.e. $q^{veg}$ refers to the vegetation control volume and $q^{snow}$ refers to the surface snowpack control volume).
+@fig-mass-bal shows the mass exchange of snowfall between the forest canopy and the snowpack on the ground surface. The storage of snow water equivalent (SWE) is represented here with respect to the canopy ($L$, mm) or the surface snowpack ($S$, mm). Fluxes that are repeated between the canopy and snowpack control volume have a superscript to specify what control volume they refer to (i.e. $q^{veg}$ refers to the vegetation control volume and $q^{snow}$ refers to the surface snowpack control volume).
 
-The change in canopy SWE storage, $W$ (mm), may be represented as:
+The change in canopy SWE storage, $L$ (mm), may be represented as:
 
 $$
-\frac{dW}{dt} = 
-q_{sf} - q_{tf}(W) - q_{unld}(W) - q_{drip}(W) - q_{wind}^{veg}(W) - q_{sub}^{veg}(W)
+\frac{dL}{dt} = 
+q_{sf} - q_{tf}(L) - q_{unld}(L) - q_{drip}(L) - q_{wind}^{veg}(L) - q_{sub}^{veg}(L)
 $$ {#eq-canopy-mass-bal}
 
-where $q_{sf}$ (mm s^-1^) is the above canopy snowfall rate, $q_{tf}$ (mm s^-1^) is the throughfall rate, $q_{wind}^{veg}$ (mm s^-1^) is the wind transport rate in our out of the control volume (typically assumed to be negligible in the literature), $q_{sub}^{veg}$ (mm s^-1^) is the intercepted snow sublimation rate, $q_{unld}$ (mm s^-1^) is the canopy snow unloading rate and $q_{drip}$ (mm s^-1^) is the canopy snow drip rate due to canopy snowmelt. $q_{wind}^{veg}$ and $q_{sub}^{veg}$ may be a positive or negative flux. Where all of the above rates are a function of snow load ($W$), which is how much snow is present in the canopy.
+where $q_{sf}$ (mm s^-1^) is the above canopy snowfall rate, $q_{tf}$ (mm s^-1^) is the throughfall rate, $q_{wind}^{veg}$ (mm s^-1^) is the wind transport rate in our out of the control volume (typically assumed to be negligible in the literature), $q_{sub}^{veg}$ (mm s^-1^) is the intercepted snow sublimation rate, $q_{unld}$ (mm s^-1^) is the canopy snow unloading rate and $q_{drip}$ (mm s^-1^) is the canopy snow drip rate due to canopy snowmelt. $q_{wind}^{veg}$ and $q_{sub}^{veg}$ may be a positive or negative flux. Where all of the above rates are a function of snow load ($L$), which is how much snow is present in the canopy.
 
-@Hedstrom1998a hypothesized that a change in hydrometeor trajectory angle was a factor in influencing interception efficiency. @fig-ws-vs-ta shows the theoretical increase in trajectory angle with increasing wind speed. 
-
-![The theoretical relationship of hydrometeor trajectory (departure from horizontal plane) with increasing wind speed. This assumes a constant hydrometor velocity of 1 m/s, typical of snowfall and a horizontal velocity equal to wind speed. ](figs/examples/wind_speed_vs_traj_angle.png){#fig-ws-vs-ta width="800"}
-
-The trajectory angle, $\theta_h$ of a hydrometeor as the departure in degrees (°) from a horizontal plane (i.e., 90° for vertical snowfall), may be calculated as:
+The trajectory angle, $\theta_h$ of a hydrometeor as the departure in degrees (°) from a horizontal plane (i.e., -90° for vertical snowfall), may be calculated as:
 
 $$
-\theta_h = \arctan \left(\frac{-rise}{run}\right)*\frac{180}{\pi}
+\theta_h = \arctan \left(\frac{-v_h(D_h)}{x_h(u_z)}\right)*\frac{180}{\pi}
 $${#eq-ta}
 
-where $rise$ is the terminal fall velocity of the hydrometeor (m s^-1^), $run$ is the horizontal change in the hydrometeor (m s^-1^) and is assumed equal to the wind speed. 
+![](figs/examples/hm_ta_triangle.png){width="300" fig-align="center"}
+
+where $v_h$ is the terminal fall velocity of the hydrometeor (m s^-1^), which is a function of the hydrometeor diameter, $D_h$, $x_h$ is the horizontal change in the hydrometeor (m s^-1^) which is a function within canopy wind speed, $u_z$ at height above ground, $z$. 
+
+Above the top of the canopy, wind flow is approximately logarithmic with height. @Cionco1965 show that, $u_z$ may be approximated using the exponential formula:
+
+$$
+u_z = u(u^*,z,z_o,d)\cdot exp\left[a\cdot\left(\frac{z_c}{h_c}-1\right)\right]
+$$
+where $u$ is the horizontal wind speed at the top of the canopy which is a function of the friction velocity $u^*$, height above ground, $z$, roughness length, $z_o$, and the displacement height of the canopy, $d$. $a$ is an attenuation coefficient that increases with increasing leaf area and decreases as the mean distance between individual trees increases, $z_c$ is the height above ground of $u_z$, and $h_c$ is the average height of the canopy elements. @Cionco1972 suggest values for $a$ of 1.01 for small needleleaf trees, @Zhu2001 provide methods to calculated $a$ based on canopy density and @Parviainen2000 provide a method to calculate $a$ using observations from two jack pine (*Pinus banksiana*) stands. @fig-ws-vs-ta shows the increase in trajectory angle calculated using @eq-ta with a constant hydrometeor velocity of 1 m s^-1^ and a horizontal velocity equal to mid-canopy wind speeds ranging from 0-20 m s^-1^. 
+
+![The theoretical relationship of hydrometeor trajectory (departure from horizontal plane) with increasing wind speed. This assumes a constant hydrometeor velocity of 1 m/s and a horizontal velocity equal to wind speed. ](figs/examples/wind_speed_vs_traj_angle.png){#fig-ws-vs-ta width="400"}
 
 # Methods
 
 ## Study Site
 
-This study was conducted at the Subalpine Ridge Forest (SRF) site located in the Fortress Mountain Research Basin (FMRB), AB ~ 51 ◦ N, 2100 m asl., a continental headwater basin with sparse subalpine forest (@fig-map-big). In-situ observations of forest snow accumulation, snow interception, and canopy snow ablation were collected over the 2022 and 2023 water years. The species of trees at the SRF site is comprised of coexisting subalpine fir (Abies lasiocarpa) and Engelmann spruce (Picea engelmannii), with a proportion of 70% and 30% respectively [@Langs2020]. In the early 1900s the majority of the SRF vegetation burned during a large forest fire that affected most of the Kananaskis Valley. Following the fire, the forest has naturally regenerated with minimal disturbance.
+This study was conducted at forest plots surrounding the Powerline Station (PWL) and Forest Tower Station (FT) located within Fortress Mountain Research Basin (FMRB), AB ~ 51 ◦ N, 2100 m asl. (@fig-maps). The species of tree surrounding the PWL and FT stations include sparsely spaced coexisting subalpine fir (Abies lasiocarpa) and Engelmann spruce (Picea engelmannii), with a proportion of 70% and 30% respectively [@Langs2020]. In the early 1900s the majority of the FMRB vegetation burned during a large forest fire that affected most of the Kananaskis Valley. Following the fire, the forest surrounding the PWL and FT stations has naturally regenerated with minimal disturbance.
 
-A 15 m tall flux tower provided measurements within the SRF site provided measurements of the meteorological conditions at 15-min time intervals (@fig-map-site). The meteorological variables used in this study include air temperature, relative humidity and wind speed (4.5 m above the ground). A weighing precipitation gauge (OTT Pluvio) provided measurements of the snowfall rate ($q_{sf}$) to an open clearing adjacent to the study area shown in @fig-map-site. The snowfall rate was corrected for undercatch following phase correction by @Harder2013 and catch efficiency by @Macdonald2007a.
+## Meterological Measurements
+
+A flux tower at the FT Station provided measurements of air temperature (Campbell Scientific HMP155A), relative humidity (Campbell Scientific HMP155A) and wind speed (Campbell Scientific Ultrasonic-86000 & Metone 014A) at 15-min time intervals at mid canopy height, 4.5 above the ground (@fig-map-site). A weighing precipitation gauge (OTT Pluvio) located at PWL Station provided measurements of the snowfall rate ($q_{sf}$) to an open clearing adjacent to the study area shown in @fig-map-site. The snowfall rate was corrected for undercatch following phase correction by @Harder2013 and catch efficiency by @Macdonald2007a. A disdrometor (OTT Parsivel2) located at PWL Station provided measurements of hydrometeor particle size and velocity. 
 
 ::: {#fig-maps layout-nrow="2"}
 ![](figs/maps/site_map_bc_ab_scale.png){#fig-map-big}
@@ -123,22 +143,50 @@ A 15 m tall flux tower provided measurements within the SRF site provided measur
 Regional map showing location of Fortress Mountain (a) and map of forest plots, flux towers, and survey transects (b) in this study.
 :::
 
-## Snow Surveys
-
-Areal snow surveys provided measurements of throughfall over a discrete time interval ($\Delta {tf}$). Twelve snow surveys (pre and post event pairs) were selected from a total of 39 snow surveys, resulting in six measurements of snow interception efficiency over the stations shown in @fig-map-site. If a pre event crust layer was present, post event measurements of fresh snow accumulation above the crust layer were interpreted as throughfall over the event. In the absence of a defined crust layer, the difference of pre and post event snow depth to ground was interpreted as event throughfall. An average of 40 snow depth samples were taken for each snow survey with forest structure ranging from canopy clearing to dense canopy (@fig-map-site). A 1000 cc snow density wedge sampler was used to measure the density of the fresh snow layer. The duration of each event, shown in @tbl-ss-met, ranged from 26 to 148 hours.
-
 ## Lysimeter Data
 
-Three subcanopy lysimeters (e.g., @fig-scl-2) provided fifteen minute interval measurements of throughfall plus unloading (instrument locations are shown in @fig-map-site). For select events where ablative processes, $q_{unld}(W)$, $q_{drip}$ and $q_{wind}^{veg}$ could be considered negligible, the subcanopy lysimeters were inferred to provide measurements of throughfall. Timelapse imagery, a weighed tree and in-situ observations were used to ensure ablation of snow intercepted in the canopy or snow on the ground was minimal over each of the selected events.
+Three subcanopy lysimeters (SCL) installed surrounding the FT Station provided fifteen minute interval measurements of throughfall plus unloading (SCL locations are shown in @fig-map-site). For select events where ablative processes, $q_{unld}(L)$, $q_{drip}$ and $q_{wind}^{veg}$ could be considered negligible, the subcanopy lysimeters were inferred to provide measurements of throughfall. Timelapse imagery, a weighed tree and in-situ observations were used to ensure ablation of snow intercepted in the canopy or snow on the ground was minimal over each of the selected events. The SCLs consisted of a plastic bucket with an opening of 0.9 m ^2^ and depth of 20 cm (e.g., @fig-scl-2) suspended from a load cell (Intertechnology 9363-D3-75-20T1) attached to an aluminum pipe connected between two trees. The load cell which measures kilograms was scaled to kg m^-2^ by dividing by the cross-sectional area of the SCL opening. The canopy structure surrounding three SCLs and was measured using hemispherical photography (Nikon Coolpix 4500 and EC-F8 hemispherical lens) and the hemispheR R package @Chianucci2023 and is shown in @tbl-scl-lai-cc.
 
-A weighed tree lysimeter, shown in @fig-w-tree-loaded and @fig-w-tree-bare, measured the weight of canopy snow load, $W_{wt}$ (kg). A live subalpine fir (Abies lasiocarpa) tree was cut and suspended from a load cell at the beginning of the 2022 and 2023 water years which recorded the weight of the tree. The bottom of the tree was sealed to limit some transpiration and to prevent spinning and abrupt impacts of the free-hanging tree, the base of the tree was attached to a support system that allows for vertical movement but limits abrupt horizontal movements. The weight of snow in the canopy was scaled to an areal estimate of canopy snow load ($W$, kg m^-2^) using manual snow survey measurements [as in @Hedstrom1998a].
+```{r scl, echo=FALSE}
+#| label: tbl-scl-lai-cc
+#| tbl-cap: "Canopy structure of the three subcanopy lysimeters (SCL) located proximal to the FT Station. Leaf area index (LAI) and Canopy Coverage was measured using hemispherical photo analysis with the R package hemispheR."
+#| 
+scl_lai_cc <- read.csv('~/local-usask/analysis/interception/data/lai/scl_canopy_metrics.csv') 
+
+scl_lai_cc$Name <- c('SCL Med', 'SCL Low', 'SCL High')
+
+scl_meta <- read.csv('~/local-usask/analysis/interception/data/loadcell/calibrations/load_cell_meta_ac_fortress.csv')
+
+scl_lai_cc |> 
+  arrange(cc) |> 
+  mutate(cc = round(cc, 2)) |> 
+  select(Name, `LAI (-)` = Le, `Canopy Coverage (-)` = cc) |> 
+  knitr::kable(booktabs = TRUE,
+               format = 'latex')
+```
+
+A weighed tree lysimeter, shown in @fig-w-tree-loaded and @fig-w-tree-bare, measured the weight of canopy snow load, $L_{wt}$ (kg). A live subalpine fir (Abies lasiocarpa) tree was cut and suspended from a load cell (Artech S-Type 20210-100) at the beginning of the 2022 and 2023 water years which recorded the weight of the tree. The bottom of the tree was sealed to limit some transpiration and to prevent spinning and abrupt impacts of the free-hanging tree, the base of the tree was attached to a support system that allows for vertical movement but limits abrupt horizontal movements. The weight of snow in the weighed tree in kg was scaled to an areal estimate of canopy snow load ($L$, kg m^-2^) using @eq-canopy-mass-bal and measurements of areal throughfall (kg m^-2^) from manual snow surveys and snowfall from the PWL Station snowfall gauge [see description of method in @Hedstrom1998a].
+
+## Snow Surveys
+
+```{r, include=FALSE}
+lai_measurements <- read.csv('../../analysis/interception/data/lai/results/2023_compiled_lai_vza_15_60.csv')  |>
+  filter(vza == 60) 
+
+cc_range <- paste(round(min(lai_measurements$cc), 2), '–', round(max(lai_measurements$cc), 2))
+lai_range <- paste(round(min(lai_measurements$Le), 2), '–', round(max(lai_measurements$Le), 2))
+```
+
+
+Manual snow surveys provided measurements of subcanopy throughfall over the forest surrounding FT Station after a snowfall event. These throughfall measurements were used in conjuction with the PWL Station snowfall gauge to scale the weighed tree and validate the UAV-lidar fresh snow depth measurements. If a pre event crust layer was present, post event measurements of fresh snow accumulation above the crust layer were interpreted as throughfall over the event. In the absence of a defined crust layer, the difference of pre and post event snow depth to ground was interpreted as event throughfall. A 1000 cm^3^ snow density wedge sampler (RIP Cutter, https://snowmetrics.com/shop/rip-1-cutter-1000-cc/) was used to measure the density of the fresh snow layer. Fourteen snow surveys (seven pre and post snowfall event pairs) that had minimal evidence of ablation were select for calibration of the weighed tree. An average of 40 snow depth samples were taken for each snow survey following two 60 m linear transects north and south of the FT Station. The forest canopy surrounding the snow survey stations had LAI ranging from `r lai_range` (-) and canopy coverage ranging from `r cc_range` (-) measured using hemispherical photography.
+
 
 ## Snow Interception
 
 Throughfall measurements collected form manual snow surveys ($q_{tf}\cdot \Delta t$) and the subcanopy lysimeters ($q_{tf}$) were used to estimate the amount of snow intercepted in the canopy. During calm snowfall periods @eq-canopy-mass-bal was be simplified to estimate the amount of snow intercepted in the canopy:
 
 $$
-\frac{dW}{dt} = q_{sf}-q_{tf}(W)
+\frac{dL}{dt} = q_{sf}-q_{tf}(L)
 $$ {#eq-dwdt-ode}
 
 This method was preferred, compared to measurements from the weighed tree lysimeter, as the subcanopy lysimeters were not influenced by sublimation losses from snow intercepted in the canopy.
@@ -146,50 +194,13 @@ This method was preferred, compared to measurements from the weighed tree lysime
 Interception efficiency, $\frac{I}{P}$ (-), which is the fraction of snow intercepted over a discrete time interval, $\Delta t$ was calculated as:
 
 $$
-\frac{I}{P} = \frac{\Delta W}{\overline{q_{sf}} \Delta t} 
+\frac{I}{P} = \frac{\Delta L}{\overline{q_{sf}} \Delta t} 
 $$ {#eq-ip}
 
-where $\Delta W$ (mm) is the increase in canopy load over a discrete time interval and $\overline{q_{sf}}$ (mm), is the average snowfall rate over $\Delta t$.
-
-## Forest Structure Metrics
-
-Upward-facing hemispherical photographs were analyzed to provide measurements of LAI and canopy coverage for each snow survey station and lysimeter location. The camera used was a Nikon Coolpix 4500 with a EC-F8 hemispherical lens. The images were cropped and automatically thresholded to differentiate between sky and canopy using the hemispheR R package [@Chianucci2023]. Forest metrics were produced for vertical zenith angles (VZA) 15°, 30°, 45° and 60°.
-
-```{r, echo=FALSE}
-#| label: tbl-ss-met
-#| tbl-cap: "Meteorological conditions and interception observations for six selected events that coincide with pre and post snow surveys. `Snowfall (mm)` and 'Canopy Snow Load (mm)' are the cumulative respective snowfall rate and interception rate over each event. `Air Temperature (°C)`, `Relative Humidity (%)`, `Wind Speed (m/s)` are the event mean. `Event I/P` is calculated as `Snowfall (mm)` divided by `Canopy Snow Load (mm)`."
-
-
-ss_event_met <- readRDS('data/fsd_storm_summary_met_no_outlier.rds')
-
-ss_event_met |>
-  mutate(event_duration_hours = difftime(end_time, start_time, units = 'hours')) |> 
-  select(storm_id,
-         event_duration_hours,
-         `Open Precip. (mm)`,
-         mean_I,
-         mean_IP,
-         `Air Temp. (°C)`,
-         `RH (%)`,
-         `Avg. Wind Speed (m/s)`
-         ) |>
-  knitr::kable(
-    col.names = c(
-      'Start Date',
-      'Event Duration (hours)',
-      'Snowfall (mm)',
-      'Canopy Snow Load (mm)',
-      'Event I/P (-)',
-      'Air Temperature (°C)',
-      'Relative Humidity (%)',
-      'Wind Speed (m/s)'
-    )
-  )
-
-```
+where $\Delta L$ (mm) is the increase in canopy load over a discrete time interval and $\overline{q_{sf}}$ (mm), is the average snowfall rate over $\Delta t$.
 
 ::: {#fig-insts layout-ncol="3"}
-![](figs/site-photos/sub-canopy-lys-2.jpg){#fig-scl-2}
+![](figs/site-photos/sub-canopy-lys-1.jpg){#fig-scl-2}
 
 ![](figs/site-photos/jan_7_hanging_tree.jpg){#fig-w-tree-loaded}
 
@@ -200,87 +211,110 @@ Subcanopy lysimeter (a), weighed tree lysimeter loaded with snow (b) and weighed
 
 # Results
 
-## Subcanopy Lysimeters
+## The influence of meteorology on snow interception
 
-A linear increase in canopy storage with increasing snowfall, is shown in @fig-scl-w-sf over 25 snowfall events. The difference in the rate of change between the events, shown in @fig-scl-w-sf, does not show a strong connection between cold events compared to warmer events. However, this change in slope is interpreted to be a result of a combination of meteorological variables which will be explored in the following section.
+The meteorology, state of canopy snow load, and interception efficiency was measured for 26 distinct snowfall events. The histograms presented in @fig-hist-met-ip, portray the frequency distribution of 15-minute measurements of air temperature, relative humidity and wind speed from the FT Station, snowfall rate from PWL Station, and interception measurements calculated using SCL 1-3 and snowfall gauge at PWL Station during all periods of snowfall during the 26 snowfall events (See station locations in @fig-map-site). The average interception efficiency observed across all periods of snowfall was 0.64 and ranged from 0 to 1. The air temperatures spanned from -25°C to 1°C, with a predominant concentration of observations within the -10°C to 0°C range. Corresponding wind speed values ranged from 0 to 4.5 m s^-1^ with a mean of 1.2 m s^-1^. 
 
-::: {#fig-w-tree layout-ncol="2"}
-![](figs/automated_snowfall_event_periods/cuml_event_snowfall_canopy_storage_scl_colour_temp.png){#fig-scl-w-sf}
+The state of canopy storage with event cumulative snowfall, measured using SCL 1-3 and snowfall gauge, is shown in @fig-scl-w-sf for each of the 26 snowfall events. Canopy storage was observed to increase linearly with increasing snowfall without evidence of reaching a maximum canopy storage capacity. Variation in the slope of each line in @fig-scl-w-sf, is attributed to differences in the canopy structure surrounding the SCL instruments and differences in meteorology and antecedent canopy snow load between the individual events. The SCL with higher canopy coverage was expected to have consistently higher canopy storage values. However, as depicted in @fig-scl-w-sf the largest event cumulative snowfall of ~ 50 mm, shows the lysimeter with the highest canopy coverage (0.82) exhibited a canopy storage value slightly less than the lysimeter with canopy coverage of 0.78. This difference between the subcanopy lysimeters, which is inconsistent with their individual forest structure, is likely result of event wind speed and the direction which could alter the apparent forest structure of each lysimeter location. In addition, the initial canopy snow load may have been different between the locations. The absence of canopy storage and interception efficiency measurements for certain troughs during specific events was caused by damage to the subcanopy lysimeter wiring due to animal interference and snow load.
 
-![](figs/automated_snowfall_event_periods/cuml_event_snowfall_canopy_storage_scl_colour_wind.png){#fig-scl-w-sf}
+For each of the 26 snowfall events the average interception efficiency was calculated and is shown with the corresponding event snowfall total in @fig-scl-ip. The average interception efficiency for SCL 1-3, across all 26 events, is shown in @fig-scl-ip to increase proportionally with the canopy coverage of each lysimeter. However, looking at the individual events, interception efficiency observed at each lysimeter does not always align with the respective canopy coverage value as was also shown in @fig-scl-w-sf. This suggests additional processes other than canopy structure are influencing subcanopy snow accumulation. For events with snowfall totals ranging from 0 to 5 mm, the average interception efficiency was 0.58. This increased to an average interception efficiency of 0.60 for events with snowfall totals between 5 and 10 mm, then decreased back to 0.58 for events with snowfall totals between 20 and 25 mm.
 
-Cumulative canopy snow storage measured using the subcanopy lysimeters plotted against cumulative event snowfall for five selected snowfall events. The colour of each line shows the average air temperature (a) and wind speed (b) over the duration of each event.
-:::
+The average interception efficiency was also calculated over each 15-minute interval within each of the 26 snowfall events and was utilized to assess the association with meteorological variables, the state of canopy snow load and hydrometeor characteristics for the corresponding time interval. Air temperature and relative humidity observed at FT Station was observed to have little influence over interception efficiency measured using the SCL and snowfall gauge (@fig-lai-met-ip, A & B). Mid canopy wind speed at FT Station was observed to increase the mean interception efficiency slightly from 0.56 to 0.62 between wind speed bins of 0.25 and 1.25 m s^-1^ (@fig-lai-met-ip, C). This is thought to be due to an associated increase in canopy contact area as hydrometeor trajectory becomes more horizontal with increasing wind speed. The mean interception efficiency decreases wind speeds above 2 m s^-1^ to a minimum of 0.48 for the 3.75 m s^-1^ wind speed bin. The initial canopy snow load had a positive association with interception efficiency as the canopy filled with snow, increasing the mean interception efficiency from 0.57 for snow loads near 0 mm to 0.66 for snow loads around 7 mm. This was followed by a gradual decline in interception efficiency for snow loads greater than 7 mm to a minimum of 0.48 at snow loads above 18 mm (@fig-lai-met-ip, C). Hydrometeor diameter and hydrometeor velocity measured using the disdrometer at PWL Station did not have a strong association with interception efficiency (@fig-lai-met-ip, E & F).
 
+![Histograms of the count (number of occurances) of 15 minute observations of air temperature, canopy load, interception efficiency, relative humidity snowfall rate, and wind speed for all periods of snowfall during the study period. Air temperature, relative humidity and wind speed are from the FT Station at mid-canopy height (7 m). Canopy load and interception efficiency were measured using the subcanopy lysimeter from FT Station and snowfall gauge from PWL Station. Station locations are shown in Figure 1. ](figs/automated_snowfall_event_periods/histogram_met_ip_snowfall_periods.png){#fig-hist-met-ip}
 
-Air temperature was observed to have little influence over interception efficiency measured using the subcanopy lysimeters and snowfall gauge for the 25 snowfall events (@fig-lai-met-ip, A & B). Relative humidity was observed to have a slight negative association with interception efficiency. However this is primarily based on the lowest relative humidity bin with relatively few observations. Wind speed was observed to increase the mean interception efficiency slightly from 0.56 to 0.62 between wind speed bins of 0.25 and 1.25 m s^-1^ (@fig-lai-met-ip, C). This is thought to be due to an associated increase in canopy contact area as hydrometeor trajectory becomes more horizontal with increasing wind speed. The mean interception efficiency decreases wind speeds above 2 m s^-1^ to a minimum of 0.47 for the 3.75 m s^-1^ wind speed bin. The initial canopy snow load had a positive association with interception efficiency as the canopy filled with snow, increasing the mean interception efficiency from 0.57 to 0.67. Followed by a gradual decline in interception efficiency for snow loads greater than 7.5 mm to a minimum of 0.48 at snow loads above 18 mm (@fig-lai-met-ip, C). As the canopy fills with snow, interception efficiency was expected to increase due to snow bridging across the branches increasing the contact area of the canopy. Interception efficiency was also expected to decline at higher snow loads due some increase in unloading due to branch bending and a decline in the canopy contact area as branches bend down. Hydrometeor diameter and velocity did not have a strong association with interception efficiency.
+::: {#fig-scl layout-ncol="2"}
 
-![Scatter plots of discrete observations (green) of snow interception efficiency observed at 15 minute intervals using the subcanopy lysimeter and snowfall gauge against and binned data (black). Panels show (A) air temperature, (B) wind speed, (C) initial canopy snow load (the snow load observed at the begining of the timestep), (E) hydrometeor diameter, (F) hydrometeor velocity. The black open circles show the mean of each bin and the error bars represent the standard deviations. The data were filtered to include observations with a snowfall rate > 0 mm/hr and a snowfall rate > the subcanopy lysimeter throughfall rate to minimize observations with unloading. Periods of unloading and melt were also removed through careful analysis of the weighed tree, subcanopy lysimeters, and timelapse imagery.](figs/automated_snowfall_event_periods/troughs_met_vs_IP_bin.png){#fig-lai-met-ip}
+![](figs/automated_snowfall_event_periods/cuml_event_snowfall_canopy_storage_sep_scl.png){#fig-scl-w-sf}
 
-## Hydrometeor Size and Velocity 
+![](figs/automated_snowfall_event_periods/event_total_snowfall_vs_IP_colour_troughs.png){#fig-scl-ip}
 
-No relationship between wind speed and hydrometeor velocity was found between fifteen minute average measurements over the study period (@fig-ws-hv). However, above wind speeds of 2 m s^-1^ an increase in velocity was observed which was also associated with smaller hydrometeor diameters. 
-
-![Scatter plot illustrating the relationship of wind speed and hydrometeor velocity. The dots represent the 15 minute averages of both wind speed and hydrometeor velocity coloured by their diameter (mm). The boxplots overlayed on top of the dots show the median (50th percentile), interquartile range (IQR) (25-75 percentile), smallest and largest value within 1.5 * the IQR.](figs/supplement/windspeed_vs_hydrometeor_velocity.png){#fig-ws-hv}
-
-
-## Aerial Lidar 
-
-The mean canopy coverage across the hemisphere for each forest plot, estimated as a function of the estimated number of canopy contacts along a ray show an increase in canopy coverage with increasing horizontal hydrometeor trajectory @fig-ht-cc. Forest plot PWL_SW which has a more closed canopy has 0.4 (-) fractional closed canopy at near vertical trajectories (near -90°) and increases at a slower rate at higher trajectories above -50° compared to sparser canopies like FSR_S which has a lower canopy coverage of 0.2 (-) from nadir and increase in canopy coverage at a higher rate compared to PWL_SW. All forest plots approach completely closed canopies at for horizontal (0°) trajectories. Since hydrometeor trajectory may be estimated as a function of wind speed, assuming constant hydrometeor terminal fall velocity and horizontal velocity equal to wind speed, @fig-ws-cc shows canopy coverage as a function of wind speed. Most of the increase in canopy coverage as a result of horizontal hydrometeor trajectories occurs between wind speeds of 0 and 2 m s^-1^. However, this relationship does not consider the turbulent windflow patterns that exist within and above the canopy. 
-
-::: {#fig-ta-ws-cc layout-ncol="2"}
-
-![](../../analysis/lidar-processing/figs/voxrs/scatter/traj_angle_vs_canopycover_2_thetaby_5.png){#fig-ht-cc}
-
-![](../../analysis/lidar-processing/figs/voxrs/scatter/wind_vs_canopycover_2_thetaby_5.png){#fig-ws-cc}
-
-Scatter plot showing the association of hydrometeor trajectory with canopy coverage (a) and wind speed with canopy coverage (b). The dots represent the mean canopy coverage across azimuth angles of the the hemisphere for a given trajectory (zenith angle - 90°) at each forest plot.
+Two plots showing the relationship between snowfall and interception. Plot (a) shows the cumulative event snowfall versus the corresponding state of canopy snow storage for each of the 26 snowfall events. Plot (b) shows total event snowfall versus the average interception efficiency for each event. Snowfall data was measured using the snowfall gauge at Powerline Station while throughfall data was measured using the three subcanopy lysimeters used for the calculation of canopy storage and interception efficiency. These lysimeters, each denoted by a distinct color (black, red, and green), correspond to varying canopy coverage (0.73, 0.78, and 0.82, respectively).
 
 :::
 
-TODO: maybe include a second plot for the snow covered day
+![Scatter plots of discrete observations (blue dots) and binned data (black dots with error bars) of meterology, canopy load, and hydrometor characteristics versus snow interception efficiency. Panels show (A) air temperature, (B) relative humidity, (C) wind speed, (D) initial canopy snow load (the snow load observed at the beginning of the timestep), (E) hydrometeor diameter, (F) hydrometeor velocity. The black open circles show the mean of each bin and the error bars represent the standard deviations. The data were filtered to include observations with a snowfall rate > 0 mm/hr, throughfall rate > 0.05 mm/hr to mimimize noise and a snowfall rate > the subcanopy lysimeter throughfall rate to minimize observations with unloading. Periods of unloading and melt were also removed through careful analysis of the weighed tree, subcanopy lysimeters, and timelapse imagery.](figs/automated_snowfall_event_periods/troughs_met_vs_IP_bin.png){#fig-lai-met-ip}
 
-To determine if horizontal hydrometeor trajectory influences on the ground snow accumulation, aerial lidar measurements of $\Delta tf$ were collected for a 24 hr long snowfall event on March 13, 2023 with a median wind speed of 1.4 m s^-1^, median wind direction of 183°, median hydrometeor velocity of 0.9 m s^-1^ and mean air temperature of -3.5 °C. The observed wind speed and direction resulted in a predicted median hydrometeor trajectory of -33° from a horizontal plane. 
+## The influence of forest structure on snow interception
 
-```{r}
-lidr_event_met_avg <- 
-  readRDS('data/event_met/lidar_events_met_avg.rds') 
+Snow accumulation was measured over the UAV-lidar flight extent (@fig-map-site) after a 24 hour snowfall event. The meteorology from this snowfall event, totalling 28.4 mm between lidar flights on March 13th and 14th, is shown in @fig-lidar-met. The event was characterised by a transition from low rates of snowfall with near 0°C air temperature and northeasterly winds from 1.5–2 m s^-1^. Higher rates of snowfall began late afternoon on March 13 and coincided with temperatures around -2.5 °C and predominately southerly winds around 1–2 m s^-1^. This snowfall event resulted in a range of throughfall depths measured across the study site, shown by the frequency distribution of throughfall in @fig-lidar-hist-tf. 
 
-lidr_event_met_avg|> 
-  knitr::kable()
+![Meteorological conditions over the duration of the March 13, 2023 snowfall event.](figs/lidar_periods/met_time_series/met_time_series_2023-03-14.png){#fig-lidar-met}
+
+![Frequency distribution of lidar measured throughfall over the 24 hour snowfall event between March 13 and 14th, 2023.](../../analysis/lidar-processing/figs/lidar_snow_depth_analysis/pre_post_figs/23_072_23_073_histogram_throughfall.png){#fig-lidar-hist-tf}
+
+The spatial distribution in I/P across the study site, calculated using @eq-ip and $\Delta L$ from UAV-lidar measurements and $\Delta sf$ from the Pluvio snowfall gauge is shown in @fig-lidar-ip. Greater I/P is observed on the north (lee) side of individual trees which is inferred to be due to the predominately southerly winds observed over this event. This effect is more apparent on the southwest of the study site compared to north and eastern locations within the study site.
+
+::: {#fig-lidar-ip layout="[[1], [1,1]]"}
+
+![](../../analysis/lidar-processing/figs/maps/23_072_23_073_v2.0.0_saip_normalised_resample_0.25.png){#fig-lidar-ip-site}
+
+![](../../analysis/lidar-processing/figs/maps/pwl_e_23_072_23_073_v2.0.0_saip_normalised_resample_0.25.png){#fig-lidar-ip-pwle}
+
+![](../../analysis/lidar-processing/figs/maps/fsr_s_23_072_23_073_v2.0.0_saip_normalised_resample_crop_0.25.png){#fig-lidar-ip-fsrs}
+
+Interception efficiency calculated over a 24 hr snowfall event from March 13, 2023 to March 14, 2024 at a 25 cm resolution. The entire extent of the UAV-lidar transect is shown in plot (a), a close up of PWL_E in plot (b), and a close up of FSR_S in plot (c). White areas are 25 cm grids that did not have any lidar returns or have been masked due to disturbance and thus, no throughfall measurement for the I/P calculation.
+
+:::
+
+To determine how forest structure was associated with interception efficiency at different azimuth and zenith angles over the March 13-14 snowfall event, each portion of the hemisphere at each grid location was considered. The Spearman's Correlation Coefficient calculated between the single raster grid of I/P and multiple canopy contact number at a given portion of the hemisphere (azimuth [0, 1, ..., 359], zenith angle [0, 1, ..., 90]) is shown in @fig-hemi-ip-cc. The hemisphere plots show that the number of canopy contacts along rays to the south with a zenith angle of 0-30° had the highest correlation with interception efficiency. This suggests that hydrometerors had trajectory angles that where predominately non vertical over the duration of this event. This aligns with the predicted median hydrometeor trajectory of -33° which was calculated using @eq-ta. The calculation utilized the measured hydrometeor terminal fall velocity, $v_h$ and the hydrometeor horizontal change, $x_h$ was inferred from the measured mid canopy wind speed.
+
+::: {#fig-hemi-ip-cc layout-ncol="2"}
+
+![](../../analysis/lidar-processing/figs/voxrs/hemis/cor_cn_ip/full_hemi_rho_p_cor_mcn_ip_23_072_vox_len_0.25m__gridgen_PWL_E.png){#fig-hemi-cc-ip-pwle}
+
+![](../../analysis/lidar-processing/figs/voxrs/hemis/cor_cn_ip/full_hemi_rho_p_cor_mcn_ip_23_072_vox_len_0.25m__gridgen_FSR_S.png){#fig-hemi-cc-ip-fsrs}
+
+Spearman's Correlation Coefficient between rasters of interception efficiency and canopy contact number (25 cm resolution) across the study site for different portions of the hemisphere (azimuth [0, 1, ..., 359], zenith angle [0, 1, ..., 90]).
+
+:::
+
+## Combined Effects of Meteorology and Forest Structure
+
+
+```{r, include=FALSE}
+hemi_stats <- readRDS('../../analysis/lidar-processing/data/hemi_stats/aggregate_hemi_stats_select_cc_wind_for_manuscript.rds')
+
+sparse_cc <- hemi_stats$cc_nadir[1]
+dense_cc <- hemi_stats$cc_nadir[6]
+wind_2ms <- hemi_stats$wind_speed[3] # not exact bc of join 
+traj_2_ms <- hemi_stats$traj_angle[hemi_stats$wind_speed == wind_2ms] |> unique()
+cc_2_ms_sparse <- hemi_stats$cc[hemi_stats$wind_speed == wind_2ms &
+                                  hemi_stats$cc_nadir == sparse_cc] |> round(2)
+cc_2_ms_dense <- hemi_stats$cc[hemi_stats$wind_speed == wind_2ms &
+                                  hemi_stats$cc_nadir == dense_cc] |> round(2)
+
+sparse_inc <- cc_2_ms_sparse - sparse_cc
+dense_inc <- cc_2_ms_dense - dense_cc
 ```
 
-For a more closed canopy (@fig-hemi-pwl-e, PWL_E), the correlation between interception efficiency and mean contact number across the hemisphere, aggregated for each grid cell, within each plot, shows that the highest Spearman's R correlation is observed between zenith angles of 15-30° and azimuth of 180-190° South. For more open canopy (@fig-hemi-fsr-s, FSR_S) the peak correlation slightly lower and not as localised, while still highest around zenith angles of 15-30° and azimuth angles of 180-190°South.
+The mean number of canopy contacts was calculated across each azimuth angle [0, 1, ..., 359] and each grid cell for each forest plot for different hydrometeor trajectory angles [-90, -85, ..., 0]. The mean number of canopy contacts aggregated across the hemisphere for each plot, shown in @fig-ht-cn, increases exponentially with increasing horizontal hydrometeor trajectory angle (estimated as a function of wind speed using @eq-ta) and linearly with wind speed. Increasing the mid-canopy wind speed from 0 to 2 m s^-1^ changed the hydrometeor trajectory from -90° (vertical) to `r traj_2_ms`°. This resulted in a corresponding increase in the apparent canopy cover measured using voxel ray sampling from `r sparse_cc` to `r cc_2_ms_sparse` (increase of `r sparse_inc`) for the sparse forest plot and from `r dense_cc` to `cc_2_ms_dense` (increase of `dense_inc`) for the dense forest plot.
 
-::: {#fig-hemis layout-ncol="2"}
-![PWL E](../../analysis/lidar-processing/figs/voxrs/hemis/cor_cn_ip/full_hemi_rho_s_cor_mcn_ip_23_072_vox_len_0.25m__gridgen_PWL_E.png){#fig-hemi-pwl-e}
+The average canopy coverage of each forest plot measured from vertical (nadir) is also shown to be important determining how the apparent canopy structure, depending on trajectory angle changes across various trajectory angles. For example, the apparent canopy coverage of forest plot PWL_SW, which has the highest canopy coverage of 0.4 (-90°, nadir), shown in @fig-ht-cc increases at a faster rate with wind speed and reaches near complete apparent canopy coverage at lower wind speeds compared to sparser canopies. All forest plots approach completely closed canopies at horizontal trajectories (0°). However, this relationship does not consider the turbulent windflow patterns that exist within and above the canopy. 
 
-![FSR S](../../analysis/lidar-processing/figs/voxrs/hemis/cor_cn_ip/full_hemi_rho_s_cor_mcn_ip_23_072_vox_len_0.25m__gridgen_FSR_S.png){#fig-hemi-fsr-s}
+::: {#fig-ta-ws-cc layout-nrow="2"}
 
-Spearman's Correlation of contact number and interception efficiency for Powerline South (a) and Subalpine Ridge Forest (b).
+![](../../analysis/lidar-processing/figs/voxrs/scatter/traj_angle_and_wind_vs_contact_number_phiby_2_thetaby_5.png){#fig-ht-cn}
+
+![](../../analysis/lidar-processing/figs/voxrs/scatter/traj_angle_and_wind_vs_canopy_coverage_phiby_2_thetaby_5.png){#fig-ht-cc}
+
+Scatter plots showing the association of (a) hydrometeor trajectory angle and wind speed with mean contact number and (b) hydrometeor trajectory angle and wind speed with apparent canopy coverage calculated as a function of mean contact number. The dots represent the mean mean contact number (a) OR mean canopy coverage (b) across all azimuth angles of the the hemisphere [0, 1, ..., 359] for a each zenith angle [0, 1, ..., 90] at each forest plot. The colour of the dot represents the mean canopy coverage of each forest plot from nadir. Trajectory angle was estimated as a function of wind speed.
+
 :::
-
-TODO: decide on using estimated return number, contact number, or transmittance here. 
-
-TODO: calculate I/P over the site to introduce the event, canopy coverage for nadir vs. zenith angle with highest correlation. I/P predicted using HP98 nadir zenith angle vs HP98 wind adjusted vs. actual across sites? 
-
-
 
 # Discussion
 
--   Forest structure is the primary control in determining the fraction of snowfall intercepted at a given location. A low range in interception efficiency was observed across events with varying snowfall, air temperature, relative humidity, hydrometeor diameter and hydrometeor velocity.
+The fraction of snowfall intercepted intercepted in this discontinuous subalpine forest is shown to be governed by forest structure, wind speed and initial canopy snow load. Occasionally the meteorology of a given event was observed to outweigh the differences in forest structure between different locations.
 
--   Empirical evidence to support the theory of increased in canopy contact area with increased wind speed [@Hedstrom1998a] has not been provided in the literature. The snow survey measurements conducted here corroborated with this theory, showing that events with high wind resulted in an increase in interception efficiency at sparse canopy locations. High frequency measurements by the subcanopy lysimeters also showed a slight increase in interception efficiency with increasing wind speed, but at peak wind speeds interception efficiency decreased due to unloading.
+@Satterlund1967 showed that interception efficiency increases as the canopy fills with snow bridging gaps in the canopy, while later declining due to branch bending and decreased canopy coverage and increased unloading. @Hedstrom1998a and @Storck2002 did not observe this initial increase. Observations from the subcanopy lysimeters here shown in @fig-scl-ip and @fig-lai-met-ip, despite displaying notable scatter, corroborate with the @Satterlund1967 theory. @fig-scl-ip and @fig-lai-met-ip indicate that initial canopy snow load exerted an important control on interception efficiency. A significant change of approximately 20% was detected between peak snow loads exceeding 20 mm (associated with low interception efficiency) and optimal snow loads of near 7 mm (associated with high interception efficiency). However, the decline in interception efficiency at high canopy snow loads in @fig-scl-ip and @fig-lai-met-ip was rate much slower than has been observed by previous studies [@Hedstrom1998a; @Satterlund1967; @Moeser2015]. At higher canopy snow loads, several studies suggest that interception efficiency declines [@Hedstrom1998a; @Satterlund1967; @Moeser2015], based on the premise of reduced canopy coverage due and catch efficiency to branch bending. However, the strong exponential decline in the interception efficiency observed with increasing event snowfall shown in @fig-hp-storck-moeser may be a result of increased unloading rates as branches bend down. This may be attributed to the care taken in the observations presented here to minimize inclusion of unloading or ablation in the throughfall measurements. The longer duration between site visits in [@Satterlund1967; @Hedstrom1998a] increase the likelihood of ablation in their throughfall measurements compared to the automated 15 minute measurements in this study. This potential inclusion of unloading within the interception parameterizations provided in [@Hedstrom1998a; @Satterlund1967; @Moeser2015] may lead to double counting of unloading when combined with an additional unloading parameterization as in [@Hedstrom1998a]. Still, if interception efficiency is expected to decline due to an associated decrease in canopy coverage from branch bending, as observed in @fig-lai-met-ip, it may be appropriate to have some decline in interception efficiency at higher canopy loads while also having a separate parameterization to increase unloading with canopy snow load.
 
--   Existing theory suggests either a positive [@Storck2002] or negative [@Hedstrom1998a] association of air temperature with the maximum canopy storage (@fig-example-wmax). The findings presented in this study deviate from the relationships outlined in @Hedstrom1998a and @Storck2002 concerning the association between air temperature and $W_{max}$. Specifically, the findings suggest an absence of relationship between air temperature and interception efficiency. The increase in canopy storage with snowfall also did not show any dependence on air temperature or a plateau in storage suggesting the maximum canopy storage value may not have been reached and is likely greater than 25 mm.
+Existing theories suggests either a positive [@Storck2002] or negative [@Hedstrom1998a] association of air temperature with the maximum canopy storage (@fig-example-wmax). The findings presented in this study deviate from the relationships outlined in @Hedstrom1998a and @Storck2002. Specifically, both @fig-scl-ip and @fig-lai-met-ip showed an absence of a maximum canopy storage capacity. It is likely that a maximum canopy storage value does exist in the study site but was higher than the observed range of canopy storage values presented here. Additionally, in @fig-lai-met-ip, no relationship between air temperature and interception efficiency was observed. As maximum canopy storage value was not present in @fig-scl-w-sf and @fig-scl-ip, a direct link cannot be made between air temperature and $L_{max}$. However, the absence of a discernible relationship between interception efficiency and air temperature suggests that there might not be an influence on $L_{max}$. This absence could also be explained by the concurrent presence of positive [adhesive and cohesive forces, @Storck2002] and negative [branch bending, @Schmidt1990] relationships. These two opposing effects could balance each other out, resulting in no observable effect on interception efficiency in the observations presented in @fig-lai-met-ip. It is also plausible that the influence of wind on interception at this site masked any potential effect of air temperature. 
 
--   @Satterlund1967 showed that interception efficiency increases as the canopy fills with snow, while later declining due to branch bending. @Hedstrom1998a and @Storck2002 did not observe this initial increase. Observations from the subcanopy lysimeters here showed some evidence for an initial increase in interception efficiency with increasing canopy snow load followed by a decline in interception efficiency likely due to unloading or reduced canopy coverage. The decline in interception efficiency at high canopy snow loads was at rate much slower than has been observed by previous studies [@Hedstrom1998a; @Satterlund1967; @Moeser2015]. At higher canopy snow loads, several studies suggest interception efficiency declines [@Hedstrom1998a; @Satterlund1967; @Moeser2015], based on the premise of reduced canopy coverage due and catch efficiency to branch bending. However, the strong exponential decline in the interception efficiency observed with increasing event snowfall shown in @fig-hp-storck-moeser may be a result of increased unloading rates as branches bend down. The long duration of snowfall events included in @Hedstrom1998a also increase the likely hood of unloading. This potential inclusion of unloading within the interception parameterizations provided in [@Hedstrom1998a; @Satterlund1967; @Moeser2015] may lead to double counting of unloading when combined with an additional unloading parameterization as in [@Hedstrom1998a]. However, if interception efficiency is known to decline due to an associated decrease in canopy coverage from branch bending it may be appropriate to have some decline in interception efficiency at higher canopy loads while also having a separate parameterization to increase unloading with canopy snow load.
-
--   Little increase in hydrometeor velocity was observed with increaseing wind speed which supported the use of a constant terminal fall velocity in @eq-ta. The increase in velocity above 2 m/s may be due to smaller diameter hydrometeors associated with convective storm activity.
+Empirical evidence to support the theory of increased in canopy contact area with increased wind speed [@Hedstrom1998a] has not been provided in the literature. Automated measurements of interception efficiency showed a slight increase in interception efficiency with increasing wind speed (below 1.5 m s^-1^). At wind speeds above 1.5 m s^-1^ interception efficiency was observed to decrease due to an associated increase in unloading. Measurements of interception efficiency collected by UAV-lidar surveys for a snowfall event with a 1.4 m s^-1^ average wind speed showed a large fraction of snow intercepted on the lee side of individual trees as a result of predominately non-vertical hydrometeor trajectory angles. The dominant hydrometeor trajectory angle was shown to be predicted using event wind speed and direction alone. The plot scale canopy coverage was shown to increase substantially as a result of increasing horizontal angle of hydrometers. The increase in plot scale canopy coverage observed in this study, of from 0.4 with zero wind to near complete coverage with midcanopy wind speeds of 2 m s^-1^ is much higher than the increase calculated using the method proposed in @Hedstrom1998a to scale canopy coverage with wind speed. Using Equation 10 in @Hedstrom1998a, an increase of in canopy coverage of 0.03 is calculated using the same wind speed and forest structure and canopy height of 10 m and forested downwind distance of 100 m. The increase in interception efficiency observed away from individual trees in @fig-lidar-ip-site and the measured increase plot scale canopy coverage using voxel ray sampling in @fig-ht-cc show that Equation 10 in @Hedstrom1998a may not be appropriate for sparse forests. Further investigation is required to test the relationships observed here in dense forest canopies. The large sensitivity of apparent forest cover to mid-canopy wind speed for this discontinuous subalpine forest suggests that this effect should be considered in snow interception models. While, increasing wind has been shown here to increase plot-scale interception, following the deposition of snow in the canopy wind is also known to increase rates of unloading [@Roesch2001; @Bartlett2015]. Poor performance of the @Roesch2001 and @Bartlett2015 algorithms has been shown in the literature [e.g. @Lumbrazo2022]. Since existing studies have not considered the concurrent effect of interception increasing as a result of increasing apparent forest structure due to increasing wind, validations of subsequent ablation parameterizations will likely benefit.
 
 # Conclusions
 
--   The forest structure is the main factor in governing the fraction of intercepted snowfall at a particular site, with meteorological conditions contributing less to variability.
+-   Forest structure is the main factor in governing the fraction of intercepted snowfall at a particular site, with meteorological conditions contributing less to variability.
 -   Forest structure metrics calculated using high zenith angles better described the variability in interception efficiency in this windswept subalpine forest.
 -   Interception efficiency increased with increasing canopy coverage and LAI. However, the strength of this association was reduced at higher wind speeds.
 -   High wind speeds increased interception efficiency due to an associated increase in canopy contact area for sparsely forested locations, while later decreasing intercepted load due to increased snow unloading.
