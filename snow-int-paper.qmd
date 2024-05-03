@@ -4,14 +4,14 @@ author: "Alex Cebulski & John Pomeroy"
 date: today
 date-format: long
 format: 
-  # docx:
-  #   reference-doc: ../config/word_template.docx
-  #   number-sections: true
-  #   toc: false
-  # pdf
-  html:
+  docx:
+    reference-doc: ../config/word_template.docx
+    number-sections: true
     toc: false
-    self-contained: true
+  # pdf
+  # html:
+  #   toc: false
+  #   self-contained: true
 editor: source
 bibliography: ../../papers/bibtex/library.bib
 csl: '../../papers/bibtex/csl-styles/apa-disable-disambiguate-add-names.csl'
@@ -29,14 +29,6 @@ knitr::opts_chunk$set(echo = FALSE, message=FALSE, warning=FALSE, fig.align='cen
 # source('scripts/01_plot_forest_snow_survey_IP.R')
 # source('scripts/01_plot_snowfall_interception_w_tree.R')
 ```
-
-TODO 
-
-look at wind flow in canopy equations:
-
-- @Cionco1972
-- @Zhu2001
-- parvanians, ellis, JM thesis 
 
 # Introduction
 
@@ -120,7 +112,7 @@ Above the top of the canopy, wind flow is approximately logarithmic with height.
 
 $$
 u_z = u(u^*,z,z_o,d)\cdot exp\left[a\cdot\left(\frac{z_c}{h_c}-1\right)\right]
-$$
+$${#eq-uz}
 where $u$ is the horizontal wind speed at the top of the canopy which is a function of the friction velocity $u^*$, height above ground, $z$, roughness length, $z_o$, and the displacement height of the canopy, $d$. $a$ is an attenuation coefficient that increases with increasing leaf area and decreases as the mean distance between individual trees increases, $z_c$ is the height above ground of $u_z$, and $h_c$ is the average height of the canopy elements. @Cionco1972 suggest values for $a$ of 1.01 for small needleleaf trees, @Zhu2001 provide methods to calculated $a$ based on canopy density and @Parviainen2000 provide a method to calculate $a$ using observations from two jack pine (*Pinus banksiana*) stands. @fig-ws-vs-ta shows the increase in trajectory angle calculated using @eq-ta with a constant hydrometeor velocity of 1 m s^-1^ and a horizontal velocity equal to mid-canopy wind speeds ranging from 0-20 m s^-1^. 
 
 ![The theoretical relationship of hydrometeor trajectory (departure from horizontal plane) with increasing wind speed. This assumes a constant hydrometeor velocity of 1 m/s and a horizontal velocity equal to wind speed. ](figs/examples/wind_speed_vs_traj_angle.png){#fig-ws-vs-ta width="400"}
@@ -129,7 +121,13 @@ where $u$ is the horizontal wind speed at the top of the canopy which is a funct
 
 ## Study Site
 
-This study was conducted at forest plots surrounding the Powerline Station (PWL) and Forest Tower Station (FT) located within Fortress Mountain Research Basin (FMRB), AB ~ 51 ◦ N, 2100 m asl. (@fig-maps). The species of tree surrounding the PWL and FT stations include sparsely spaced coexisting subalpine fir (Abies lasiocarpa) and Engelmann spruce (Picea engelmannii), with a proportion of 70% and 30% respectively [@Langs2020]. In the early 1900s the majority of the FMRB vegetation burned during a large forest fire that affected most of the Kananaskis Valley. Following the fire, the forest surrounding the PWL and FT stations has naturally regenerated with minimal disturbance.
+```{r, include=FALSE}
+ft_mean_ht <- readRDS('../../analysis/lidar-processing/data/lidR_canopy_metrics/frs_s_mean_tree_height.rds')
+
+pwl_e_mean_ht <- readRDS('../../analysis/lidar-processing/data/lidR_canopy_metrics/pwl_e_mean_tree_height.rds')
+```
+
+This study was conducted at forest plots surrounding the Powerline Station (PWL) and Forest Tower Station (FT) located within Fortress Mountain Research Basin (FMRB), AB ~ 51 ◦ N, 2100 m asl. (@fig-maps). The species of tree surrounding the PWL and FT stations include sparsely spaced coexisting subalpine fir (Abies lasiocarpa) and Engelmann spruce (Picea engelmannii), with a proportion of 70% and 30% respectively [@Langs2020]. The average height of the canopy surrounding the plot to the east of the PWL station is `r pwl_e_mean_ht` and surrounding the forest plot around the FT Station is `r ft_mean_ht`. In the early 1900s the majority of the FMRB vegetation burned during a large forest fire that affected most of the Kananaskis Valley. Following the fire, the forest surrounding the PWL and FT stations has naturally regenerated with minimal disturbance.
 
 ## Meterological Measurements
 
@@ -167,7 +165,19 @@ scl_lai_cc |>
 
 A weighed tree lysimeter, shown in @fig-w-tree-loaded and @fig-w-tree-bare, measured the weight of canopy snow load, $L_{wt}$ (kg). A live subalpine fir (Abies lasiocarpa) tree was cut and suspended from a load cell (Artech S-Type 20210-100) at the beginning of the 2022 and 2023 water years which recorded the weight of the tree. The bottom of the tree was sealed to limit some transpiration and to prevent spinning and abrupt impacts of the free-hanging tree, the base of the tree was attached to a support system that allows for vertical movement but limits abrupt horizontal movements. The weight of snow in the weighed tree in kg was scaled to an areal estimate of canopy snow load ($L$, kg m^-2^) using @eq-canopy-mass-bal and measurements of areal throughfall (kg m^-2^) from manual snow surveys and snowfall from the PWL Station snowfall gauge [see description of method in @Hedstrom1998a].
 
+## UAV Data Processing
+
+Two uncrewed aerial vehicle (UAV) lidar surveys were conducted before and after the snowfall event to be used for the measurement of snow accumulation and computation of canopy structure metrics. The UAV (FreeFly Alta X) was equipped with a REIGL miniVUX-2 airborne laser scanner payload, an Applanix APX-20 inertial measurement unit (IMU) and global navigation satellite system (GNSS). The UAV was flown 90 m above the ground at a speed of 3 m s^-1^ following a preprogrammed flight trajectory shown in @fig-map-site. 
+
+The REIGL miniVUX-2 laser operates at a near infrared wavelength with a laser beam footprint of 0.160 m x 0.05 mm (at 100 m above ground). The accuracy and precision of the miniVUX-2 is described by REIGL for a lab environment of 0.015 m and 0.01 m respectively (at 50 m above ground). The miniVUX-2 was configured with a laser pulse repetition rate of 200 kHz, field of view of 360°, scan speed of 31.09 revolutions s^-1^ and an angular step width of 0.0558°, resulting in an expected an average point cloud density of 107 returns m^-2^ for each flight path.
+
+Georeferenced point clouds with x, y, and z coordinates for each laser return were generated following methods outlined by @Harder2020 and @Staines2023 to reconcile survey lidar, IMU and GNSS data. A ground based GNSS system was positioned on a permanent monument during each survey and underwent precise point positioning (PPP) correction by @ppp2024. Differential GNSS correction of the UAV trajectory was conducted using the ground based PPP GNSS observations and the POSPac UAV software. The UAV-lidar point clouds were then transformed from a sensor referenced coordinate system to a georeferenced coordinate system (EPSG:32611 - WGS 84 / UTM zone 11N) using the RIEGL Riprocess Software. A consistent vertical offset of up to 6 cm between UAV-lidar flight lines was observed in the resulting point clouds on March 13th and 14th, 2024 and was attributed to IMU drift. This offset between flight lines was corrected using the BayesMap stripalign software, which adjusts the vertical elevation of the point cloud to the ground control points (GCP) collected across the study site using a differential GNSS rover. After strip alignment, the mean elevation bias (lidar minus GCP) was 0.000 m and the RMS error changed from 0.055 m to 0.038 m March 13^th^ and changed from 0.033 m to 0.029 m on March 14^th^. The point cloud density ranged from ~1200 returns m^2^ in open clearings to ~2200 m^2^ in sparse forest for both the March 13 and 14th surveys after all flight paths were combined. 
+
+Quality control, ground classification and calculation of the change in between two UAV-lidar point clouds was conducted using the LAStools software package [@LAStools2024]. Point clouds were clipped to a polygon with a 20 m buffer bounding the UAV transect shown in @fig-map-site. The ground classification was conducted using the "lasground_new" function [@LAStools2024] for both the pre and post snowfall event point clouds, with a step size set to 2 m and 8 substeps (ultra_fine setting). The offset and spike options were set to remove points that are more than 0.1 m above or below the initial ground surface estimate surface which "lasground_new" fits to the last returns. This function is based on an algorithm outlined by @Axelsson2000, describing the process of making the initial ground surface element.
+
 ## Snow Surveys
+
+### In-situ Snow Depth and Density
 
 ```{r, include=FALSE}
 lai_measurements <- read.csv('../../analysis/interception/data/lai/results/2023_compiled_lai_vza_15_60.csv')  |>
@@ -177,9 +187,17 @@ cc_range <- paste(round(min(lai_measurements$cc), 2), '–', round(max(lai_measu
 lai_range <- paste(round(min(lai_measurements$Le), 2), '–', round(max(lai_measurements$Le), 2))
 ```
 
+Manual snow surveys provided measurements of subcanopy throughfall over the forest surrounding FT Station after a snowfall event. These throughfall measurements were used to scale the weighed tree and for accuracy assessment of the UAV-lidar fresh snow depth measurements. If a pre event crust layer was present the depth of post event fresh snow accumulation above the crust layer were interpreted as throughfall over the event. In the absence of a defined crust layer, the difference in pre and post event snow depth to ground was interpreted as event throughfall. A 1000 cm^3^ snow density wedge sampler (RIP Cutter, https://snowmetrics.com/shop/rip-1-cutter-1000-cc/) was used to measure the density of the fresh snow layer, $\overline{\rho_{tf}}$ (kg m^-3^). The throughfall depth measurements, $\Delta HS$ were converted to snow water equivalent (SWE) using the following equation:
 
-Manual snow surveys provided measurements of subcanopy throughfall over the forest surrounding FT Station after a snowfall event. These throughfall measurements were used in conjuction with the PWL Station snowfall gauge to scale the weighed tree and validate the UAV-lidar fresh snow depth measurements. If a pre event crust layer was present, post event measurements of fresh snow accumulation above the crust layer were interpreted as throughfall over the event. In the absence of a defined crust layer, the difference of pre and post event snow depth to ground was interpreted as event throughfall. A 1000 cm^3^ snow density wedge sampler (RIP Cutter, https://snowmetrics.com/shop/rip-1-cutter-1000-cc/) was used to measure the density of the fresh snow layer. Fourteen snow surveys (seven pre and post snowfall event pairs) that had minimal evidence of ablation were select for calibration of the weighed tree. An average of 40 snow depth samples were taken for each snow survey following two 60 m linear transects north and south of the FT Station. The forest canopy surrounding the snow survey stations had LAI ranging from `r lai_range` (-) and canopy coverage ranging from `r cc_range` (-) measured using hemispherical photography.
+$$
+\Delta SWE_{tf} = \Delta HS \cdot \overline{\rho_{tf}}
+$${#eq-swe-tf}
 
+Fourteen snow surveys (seven pre and post snowfall event pairs) that had minimal evidence of ablation were select for calibration of the weighed tree. An average of 40 snow depth samples were taken for each snow survey following two 60 m linear transects north and south of the FT Station. The forest canopy surrounding the snow survey stations had LAI ranging from `r lai_range` (-) and canopy coverage ranging from `r cc_range` (-) measured using hemispherical photography.
+
+### UAV-Lidar Snow Depth
+
+The change in elevation between the two UAV-lidar surveys was interpreted as the increase in snow accumulation, $\Delta HS$ over the snowfall event. This change was calculated using a point-to-grid subtraction method, similar to the approach used by @Deems2013 and @Staines2023, using the "lasheight" function from the @LAStools2024 software. The pre snowfall event point cloud from "lasground_new" by "lasheight" to construct a "ground" TIN. Subsequently, the height of each post snowfall event point above the ground TIN, resulting in a point cloud representing $\Delta HS$. This point cloud was then converted into a raster of $\Delta HS$ with a grid cell resolution of 5 x 5 cm using the "las2dem" function. Further quality control and resampling of the 5 cm raster of $\Delta HS$ was conducted using the R package Terra @Hijmans2024. Regions that were disturbed over the snowfall event during the in-situ snow survey and values that exceeded the .999th quantile were removed. To help remove any remaining noise a 25 cm $\Delta HS$ raster was generated by computing the median of the 5 cm $\Delta HS$ values within each 25 cm grid cell.
 
 ## Snow Interception
 
@@ -245,6 +263,8 @@ Snow accumulation was measured over the UAV-lidar flight extent (@fig-map-site) 
 
 The spatial distribution in I/P across the study site, calculated using @eq-ip and $\Delta L$ from UAV-lidar measurements and $\Delta sf$ from the Pluvio snowfall gauge is shown in @fig-lidar-ip. Greater I/P is observed on the north (lee) side of individual trees which is inferred to be due to the predominately southerly winds observed over this event. This effect is more apparent on the southwest of the study site compared to north and eastern locations within the study site.
 
+To determine how forest structure was associated with interception efficiency at different azimuth and zenith angles over the March 13-14 snowfall event, each portion of the hemisphere at each grid location was considered. The Spearman's Correlation Coefficient calculated between the single raster grid of I/P and multiple canopy contact number at a given portion of the hemisphere (azimuth [0, 1, ..., 359], zenith angle [0, 1, ..., 90]) is shown in @fig-hemi-ip-cc. The hemisphere plots show that the number of canopy contacts along rays to the south with a zenith angle of 0-30° had the highest correlation with interception efficiency. This suggests that hydrometerors had trajectory angles that where predominately non vertical over the duration of this event. This aligns with the predicted median hydrometeor trajectory of -33° which was calculated using @eq-ta. The calculation utilized the measured hydrometeor terminal fall velocity, $v_h$ and the hydrometeor horizontal change, $x_h$ was inferred from the measured mid canopy wind speed.
+
 ::: {#fig-lidar-ip layout="[[1], [1,1]]"}
 
 ![](../../analysis/lidar-processing/figs/maps/23_072_23_073_v2.0.0_saip_normalised_resample_0.25.png){#fig-lidar-ip-site}
@@ -257,15 +277,13 @@ Interception efficiency calculated over a 24 hr snowfall event from March 13, 20
 
 :::
 
-To determine how forest structure was associated with interception efficiency at different azimuth and zenith angles over the March 13-14 snowfall event, each portion of the hemisphere at each grid location was considered. The Spearman's Correlation Coefficient calculated between the single raster grid of I/P and multiple canopy contact number at a given portion of the hemisphere (azimuth [0, 1, ..., 359], zenith angle [0, 1, ..., 90]) is shown in @fig-hemi-ip-cc. The hemisphere plots show that the number of canopy contacts along rays to the south with a zenith angle of 0-30° had the highest correlation with interception efficiency. This suggests that hydrometerors had trajectory angles that where predominately non vertical over the duration of this event. This aligns with the predicted median hydrometeor trajectory of -33° which was calculated using @eq-ta. The calculation utilized the measured hydrometeor terminal fall velocity, $v_h$ and the hydrometeor horizontal change, $x_h$ was inferred from the measured mid canopy wind speed.
-
 ::: {#fig-hemi-ip-cc layout-ncol="2"}
 
-![](../../analysis/lidar-processing/figs/voxrs/hemis/cor_cn_ip/full_hemi_rho_p_cor_mcn_ip_23_072_vox_len_0.25m__gridgen_PWL_E.png){#fig-hemi-cc-ip-pwle}
+![PWL](../../analysis/lidar-processing/figs/voxrs/hemis/cor_cn_ip/full_hemi_rho_s_cor_mcn_ip_23_072_vox_len_0.25m_sa_gridgen_v2.0.0_sa_PWL_E.png){#fig-hemi-cc-ip-pwle}
 
-![](../../analysis/lidar-processing/figs/voxrs/hemis/cor_cn_ip/full_hemi_rho_p_cor_mcn_ip_23_072_vox_len_0.25m__gridgen_FSR_S.png){#fig-hemi-cc-ip-fsrs}
+![FT](../../analysis/lidar-processing/figs/voxrs/hemis/cor_cn_ip/full_hemi_rho_s_cor_mcn_ip_23_072_vox_len_0.25m_sa_gridgen_v2.0.0_sa_FSR_S.png){#fig-hemi-cc-ip-fsrs}
 
-Spearman's Correlation Coefficient between rasters of interception efficiency and canopy contact number (25 cm resolution) across the study site for different portions of the hemisphere (azimuth [0, 1, ..., 359], zenith angle [0, 1, ..., 90]).
+Spearman's Correlation Coefficient between rasters of interception efficiency and canopy contact number (25 cm resolution) across the study site for different portions of the hemisphere (azimuth [0, 1, ..., 359], zenith angle [0, 1, ..., 90]) for the forest plot to the east of PWL Station (a) and for the forest plot surrounding FT Station (b).
 
 :::
 
@@ -298,7 +316,7 @@ The average canopy coverage of each forest plot measured from vertical (nadir) i
 
 ![](../../analysis/lidar-processing/figs/voxrs/scatter/traj_angle_and_wind_vs_canopy_coverage_phiby_2_thetaby_5.png){#fig-ht-cc}
 
-Scatter plots showing the association of (a) hydrometeor trajectory angle and wind speed with mean contact number and (b) hydrometeor trajectory angle and wind speed with apparent canopy coverage calculated as a function of mean contact number. The dots represent the mean mean contact number (a) OR mean canopy coverage (b) across all azimuth angles of the the hemisphere [0, 1, ..., 359] for a each zenith angle [0, 1, ..., 90] at each forest plot. The colour of the dot represents the mean canopy coverage of each forest plot from nadir. Trajectory angle was estimated as a function of wind speed.
+Scatter plots showing the association of (a) hydrometeor trajectory angle and wind speed with mean contact number and (b) hydrometeor trajectory angle and wind speed with apparent canopy coverage calculated as a function of mean contact number. The dots represent the mean mean contact number (a) OR mean canopy coverage (b) across all azimuth angles of the hemisphere [0, 1, ..., 359] for a each zenith angle [0, 1, ..., 90] at each forest plot. The colour of the dot represents the mean canopy coverage of each forest plot from nadir. Trajectory angle was estimated as a function of wind speed.
 
 :::
 
