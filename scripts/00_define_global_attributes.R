@@ -23,11 +23,22 @@ parsivel <- readRDS('../../analysis/disdrometer/data/disdro_spectrum_processed_a
 ffr_met <- readRDS('../../analysis/met-data-processing/data/ffr_crhm_modelling_obs.rds')
 ffr_met_wnd <- readRDS('../../analysis/met-data-processing/data/ffr_t_rh_u_qaqc_fill.rds')
 pwl_sf <- readRDS('../../analysis/met-data-processing/data/pluvio-qaqc/pwl_pluvio_15_min_qaqc_undercatch_corr_ac.rds')
+pwl_wind <- readRDS('data/pwl_met_qaqc.rds') |>
+  select(
+    datetime,
+    wind_speed = WindSpeed_S_WVT,
+    wind_dir_true = WindDir_D1_WVT # keir confirmed junction box is pointed at 180 deg south (true) as per spec
+    # sd_wind_dir = WindDir_SD1_WVT
+  )  |>
+  mutate(
+    sensor = 'pwl_wnd_rm_young_5.2m') |> select(-wind_dir_true)
 
 # theme_bw(base_size = 14)
 options(ggplot2.discrete.colour= palette.colors(palette = "R4"))
+cc_colours <- c("#9E9E9E",  "#F5C710", "#61D04F")
 
-# "#000000" "#DF536B" "dodgerblue" "#2297E6" "#28E2E5" "#CD0BBC" "#F5C710" "#9E9E9E"
+# [1] "#000000" "#DF536B" "#61D04F" "#2297E6" "#28E2E5" "#CD0BBC" "#F5C710"
+# [8] "#9E9E9E"
 
 fig_width <- 5.5
 fig_height <- 4

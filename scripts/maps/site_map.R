@@ -16,41 +16,31 @@ ss_coords <- sf::read_sf('../../analysis/interception/data/gis/gnss/avg_gnss_coo
   mutate(type = 'Snow Survey') |>
   select(type)
 
+bad_names <- c('EC low',
+               'SR50',
+               'TB1',
+               'TB2',
+               'TB3',
+               'TB4')
+
+scl_name_dict <- data.frame(name = c('SCL 1', 'SCL 2', 'SCL 3'),
+                            new_name = c('SCL Med', 'SCL Low', 'SCL High'))
+
+inst_coords <- sf::read_sf('../../analysis/interception/data/lai/instrument_coords.gpkg') |>
+  filter(!name %in% bad_names) |>
+  st_transform(st_crs(ss_coords)) |>
+  mutate(name = gsub('Trough', 'SCL', name)) |>
+  left_join(scl_name_dict, by = 'name') |>
+  select(name = new_name, type, geometry = geom)
+
 stns <- data.frame(
-  name = c('Powerline Station', 'Forest Tower'),
+  name = c('PWL Station', 'FT Station'),
   type = 'Flux Tower',
   x = c(626890.966, 627006.643),
   y = c(5632024.896, 5631995.019)) |>
-  st_as_sf(coords = c("x", "y"), crs = st_crs(ss_coords))
+  st_as_sf(coords = c("x", "y"), crs = st_crs(ss_coords)) |> rbind(inst_coords)
 
-bg <- terra::rast('/media/alex/phd-data/local-usask/analysis/lidar/gis/22_292FT_RGB.tif')
-
-# Resample background image  ----
-
-# bbox <- terra::ext(bg)
-#
-# # construct raster so cells match up with centre of dots
-# template_rast <- terra::rast(
-#   resolution = 0.25,
-#   xmin = bbox$xmin,
-#   xmax = bbox$xmax,
-#   ymin = bbox$ymin,
-#   ymax = bbox$ymax,
-#   vals = NA_real_,
-#   crs = "epsg:32611"
-# )
-#
-# # take the median of the cells w/in out coarser template
-# bg_resamp <-
-#   terra::resample(bg, template_rast)
-#
-# bg_resamp <- terra::ifel(bg_resamp == 0, NA, bg_resamp)
-#
-# terra::writeRaster(
-#   bg_resamp,
-#   '/media/alex/phd-data/local-usask/analysis/lidar/gis/22_292FT_RGB_resamp_25cm.tif',
-#   overwrite = T
-# )
+bg <- terra::rast('/media/alex/phd-data/local-usask/analysis/lidar/gis/22_292FT_RGB_resamp_10cm.tif')
 
 bg_resamp <- terra::rast('/media/alex/phd-data/local-usask/analysis/lidar/gis/22_292FT_RGB_resamp_25cm.tif')
 
@@ -94,6 +84,6 @@ tm <- tm_shape(bg_resamp, bbox = bbox) +
                 col = 'red',
                 labels = c("Forest Plots"))
 
-# tm
+tm
 
 tmap::tmap_save(tm, 'figs/maps/site_map.png', width = 6, height = 4, unit = 'in')
