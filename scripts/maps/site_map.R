@@ -6,11 +6,22 @@ library(tidyterra)
 library(sf)
 library(tmap)
 
-fsr_plots <- st_read('/home/alex/local-usask/analysis/lidar-processing/data/gis/shp/fsr_forest_plots_v_2_0.shp')
+plot_name_dict <- data.frame(
+  name = c('PWL_E', 'FSR_S'),
+  plot_name = c('PWL Plot', 'FT Plot')
+)
+
+fsr_plots <- st_read('/home/alex/local-usask/analysis/lidar-processing/data/gis/shp/fsr_forest_plots_v_1_0.shp') |>
+  filter(name %in%  c('PWL_E', 'FSR_S')) |>
+  left_join(plot_name_dict)
+
 
 lidr_flight_path <- st_read('/home/alex/local-usask/analysis/lidar-processing/data/metadata/drone_trajectory/shp/23_073_all_lidar_trajectory_lines.gpkg')
 
+# detailed path
 ss_transect_path <- st_read('/home/alex/local-usask/analysis/lidar-processing/data/gis/shp/23_73_transect.shp')
+# rough path
+ss_transect_path_rough <- st_read('/home/alex/local-usask/analysis/lidar-processing/data/gis/shp/fsr_snow_survey_transect_polyline.shp')
 
 ss_coords <- sf::read_sf('../../analysis/interception/data/gis/gnss/avg_gnss_coords.gpkg') |>
   mutate(type = 'Snow Survey') |>
@@ -40,6 +51,8 @@ stns <- data.frame(
   y = c(5632024.896, 5631995.019)) |>
   st_as_sf(coords = c("x", "y"), crs = st_crs(ss_coords)) |> rbind(inst_coords)
 
+# st_write(stns, 'data/gis/stn_coords.gpkg')
+
 bg <- terra::rast('/media/alex/phd-data/local-usask/analysis/lidar/gis/22_292FT_RGB_resamp_10cm.tif')
 
 bg_resamp <- terra::rast('/media/alex/phd-data/local-usask/analysis/lidar/gis/22_292FT_RGB_resamp_25cm.tif')
@@ -56,13 +69,13 @@ tm <- tm_shape(bg_resamp, bbox = bbox) +
     n.y = 1
   ) +
   tm_shape(fsr_plots) +
-  tm_borders(col = 'red', lwd = 2) +
+  tm_polygons('plot_name', palette = c('salmon', 'dodgerblue'), title = '', alpha = .5) +
   tm_shape(lidr_flight_path) +
   tm_lines(col = 'blue', lty = 'dashed', lwd = 2, legend.col.show = T) +
-  # tm_shape(ss_transect_path) +
-  # tm_lines(col = 'orange', lty = 'dashed', lwd = 2) +
+  tm_shape(ss_transect_path_rough) +
+  tm_lines(col = 'orange', lty = 'solid', lwd = 2) +
   tm_shape(stns) +
-  tm_symbols(size = 0.5, col = 'name', palette = palette("Okabe-Ito"), title.col = '') +
+  tm_symbols(size = 0.5, col = 'name', palette = rev(palette("Okabe-Ito")[1:5]), title.col = '') +
   tm_scale_bar(position = c(0, 0)) +
   tm_compass(position = c(0, 0.1)) +
   tm_layout(
@@ -81,9 +94,9 @@ tm <- tm_shape(bg_resamp, bbox = bbox) +
                 col = "blue",
                 labels = c("UAV Transect"))+
   tm_add_legend(type = 'line',
-                col = 'red',
-                labels = c("Forest Plots"))
+                col = 'orange',
+                labels = c("In-situ Transect"))
 
-tm
+# tm
 
 tmap::tmap_save(tm, 'figs/maps/site_map.png', width = 6, height = 4, unit = 'in')

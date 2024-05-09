@@ -8,10 +8,11 @@ ffr_met_wnd_lidar_events <- lidar_events_long_dt |>
   left_join(ffr_met_wnd)  |>
   left_join(parsivel, by = 'datetime') |>
   left_join(pwl_sf) |>
-  filter(event_id == select_event)
+  filter(event_id == select_event,
+         ppt > 0)
 
 median_wind_dir <- median(ffr_met_wnd_lidar_events$wind_dir)
-median_vel <- median(ffr_met_wnd_lidar_events$part_vel, na.rm = T)
+median_vel <- mean(ffr_met_wnd_lidar_events$part_vel, na.rm = T)
 
 ffr_met_wnd_lidar_events$traj_angle <-
   traj_angle_deg(ffr_met_wnd_lidar_events$wind_speed, median_vel)

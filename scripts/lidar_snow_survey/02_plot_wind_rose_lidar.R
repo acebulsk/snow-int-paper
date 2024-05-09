@@ -7,27 +7,64 @@ source('scripts/lidar_snow_survey/01_plot_lidar_met_time_series.R')
 met_w_snowfall <- ffr_met_wnd_lidar_events |>
   filter(ppt > 0.1)
 
+ffr_met_wnd_lidar_events_snowing <- met_w_snowfall |>
+  group_by(event_id) |>
+  mutate(event_cml_sf = cumsum(ppt),
+         ppt = ppt*4) |>
+  group_by(event_id) |>
+  summarise(
+    `Air Temp. (°C)` = mean(air_temp),
+    `RH (%)` = mean(rh),
+    `med FT Wind Dir. (°)` = median(ft_wind_dir),
+    `med FT Wind Speed (m/s)` = median(ft_wind_speed),
+    `med PWL Wind Dir. (°)` = median(pwl_wind_dir),
+    `med PWL Wind Speed (m/s)` = median(pwl_wind_speed),
+    `mean FT Wind Dir. (°)` = mean(ft_wind_dir),
+    `mean FT Wind Speed (m/s)` = mean(ft_wind_speed),
+    `mean PWL Wind Dir. (°)` = mean(pwl_wind_dir),
+    `mean PWL Wind Speed (m/s)` = mean(pwl_wind_speed),
+    `Cuml. Snowfall (mm)` = sum(ppt)/4
+  )
+
+saveRDS(ffr_met_wnd_lidar_events_snowing, 'data/event_met/lidar_events_met_avgs_snowing.rds')
+
 for (event in as.character(scan_dates$event_id)) {
   ffr_met_wnd_event <- met_w_snowfall[as.character(met_w_snowfall$event_id) == event, ]
 
+  event_wind_stats <-
+
   p <- weatherdash::wind_rose(ffr_met_wnd_event,
                               'datetime',
-                              'wind_speed',
-                              'wind_dir',
+                              'ft_wind_speed',
+                              'ft_wind_dir',
                               dir_res = 30,
-                              ws_res = 1,
+                              ws_res = .5,
                               ws_max = 5,
-                              plot_title = event,
+                              plot_title = 'FT',
                               spd_unit = 'm/s'
   )
 
   p
 
-  # reticulate::py_install('kaleido')
-  # reticulate::py_install('plotly')
-  plotly::save_image(p, paste0('figs/lidar_periods/wind_rose/png/wind_rose_event_snowing', event, '.png'))
-  # htmltools::save_html(p, paste0('figs/lidar_periods/wind_rose/interactive/wind_rose_event_snowing_', event, '.html'))
+  plotly::save_image(p, paste0('figs/lidar_periods/wind_rose/png/ft_wind_rose_event_snowing', event, '.png'))
+
+  p <- weatherdash::wind_rose(ffr_met_wnd_event,
+                              'datetime',
+                              'pwl_wind_speed',
+                              'pwl_wind_dir',
+                              dir_res = 30,
+                              ws_res = .5,
+                              ws_max = 5,
+                              plot_title = 'PWL',
+                              spd_unit = 'm/s'
+  )
+
+  p
+
+  plotly::save_image(p, paste0('figs/lidar_periods/wind_rose/png/pwl_wind_rose_event_snowing', event, '.png'))
 }
+
+
 #
 # ggwindRose(ffr_met_wnd_event, 'wind_speed', 'wind_dir')
 #

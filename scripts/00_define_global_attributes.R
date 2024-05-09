@@ -23,15 +23,13 @@ parsivel <- readRDS('../../analysis/disdrometer/data/disdro_spectrum_processed_a
 ffr_met <- readRDS('../../analysis/met-data-processing/data/ffr_crhm_modelling_obs.rds')
 ffr_met_wnd <- readRDS('../../analysis/met-data-processing/data/ffr_t_rh_u_qaqc_fill.rds')
 pwl_sf <- readRDS('../../analysis/met-data-processing/data/pluvio-qaqc/pwl_pluvio_15_min_qaqc_undercatch_corr_ac.rds')
-pwl_wind <- readRDS('data/pwl_met_qaqc.rds') |>
+pwl_wind <- readRDS('../../analysis/met-data-processing/data/pwl_met_qaqc.rds') |>
   select(
     datetime,
     wind_speed = WindSpeed_S_WVT,
     wind_dir_true = WindDir_D1_WVT # keir confirmed junction box is pointed at 180 deg south (true) as per spec
     # sd_wind_dir = WindDir_SD1_WVT
-  )  |>
-  mutate(
-    sensor = 'pwl_wnd_rm_young_5.2m') |> select(-wind_dir_true)
+  )
 
 # theme_bw(base_size = 14)
 options(ggplot2.discrete.colour= palette.colors(palette = "R4"))

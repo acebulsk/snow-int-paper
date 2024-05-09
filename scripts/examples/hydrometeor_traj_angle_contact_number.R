@@ -26,7 +26,7 @@ traj_angle_deg <- function(wind_speed, velocity){
 }
 
 wind_speed <- seq(0,20, 0.1)
-hm_velocity <- 1
+hm_velocity <- seq(0.5, 1.5, by = 0.5)
 # coefs below are from lidar-processing/voxrs/scripts/03
 a <- 1.01824 # cal across all plots
 b <- 0.03984 # cal across all plots
@@ -35,13 +35,26 @@ j <- 0.36786 # cal on PWL SW
 
 # Plot wind vs trajectory angle
 
-traj_angle_deg_vect <- traj_angle_deg(wind_speed, hm_velocity)
+ta_u_hm_vel_df <- expand_grid(wind_speed, hm_velocity)
 
-ggplot(data.frame(wind_speed, traj_angle_deg_vect), aes(wind_speed, traj_angle_deg_vect)) +
+ta_u_hm_vel_df$traj_angle_deg_vect <-
+  traj_angle_deg(ta_u_hm_vel_df$wind_speed, ta_u_hm_vel_df$hm_velocity)
+
+ggplot(
+  ta_u_hm_vel_df |>
+    mutate(hm_velocity = as.character(hm_velocity)),
+  aes(
+    wind_speed,
+    traj_angle_deg_vect,
+    colour = hm_velocity,
+    group = hm_velocity
+  )
+) +
   geom_line() +
   ylab(traj_lab) +
-  xlab(expression(Wind~Speed~(m~s^{-1}))) +
-  ylim(c(-90, 0))
+  xlab('Horizontal Velocity (m/s)') +
+  ylim(c(-90, 0)) +
+  scale_color_viridis_d(name = 'Fall Velocity (m/s)')
 
 ggsave('figs/examples/wind_speed_vs_traj_angle.png', device = png,
       width = 3, height = 3)
