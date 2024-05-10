@@ -126,7 +126,7 @@ where $u$ is the horizontal wind speed at the top of the canopy which is a funct
 
 ## Study Site
 
-This study was conducted at forest plots surrounding the Powerline Station (PWL) and Forest Tower Station (FT) located within Fortress Mountain Research Basin (FMRB), AB ~ 51 ◦ N, 2100 m asl. (@fig-maps). The species of tree surrounding the PWL and FT stations include sparsely spaced coexisting subalpine fir (Abies lasiocarpa) and Engelmann spruce (Picea engelmannii), with a proportion of 70% and 30% respectively [@Langs2020]. In the early 1900s the majority of the FMRB vegetation burned during a large forest fire that affected most of the Kananaskis Valley. Following the fire, the forest surrounding the PWL and FT stations has naturally regenerated with minimal disturbance.
+This study was conducted from October 2021 to July 2023 at forest plots surrounding the Powerline Station (PWL) and Forest Tower Station (FT) located within Fortress Mountain Research Basin (FMRB), AB ~ 51 ◦ N, 2100 m asl. (@fig-maps). The average annual precipitation at PWL Station from 2013 to 2023 is 1045 mm, with the peak annual snow water equivalent (SWE) reaching 465 mm, typically occuring in late April. The species of tree surrounding the PWL and FT stations include sparsely spaced coexisting subalpine fir (Abies lasiocarpa) and Engelmann spruce (Picea engelmannii), with a proportion of 70% and 30% respectively [@Langs2020]. In the early 1900s the majority of the FMRB vegetation burned during a large forest fire that affected most of the Kananaskis Valley. Following the fire, the forest surrounding the PWL and FT stations has naturally regenerated with minimal disturbance.
 
 ## Meterological Measurements
 
@@ -316,17 +316,13 @@ A hemisphere plot was generated for both the FT and PWL forest plots using $\rho
 
 The predicted hydrometeor trajectory angle of the event, calculated using @eq-ta, was `r ft_ta`° using measured wind speed (4.5 m above ground) at FT Station and hydrometeor velocity of 0.9 m s^-1^ from PWL Station. The predicted hydrometeor trajectory angle is 25° to 45° more horizontal compared to the area of the hemisphere found to have the highest correlation between canopy contact number and I/P. This may be partially explained by three factors, 1) extrapolating wind speed measured within sparse canopy (FT Station) to regions characterised by higher stem density (PWL Station), where wind speed was likely lower leading to more vertical trajectory angles, 2) The conical shape of needleleaf trees within the PWL and FT forest plots, resulting in a larger surface area closer to the ground, and thus intercepted more snow closer to the tree an thus leading to higher correlation between I/P and contact number from zenith angles closer to vertical, 3) the theory proposed in @eq-ta assumes a linear trajectory, and does not consider non-linear patterns such as wind flow wrapping around tree elements, turbulent flow, or differences in wind speed with height. 
 
-::: {#fig-lidar-ip layout="[[1, 1], [1,1]]"}
+::: {#fig-lidar-ip layout="[[1,1], [1]]"}
 
-![PWL Canopy Height](../../analysis/lidar-processing/figs/maps/pwl_e_canopy_height_lidR.png){#fig-lidar-ch-pwl}
-
-![FT Canopy Height](../../analysis/lidar-processing/figs/maps/frs_s_canopy_height_lidR.png){#fig-lidar-ch-ft}
-
-![FT I/P](../../analysis/lidar-processing/figs/maps/pwl_e_23_072_23_073_v2.0.0_saip_normalised_resample_0.25.png){#fig-lidar-ip-pwle}
+![PWL I/P](../../analysis/lidar-processing/figs/maps/pwl_e_23_072_23_073_v2.0.0_saip_normalised_resample_0.25.png){#fig-lidar-ip-pwle}
 
 ![FT I/P](../../analysis/lidar-processing/figs/maps/fsr_s_23_072_23_073_v2.0.0_saip_normalised_resample_crop_0.25.png){#fig-lidar-ip-fsrs}
 
-Canopy height (top row) and interception efficiency calculated over a 24 hr snowfall event from March 13, 2023 to March 14, 2024 (bottom row) for the PWL forest plot (left column) and FT forest plot (right column) at a 25 cm resolution. The canopy height for PWL (a), FT (b). Interception efficiency for PWL (c) and FT (d). White areas for the bottom row are 25 cm grids that did not have any lidar ground returns or have been masked due to disturbance and thus, no throughfall measurement for the I/P calculation.
+Interception efficiency calculated over a 24 hr snowfall event from March 13, 2023 to March 14, 2024 for the PWL forest plot (a) and FT forest plot (b) at a 25 cm resolution. White areas for the bottom row are 25 cm grids that did not have any lidar ground returns or have been masked due to disturbance and thus, no throughfall measurement for the I/P calculation.
 
 :::
 
@@ -385,15 +381,14 @@ Empirical evidence to support the theory of increased in canopy contact area wit
 
 # Conclusions
 
--   Forest structure is the main factor governing the fraction of intercepted snowfall at a particular site, with meteorological conditions contributing less to variability related to initial interception.
 -   No influence of air temperature, relative humidity, hydrometeor velocity, hydrometeor diameter or canopy storage on interception efficiency was observed.
 -   Interception efficiency was shown to increase with wind speed and canopy snow load as a result of increasing the snow-leaf contact area ratio.
 -   High wind speeds were observed to decrease intercepted load due to increased snow unloading.
+-   Forest structure is the main factor governing the fraction of intercepted snowfall at a particular site, with meteorological conditions contributing less to variability.
 -   A new snow interception parameterization has been presented which calculates initial interception, before canopy snow ablation, as a function of snowfall rate and snow-leaf contact area ratio. 
 -   A second new parameterization is proposed which calculates snow-leaf contact area ratio as a function of nadir canopy coverage, wind speed and canopy snow load.
 -   Caution should be taken in using this updated interception routine with existing canopy snow ablation parameterizations as they were developed using earlier snow interception routines that also included ablative processes. 
 -   Future work will will involve a canopy snow ablation routine that is revised to work with this new snow interception routine.
-
 
 \pagebreak
 
