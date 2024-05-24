@@ -30,6 +30,18 @@ knitr::opts_chunk$set(echo = FALSE, message=FALSE, warning=FALSE, fig.align='cen
 # source('scripts/01_plot_snowfall_interception_w_tree.R')
 ```
 
+# TODO 
+
+I/P = Leaf contact area * a
+
+where:
+
+    a = an efficiency constant (potentially determined from linear regression from slide 19)
+    leaf contact area = fn[canopy coverage, trajectory angle]
+    trajectory angle = fn[wind speed (at what height?), fall velocity]
+    
+talk about rainfall interception work.. 
+
 # Introduction
 
 Forest cover extends over approximately half of North America’s snow-covered region, governing snowpack accumulation and ablation, thereby influencing the timing and magnitude of runoff generation from snowmelt.

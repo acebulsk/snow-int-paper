@@ -18,10 +18,19 @@ met_intercept <- readRDS('../../analysis/interception/data/storm_analysis/contin
     IP = q_int / q_sf) |>
   filter(IP < 1)
 
+calg_mag_declination <- 13.5 # deg + east in 2020 https://www.ngdc.noaa.gov/geomag/magfield-wist/
+
 parsivel <- readRDS('../../analysis/disdrometer/data/disdro_spectrum_processed_agg_15_min.RDS')
 
 ffr_met <- readRDS('../../analysis/met-data-processing/data/ffr_crhm_modelling_obs.rds')
 ffr_met_wnd <- readRDS('../../analysis/met-data-processing/data/ffr_t_rh_u_qaqc_fill.rds')
+# not enough ec wind obs over the event
+# ffr_ec <- readRDS('../../analysis/eddy-cov/data/high-tower/ec_high_tower_30_min_2021_2023_qc_rough.rds') |>
+#   mutate(ec_wind_dir = wind_dir_mag - calg_mag_declination) |>
+#   select(datetime, ec_wind_speed = wind_speed, ec_wind_dir)
+# ffr_ec <- readRDS('../../analysis/eddy-cov/data/low-tower/low_tower_15min_2021_2023_qc_rough.rds') |>
+#   mutate(ec_wind_dir = wind_dir_mag - calg_mag_declination) |>
+#   select(datetime, ec_wind_speed = wind_speed, ec_wind_dir)
 pwl_sf <- readRDS('../../analysis/met-data-processing/data/pluvio-qaqc/pwl_pluvio_15_min_qaqc_undercatch_corr_ac.rds')
 pwl_wind <- readRDS('../../analysis/met-data-processing/data/pwl_met_qaqc.rds') |>
   select(

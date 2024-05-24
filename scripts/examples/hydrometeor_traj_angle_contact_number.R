@@ -2,7 +2,7 @@ library(tidyverse)
 
 mcn_lab <- 'Mean Contact Number (-)'
 ws_lab <- 'Wind Speed (m/s)'
-traj_lab <- 'Hydrometeor Trajectory (°)'
+traj_lab <- 'Hydrometeor Trajectory Angle (°)'
 ip_lab <- 'Interception Efficiency (-)'
 
 # returns I/P given calibrated parameters
@@ -17,9 +17,9 @@ traj_angle_to_mcn <- function(traj_angle, a, b){
   return(mcn)
 }
 
-# returns angle in degrees from horizontal plane
+# returns angle in degrees from zenith
 traj_angle_deg <- function(wind_speed, velocity){
-  slope <- -velocity/wind_speed
+  slope <- wind_speed/velocity
   angle_deg <- atan(slope) * 180 / pi
 
   return(angle_deg)
@@ -53,11 +53,12 @@ ggplot(
   geom_line() +
   ylab(traj_lab) +
   xlab('Horizontal Velocity (m/s)') +
-  ylim(c(-90, 0)) +
-  scale_color_viridis_d(name = 'Fall Velocity (m/s)')
+  ylim(c(0, 90)) +
+  scale_color_viridis_d(name = 'Fall Velocity (m/s)') +
+  theme(legend.position = 'bottom')
 
 ggsave('figs/examples/wind_speed_vs_traj_angle.png', device = png,
-      width = 3, height = 3)
+      width = 4, height = 4)
 
 # Plot trajectory angle vs mean contact number
 
