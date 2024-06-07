@@ -114,15 +114,13 @@ $$ {#eq-canopy-mass-bal}
 
 where $q_{sf}$ (mm s^-1^) is the above canopy snowfall rate, $q_{tf}$ (mm s^-1^) is the throughfall rate, $q_{wind}^{veg}$ (mm s^-1^) is the wind transport rate in our out of the control volume (typically assumed to be negligible in the literature), $q_{sub}^{veg}$ (mm s^-1^) is the intercepted snow sublimation rate, $q_{unld}$ (mm s^-1^) is the canopy snow unloading rate and $q_{drip}$ (mm s^-1^) is the canopy snow drip rate due to canopy snowmelt. $q_{wind}^{veg}$ and $q_{sub}^{veg}$ may be a positive or negative flux. Where all of the above rates are a function of snow load ($L$), which is how much snow is present in the canopy.
 
-The trajectory angle, $\theta_h$ of a hydrometeor as the departure in degrees (°) from a horizontal plane (i.e., -90° for vertical snowfall), may be calculated as:
+The trajectory angle, $\theta_h$ of a hydrometeor as the departure in degrees (°) from a vertical plane (i.e., 0° for vertical snowfall), may be calculated as:
 
 $$
-\theta_h = \arctan \left(\frac{-v_h(D_h)}{x_h(u_z)}\right)*\frac{180}{\pi}
+\theta_h = \arctan \left(\frac{x_h(u_z)}{v_h(D_h)}\right)*\frac{180}{\pi}
 $${#eq-ta}
 
-![](figs/examples/hm_ta_triangle.png){width="300" fig-align="center"}
-
-where $v_h$ is the terminal fall velocity of the hydrometeor (m s^-1^), which is a function of the hydrometeor diameter, $D_h$, $x_h$ is the horizontal change in the hydrometeor (m s^-1^) which is a function within canopy wind speed, $u_z$ at height above ground, $z$. 
+where $v_h$ is the terminal fall velocity of the hydrometeor (m s^-1^), which is a function of the hydrometeor diameter, $D_h$ and $x_h$ is the horizontal change in the hydrometeor (m s^-1^) which is a function within canopy wind speed, $u_z$ at height above ground, $z$. 
 
 Above the top of the canopy, wind flow is approximately logarithmic with height. @Cionco1965 show that, $u_z$ may be approximated using the exponential formula:
 
@@ -350,36 +348,39 @@ Spearman's Correlation Coefficient between rasters of interception efficiency an
 
 ## Combined Effects of Meteorology and Forest Structure
 
-
 ```{r, include=FALSE}
-hemi_stats <- readRDS('../../analysis/lidar-processing/data/hemi_stats/aggregate_hemi_stats_select_cc_wind_for_manuscript.rds')
+library(dplyr)
+hemi_stats <- readRDS('../../analysis/lidar-processing/data/hemi_stats/full_voxrs_not_filtered_to_swe_traj_angle_w_lca_23_072.rds') |> 
+  mutate(find_wind = abs(1-wind_speed))
 
-sparse_cc <- hemi_stats$cc_nadir[1]
-dense_cc <- hemi_stats$cc_nadir[6]
-wind_2ms <- hemi_stats$wind_speed[3] # not exact bc of join 
-traj_2_ms <- hemi_stats$traj_angle[hemi_stats$wind_speed == wind_2ms] |> unique()
-cc_2_ms_sparse <- hemi_stats$cc[hemi_stats$wind_speed == wind_2ms &
-                                  hemi_stats$cc_nadir == sparse_cc] |> round(1)
-cc_2_ms_dense <- hemi_stats$cc[hemi_stats$wind_speed == wind_2ms &
-                                  hemi_stats$cc_nadir == dense_cc] |> round(1)
+select_wind_speed <- 1
+pwl <- hemi_stats |> filter(plot_name == 'PWL')
+ft <- hemi_stats |> filter(plot_name == 'FT')
+pwl_inc <- pwl$lca_inc[which.min(abs(select_wind_speed-pwl$wind_speed))]
+ft_inc <- ft$lca_inc[which.min(abs(select_wind_speed-ft$wind_speed))]
+ta <- pwl$traj_angle[which.min(abs(select_wind_speed-pwl$wind_speed))]
 
-sparse_inc <- cc_2_ms_sparse - sparse_cc
-dense_inc <- cc_2_ms_dense - dense_cc
+pwl_nadir <- pwl$lca_nadir |> unique()
+ft_nadir <- ft$lca_nadir |> unique()
+pwl_perc_inc <- pwl_inc / pwl_nadir * 100
+ft_perc_inc <- ft_inc / ft_nadir * 100
 ```
 
-The mean number of canopy contacts calculated for each forest plot for different hydrometeor trajectory angles [-90, -85, ..., 0] averaged across each azimuth angle [0, 1, ..., 359] and across all plot grid cells is shown in @fig-ht-cn to increase exponentially with increasing horizontal hydrometeor trajectory angle (estimated as a function of wind speed using @eq-ta) and linearly with wind speed. Increasing the mid-canopy wind speed from 0 to 2 m s^-1^ changed the hydrometeor trajectory from -90° (vertical) to `r traj_2_ms`°. This resulted in a corresponding increase in the apparent canopy cover measured using voxel ray sampling from `r sparse_cc` to `r cc_2_ms_sparse` (increase of `r sparse_inc`) for the sparse forest plot and from `r dense_cc` to `r cc_2_ms_dense` (increase of `r dense_inc`) for the dense forest plot.
+The observed VoxRS leaf contact area averages across azimuth angles [0, 1, ..., 359] for trajectory angles [0, 1, ..., 90] is shown in @fig-lca-ht-ws (solid lines). With a vertical hydrometeor trajectory (i.e., trajectory angle = 0°), the leaf contact area is equal to the canopy coverage of the forest plot, `r `pwl_nadir |> round(2)` and `r ft_nadir |> round(2)` for PWL and FT respectively. Increasing the hydrometeor trajectory angle results in a substantial rise in the observed leaf contact area. For example, with a wind speed of `r select_wind_speed` m s^-1^ which leads to a trajectory angle of `r ta |> round(0)`° using @eq-ta, the leaf contact area increased by a fraction of `r pwl_inc |> round(2)` and `r ft_inc |> round(2)` for the PWL and FT forest plots respectively in @fig-lca-ht-ws (right panel). This is a percent increase in the plot leaf contact area from nadir of `r pwl_perc_inc |> round(0)`% and `r ft_perc_inc |> round(0)` for PWL and FT respectively. 
 
-The average canopy coverage of each forest plot measured from vertical (nadir) is also shown to be important determining how the apparent canopy structure, depending on trajectory angle changes across various trajectory angles. For example, the apparent canopy coverage of forest plot PWL_SW, which has the highest canopy coverage of 0.4 (-90°, nadir), shown in @fig-ht-cc increases at a faster rate with wind speed and reaches near complete apparent canopy coverage at lower wind speeds compared to sparser canopies. All forest plots approach completely closed canopies at horizontal trajectories (0°). However, this relationship does not consider the turbulent windflow patterns that exist within and above the canopy. 
+A non-linear least squares regression was fit to the VoxRS leaf contact area observations and is also shown in @fig-lca-ht-ws (dashed lines). This provides improved prediction of the change in leaf contact area from nadir compared to an existing relationship described by @Hedstrom1998a also shown in @fig-lca-ht-ws (dotted lines). Maybe need to show nls relationship... 
 
-::: {#fig-ta-ws-cc layout-nrow="2"}
+$$
+LCA^* = LCA + \left(
+\frac{\text{Asym}}{1 + \exp\left(\frac{\text{xmid} - x}{\text{scal}}\right)} - \frac{\text{Asym}}{1 + \exp\left(\frac{\text{xmid}}{\text{scal}}\right)}
+\right)
+$$
 
-![](../../analysis/lidar-processing/figs/voxrs/scatter/traj_angle_and_wind_vs_contact_number_phiby_2_thetaby_5.png){#fig-ht-cn}
+@fig-lca-ht-ws shows the increase in leaf contact area for the denser canopy PWL plateaus at more vertical trajectory angles as the leaf contact area approaches complete coverage compared to the sparser canopy of FT which continues to increase until leaf contact area approaches 1 at near horizontal trajectories. A non-linear least squares regression was fit to the FT and PWL observations using a logistic relationship and provides a good fit for the average conditions between each plot. Existing theory proposed by @Hedstrom1998a (dotted lines in @fig-lca-ht-ws) failed to represent the observations collected from this study site.
 
-![](../../analysis/lidar-processing/figs/voxrs/scatter/traj_angle_and_wind_vs_canopy_coverage_phiby_2_thetaby_5.png){#fig-ht-cc}
+<!-- This figure is generated under the lidar-processing project using scripts 11-13. This generates 100's of GB of data on RAM and therefore scripts 11 and 12 are run on copernicus and the resulting df is sent over to local to run script 13. Can run this locally if we use a larger step across phi and theta angles.  -->
 
-Scatter plots showing the association of (a) hydrometeor trajectory angle and wind speed with mean contact number and (b) hydrometeor trajectory angle and wind speed with apparent canopy coverage calculated as a function of mean contact number. The dots represent the mean mean contact number (a) OR mean canopy coverage (b) across all azimuth angles of the hemisphere [0, 1, ..., 359] for a each zenith angle [0, 1, ..., 90] at each forest plot. The colour of the dot represents the mean canopy coverage of each forest plot from nadir. Trajectory angle was estimated as a function of wind speed.
-
-:::
+![Plots showing the relationship between hydrometeor trajectory angle (left) and mid canopy wind speed (right) with leaf contact area. Hydrometeor Trajectory Angle is measured as degrees from zenith. Mid canopy wind speed is calculated as a function of hydrometeor trajectory angle by rearanging @eq-ta. The solid lines (obs) represent the observed leaf contact area from VoxRS, the dashed lines (mod) represent predictions from a non-linear least squares regression on the VoxRS observed data, and the dotted lines (HP98) represent the predictions from Equation 10 in @Hedstrom1998a. The line color represents the forest plot, FT (black), PWL (red) and the non-linear least squares regression fit to both plots in (green).](../../analysis/lidar-processing/figs/voxrs/scatter/WITH_TREEWELLS_traj_angle_and_wind_phiby_1_thetaby_2_traj_angle_wind_speed_vs_lca_w_mods_w_hp98_mean_sd_23_072.png){#fig-lca-ht-ws}
 
 # Discussion
 
@@ -394,9 +395,10 @@ Empirical evidence to support the theory of increased in canopy contact area wit
 # Conclusions
 
 -   No influence of air temperature, relative humidity, hydrometeor velocity, hydrometeor diameter or canopy storage on interception efficiency was observed.
--   Interception efficiency was shown to increase with wind speed and canopy snow load as a result of increasing the snow-leaf contact area ratio.
--   High wind speeds were observed to decrease intercepted load due to increased snow unloading.
--   Forest structure is the main factor governing the fraction of intercepted snowfall at a particular site, with meteorological conditions contributing less to variability.
+-   Automated point measurements showed interception efficiency increased with wind speed and canopy snow load as a result of increasing the snow-leaf contact area ratio.
+-   At the forest plot scale, UAV lidar measurements showed forest structure is the main factor governing the fraction of intercepted snowfall at a particular site, with meteorological conditions contributing less to variability.
+-   Across a range of wind speeds, leaf contact area increased substantially with increasing horizontal trajectory angle but did not increase with snow load. An existing theoretical relationship failed to represent the increase in leaf contact area with wind speed at this site.
+-   Snow accumulation and canopy structure metrics from a wind-driven snowfall event revealed canopy structure metrics adjusted for trajectory angle provided a better predictor of interception efficiency compared to nadir canopy coverage.
 -   A new snow interception parameterization has been presented which calculates initial interception, before canopy snow ablation, as a function of snowfall rate and snow-leaf contact area ratio. 
 -   A second new parameterization is proposed which calculates snow-leaf contact area ratio as a function of nadir canopy coverage, wind speed and canopy snow load.
 -   Caution should be taken in using this updated interception routine with existing canopy snow ablation parameterizations as they were developed using earlier snow interception routines that also included ablative processes. 
