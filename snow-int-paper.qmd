@@ -110,7 +110,7 @@ The change in canopy SWE storage, $L$ (mm), may be represented as:
 $$
 \frac{dL}{dt} = 
 q_{sf} - q_{tf}(L) - q_{unld}(L) - q_{drip}(L) - q_{wind}^{veg}(L) - q_{sub}^{veg}(L)
-$$ {#eq-canopy-mass-bal}
+$${#eq-canopy-mass-bal}
 
 where $q_{sf}$ (mm s^-1^) is the above canopy snowfall rate, $q_{tf}$ (mm s^-1^) is the throughfall rate, $q_{wind}^{veg}$ (mm s^-1^) is the wind transport rate in our out of the control volume (typically assumed to be negligible in the literature), $q_{sub}^{veg}$ (mm s^-1^) is the intercepted snow sublimation rate, $q_{unld}$ (mm s^-1^) is the canopy snow unloading rate and $q_{drip}$ (mm s^-1^) is the canopy snow drip rate due to canopy snowmelt. $q_{wind}^{veg}$ and $q_{sub}^{veg}$ may be a positive or negative flux. Where all of the above rates are a function of snow load ($L$), which is how much snow is present in the canopy.
 
@@ -246,9 +246,9 @@ Subcanopy lysimeter (a), weighed tree lysimeter loaded with snow (b) and weighed
 
 ## UAV-Lidar Canopy Metrics
 
-UAV-lidar point cloud and trajectory data collected on MArch 13 and 14, 2024 were utilized to characterise the canopy structure of the study site. To facilitate this, the voxel ray sampling (VoxRS, https://github.com/jstaines/VoxRS) of lidar methodology outlined by @Staines2023 was used. This method aims to provide canopy metrics in a way that is insensitive to nonuniform lidar sampling arising from beam occlusion in vegetation (reduced points near the ground). The canopy products produced from VoxRS here include: canopy contact number ($X_b$), the mean theoretical number of canopy contacts for a given ray, radiation transmittance ($\tau$) and canopy coverage $1-\tau$ all with units (-). See supporting information in @Staines2023 for details on how these metrics are computed.
+UAV-lidar point cloud and trajectory data collected on MArch 13 and 14, 2024 were utilized to characterise the canopy structure of the study site. To facilitate this, the voxel ray sampling (VoxRS, https://github.com/jstaines/VoxRS) of lidar methodology outlined by @Staines2023 was used. This method aims to provide canopy metrics in a way that is insensitive to nonuniform lidar sampling arising from beam occlusion in vegetation (reduced points near the ground). The canopy products produced from VoxRS here include: canopy contact number ($X_b$), the mean theoretical number of canopy contacts for a given ray, radiation transmittance ($\tau$) and leaf contact area $1-\tau, LCA$ all with units (-). See supporting information in @Staines2023 for details on how these metrics are computed.
 
-To determine how forest structure was associated with interception efficiency at different azimuth and zenith angles over the March 13-14 snowfall event, each portion of the hemisphere at each grid location was considered. The relationship between I/P and canopy contact number was found to be non-linear and thus the Spearman's Correlation Coefficient, $\rho_s$ was calculated to quantify the association between a single raster of I/P and 32'760 rasters containing the canopy contact number hemisphere for each portion of the hemisphere (azimuth [0, 1, ..., 359], zenith angle [0, 1, ..., 90]). 
+To determine how forest structure was associated with interception efficiency at different azimuth and zenith angles over the March 13-14 snowfall event, each portion of the hemisphere at each grid location was considered. The relationship between I/P and canopy contact number was found to be non-linear and thus the Spearman's Correlation Coefficient, $\rho_p$ was calculated to quantify the association between a single raster of I/P and 32'760 rasters containing the canopy contact number hemisphere for each portion of the hemisphere (azimuth [0, 1, ..., 359], zenith angle [0, 1, ..., 90]). 
 
 # Results
 
@@ -279,8 +279,6 @@ Two plots showing the relationship between snowfall and interception. Plot (a) s
 ## The influence of forest structure on snow interception
 
 ```{r, include=FALSE}
-source('scripts/examples/hydrometeor_traj_angle_contact_number.R')
-
 # MET
 snowing_met <- readRDS('data/event_met/lidar_events_met_avgs_snowing.rds') |> 
   filter(event_id == '2023-03-14')
@@ -296,9 +294,9 @@ wd <- snowing_met |>
   round()
 hm <- 0.9 # mean measured event parsivel
 ft_ta <- traj_angle_deg(ft_ws_avg, hm) |> 
-  round(2)
+  round(0)
 pwl_ta <- traj_angle_deg(pwl_ws_avg, hm) |> 
-  round(2)
+  round(0)
 
 # CANOPY 
 ft_mean_ht <- readRDS('../../analysis/lidar-processing/data/lidR_canopy_metrics/frs_s_mean_tree_height.rds') |> 
@@ -308,23 +306,38 @@ pwl_e_mean_ht <- readRDS('../../analysis/lidar-processing/data/lidR_canopy_metri
   round(2)
 
 # HEMI STATS
-pwl_2_5_th_percentile <- readRDS('../../analysis/lidar-processing/data/hemi_stats/hemi_avg_theta_phi_for_rho_s_upper_2_5th_percentile_23_072_vox_len_0.25m_sa_gridgen_v2.0.0_sa_PWL_E.rds')
+vox_config_id <- "23_072_vox_len_0.25m_sa_gridgen_v2.0.0_sa"
+pwl_hemi_stat <-
+  readRDS(
+  paste0(
+    '../../analysis/lidar-processing/data/hemi_stats/hemi_raw_theta_phi_for_rho_s_upper_2_5th_percentile_',
+    vox_config_id,
+    "_",
+    'PWL_E',
+    '.rds'
+  ))
 
-ft_2_5_th_percentile <- readRDS('../../analysis/lidar-processing/data/hemi_stats/hemi_avg_theta_phi_for_rho_s_upper_2_5th_percentile_23_072_vox_len_0.25m_sa_gridgen_v2.0.0_sa_FSR_S.rds')
+ft_hemi_stat <-
+  readRDS(
+  paste0(
+    '../../analysis/lidar-processing/data/hemi_stats/hemi_raw_theta_phi_for_rho_s_upper_2_5th_percentile_',
+    vox_config_id,
+    "_",
+    'FSR_S',
+    '.rds'
+  ))
 
+pwl_phi_to <- max(pwl_hemi_stat$phi_d) |> round()
+ft_phi_to <- max(ft_hemi_stat$phi_d) |> round()
+pwl_theta_to <- max(pwl_hemi_stat$theta_d) |> round()
+ft_theta_to <- max(ft_hemi_stat$theta_d) |> round()
+pwl_theta_from <- min(pwl_hemi_stat$theta_d) |> round()
+ft_theta_from <- min(ft_hemi_stat$theta_d) |> round()
 ```
 
-Snow accumulation was measured over the UAV-lidar flight extent (@fig-map-site) after a 24 hour snowfall event with steady southerly winds. The meteorology from this snowfall event, totalling 28.4 mm between lidar flights on March 13th and 14th, is shown in @fig-lidar-met. The event was characterised by a transition from low rates of snowfall and air temperature near 0°C to higher rates of snowfall late afternoon on March 13 and coincided with air temperatures around -2.5 °C. Wind speed observed while it was snowing ($q_{sf}$ > 0.1 m s^-1^) was predominately lower at FT Station compared to PWL Station with event averages of `r ft_ws_avg` and `r pwl_ws_avg` respectively. Wind direction observed during snowfall was consistently from the south at both FT Station and PWL Station with an average of `r wd`°. This snowfall event resulted in a range of throughfall depths measured across the study site, shown by the frequency distribution of throughfall in @fig-lidar-hist-tf. 
+Snow accumulation was measured over a 24 hour snowfall event with steady southerly winds over the UAV-lidar flight transect shown in @fig-map-site. The snowfall event totalled 28.4 mm and was characterised by a transition from low rates of snowfall and air temperature near 0°C to higher rates of snowfall late afternoon on March 13 and coincided with air temperatures around -2.5 °C. The average wind speed of `r ft_ws_avg` m/s and direction of 188° was observed 4.2 m above the ground.
 
-![Meteorological conditions over the duration of the March 13, 2023 snowfall event observed at PWL Station (blue) and FT Station (red).](figs/lidar_periods/met_time_series/met_time_series_2023-03-14.png){#fig-lidar-met}
-
-![Frequency distribution of lidar measured throughfall over the 24 hour snowfall event between March 13 and 14th, 2023.](../../analysis/lidar-processing/figs/lidar_snow_depth_analysis/pre_post_figs/23_072_23_073_histogram_throughfall.png){#fig-lidar-hist-tf}
-
-The spatial distribution in I/P across the study site, calculated using @eq-ip and $\Delta SWE_{tf}$ from UAV-lidar measurements and $\Delta sf$ from the Pluvio snowfall gauge is shown in @fig-lidar-ip. Greater I/P is observed on the north (lee) side of individual trees which is interpreted to be a result of non vertical hydrometeor trajectories from the steady southerly winds observed over this event. This effect is more apparent within the PWL forest plot (@fig-lidar-ip-pwle), compared to the FT forest plot (@fig-lidar-ip-fsrs). While average wind speed over the event was observed to be higher at the PWL Station compared to the FT Station, the position of the anemometer in a forest clearing and slightly higher off the ground likely contributed to the higher wind speed. Wind speeds within the PWL forest plot canopy are expected to be lower compared to the FT forest plot due to the higher canopy coverage and taller canopy height. The height of the canopy measured using UAV-lidar, is shown in @fig-lidar-ch-pwl and fig-lidar-ch-ft for the PWL and FT forest plots respectively. The average height of the canopy surrounding the plot to the east of the PWL station is `r pwl_e_mean_ht` and surrounding the forest plot around the FT Station is `r ft_mean_ht`. Based on the large difference in forest structure it is interpreted that the differences in I/P between the two plots are primarily a result of differences in forest structure rather than localised wind flow patterns.
-
-A hemisphere plot was generated for both the FT and PWL forest plots using $\rho_s$ value between $X_b$ and I/P from each azimuth and zenith angle combination and is shown in @fig-hemi-ip-cc. A zone of high correlation, above the 97.5th percentile was found to have an average azimuth of `r pwl_2_5_th_percentile$theta |> round()`° and `r ft_2_5_th_percentile$theta |> round()`° and zenith angle of `r pwl_2_5_th_percentile$phi |> round()`° and `r ft_2_5_th_percentile$phi |> round()`° for PWL and FT forest plots respectively. The high $\rho_s$ around similar zenith angles between PWL and FT also provide evidence that wind speeds were similar between the two plots resulting in similar hydrometeor trajectory angles. However, the large difference in I/P extending beyond individual trees between the PWL and FT plots is attributed to differences if canopy height [@fig-lidar-ip].
-
-The predicted hydrometeor trajectory angle of the event, calculated using @eq-ta, was `r ft_ta`° using measured wind speed (4.5 m above ground) at FT Station and hydrometeor velocity of 0.9 m s^-1^ from PWL Station. The predicted hydrometeor trajectory angle is 25° to 45° more horizontal compared to the area of the hemisphere found to have the highest correlation between canopy contact number and I/P. This may be partially explained by three factors, 1) extrapolating wind speed measured within sparse canopy (FT Station) to regions characterised by higher stem density (PWL Station), where wind speed was likely lower leading to more vertical trajectory angles, 2) The conical shape of needleleaf trees within the PWL and FT forest plots, resulting in a larger surface area closer to the ground, and thus intercepted more snow closer to the tree an thus leading to higher correlation between I/P and contact number from zenith angles closer to vertical, 3) the theory proposed in @eq-ta assumes a linear trajectory, and does not consider non-linear patterns such as wind flow wrapping around tree elements, turbulent flow, or differences in wind speed with height. 
+The spatial distribution in I/P across the study site, calculated using @eq-ip and $\Delta SWE_{tf}$ from UAV-lidar measurements and $\Delta sf$ from the Pluvio snowfall gauge is shown in @fig-lidar-ip. Greater I/P is observed on the north (lee) side of individual trees which is interpreted to be a result of non vertical hydrometeor trajectories from the steady southerly winds observed over this event. This effect is more apparent within the PWL forest plot (@fig-lidar-ip-pwle), compared to the FT forest plot (@fig-lidar-ip-fsrs). The average height of the canopy surrounding the plot to the east of the PWL station is `r pwl_e_mean_ht` and surrounding the forest plot around the FT Station is `r ft_mean_ht`. Based on the large difference in forest structure it is interpreted that the differences in I/P between the two plots are primarily a result of differences in forest structure rather than localised wind flow patterns.
 
 ::: {#fig-lidar-ip layout="[[1,1], [1]]"}
 
@@ -336,15 +349,23 @@ Interception efficiency calculated over a 24 hr snowfall event from March 13, 20
 
 :::
 
+A hemisphere plot was generated for both the FT and PWL forest plots shown in @fig-hemi-ip-cc, illustrates the pearson correlation coefficient ($\rho_p$) between 25 cm resolution rasters of interception efficiency and leaf contact area for each grid cell across the study site for each portion of the hemisphere (azimuth [0°, 1°, ..., 359°], zenith angle [0°, 1°, ..., 90°]). A zone of high correlation, corresponding to the upper 97.5th percentile of $\rho_p$, was found between zenith angles of 0° – `r pwl_phi_to`° and azimuth angles of `r pwl_theta_from`° – `r pwl_theta_to`° for the PWL forest plot. For the FT forest plot, a similar high correlation zone was observed between ranges of zenith angles of 0° – `r ft_phi_to`° and azimuth angles of `r ft_theta_from`° – `r ft_theta_to`°. The high $\rho_p$ found amung non vertical zenith angles of up to 30° for both PWL and FT provide evidence of how the hydrometeor trajectory angle may have shifted over the snowfall event. Since UAV-lidar measurements of throughfall were limited near the trunks of individual trees due to beam occlusion of overlying vegetation. $\rho_p$ could only be computed where interception efficiency values were available as shown in @fig-lidar-ip and thus relatively low $\rho_p$ values are shown for near nadir zenith angles in @fig-hemi-ip-cc.
+
+The predicted hydrometeor trajectory angle of the event, calculated using @eq-ta, was `r ft_ta`°, considering an event measured wind speed of `r ft_ws_avg` at FT Station and hydrometeor velocity of 0.9 m s^-1^ from PWL Station. This predicted hydrometeor trajectory angle is 25° more horizontal compared to the area of the hemipshere observed to have high correlation between leaf contact area and interception efficiency in @fig-hemi-ip-cc. This may be partially explained by three factors, 1) the height of the wind speed measurement at 4.2 m may be higher than the dominant wind flow important for controlling hydrometeor trajectory and subseqent interception (i.e., the conical shape of needleleaf trees have a larger surface area closer to the ground), 2) extrapolating wind speed measured within sparse canopy (FT Station) to regions characterised by higher stem density across the study site, where wind speed may have been lower leading to more vertical trajectory angles, and 3) the theory proposed in @eq-ta assumes a linear trajectory, and does not consider non-linear patterns such as wind flow wrapping around tree elements, turbulent flow, or differences in wind speed with height. 
+
 ::: {#fig-hemi-ip-cc layout-ncol="2"}
 
-![PWL](../../analysis/lidar-processing/figs/voxrs/hemis/cor_cn_ip/full_hemi_rho_s_cor_mcn_ip_23_072_vox_len_0.25m_sa_gridgen_v2.0.0_sa_PWL_E.png){#fig-hemi-cc-ip-pwle}
+![PWL](../../analysis/lidar-processing/figs/voxrs/hemis/full_hemi_rho_p_cor_lca_ip_23_072_vox_len_0.25m_sa_gridgen_v2.0.0_sa_PWL_E.png){#fig-hemi-cc-ip-pwle}
 
-![FT](../../analysis/lidar-processing/figs/voxrs/hemis/cor_cn_ip/full_hemi_rho_s_cor_mcn_ip_23_072_vox_len_0.25m_sa_gridgen_v2.0.0_sa_FSR_S.png){#fig-hemi-cc-ip-fsrs}
+![FT](../../analysis/lidar-processing/figs/voxrs/hemis/full_hemi_rho_p_cor_lca_ip_23_072_vox_len_0.25m_sa_gridgen_v2.0.0_sa_PWL_E.png){#fig-hemi-cc-ip-fsrs}
 
-Spearman's Correlation Coefficient between rasters of interception efficiency and canopy contact number (25 cm resolution) across the study site for different portions of the hemisphere (azimuth [0, 1, ..., 359], zenith angle [0, 1, ..., 90]) for the forest plot to the east of PWL Station (a) and for the forest plot surrounding FT Station (b).
+The Pearson Correlation Coefficient between rasters (25 cm resolution) of interception efficiency and leaf contact area for each grid cell across the study site for each portion of the hemisphere (azimuth [0°, 1°, ..., 359°], zenith angle [0°, 1°, ..., 90°]) for the PWL (a) and FT (b) forest plots.
 
 :::
+
+The relationship between the average leaf contact area taken for zenith angles (0° – 30°) and azimuth angles (170° – 220°) corresponding to the zone of high correlation in @fig-hemi-ip-cc and interception efficiency measued across FT and PWL is shown in @fig-lca-vs-ip. The association between leaf contact area and interception efficiency does not follow a 1:1 line as snow flakes may float through gaps in branch and bounce off the canopy elements. 
+
+![Scatter plots showing the relationship between leaf contact area and interception efficiency.](../../analysis/lidar-processing/figs/voxrs/scatter/pwl_ft_lca_vs_ip_phi_0_31_theta_171_223_resample_5m.png)
 
 ## Combined Effects of Meteorology and Forest Structure
 
@@ -364,23 +385,49 @@ pwl_nadir <- pwl$lca_nadir |> unique()
 ft_nadir <- ft$lca_nadir |> unique()
 pwl_perc_inc <- pwl_inc / pwl_nadir * 100
 ft_perc_inc <- ft_inc / ft_nadir * 100
+
+nls_coefs <- readRDS('data/models/ta_vs_lca_nls_coefs.rds')
 ```
 
-The observed VoxRS leaf contact area averages across azimuth angles [0, 1, ..., 359] for trajectory angles [0, 1, ..., 90] is shown in @fig-lca-ht-ws (solid lines). With a vertical hydrometeor trajectory (i.e., trajectory angle = 0°), the leaf contact area is equal to the canopy coverage of the forest plot, `r `pwl_nadir |> round(2)` and `r ft_nadir |> round(2)` for PWL and FT respectively. Increasing the hydrometeor trajectory angle results in a substantial rise in the observed leaf contact area. For example, with a wind speed of `r select_wind_speed` m s^-1^ which leads to a trajectory angle of `r ta |> round(0)`° using @eq-ta, the leaf contact area increased by a fraction of `r pwl_inc |> round(2)` and `r ft_inc |> round(2)` for the PWL and FT forest plots respectively in @fig-lca-ht-ws (right panel). This is a percent increase in the plot leaf contact area from nadir of `r pwl_perc_inc |> round(0)`% and `r ft_perc_inc |> round(0)` for PWL and FT respectively. 
+The observed increase in leaf contact area for trajectory angles [0°, 1°, ..., 90°] and wind speeds [0 to 10 (m/s)] is shown in @fig-finclca-ht-ws. Increasing the hydrometeor trajectory angle results in a substantial rise in the observed leaf contact area. For example, with a wind speed of `r select_wind_speed` m s^-1^ which leads to a trajectory angle of `r ta |> round(0)`° using @eq-ta, the leaf contact area increased by a fraction of `r pwl_inc |> round(2)` and `r ft_inc |> round(2)` for the PWL and FT forest plots respectively in @fig-lca-ht-ws (right panel). This is a percent increase in the plot leaf contact area from nadir of `r pwl_perc_inc |> round(0)`% and `r ft_perc_inc |> round(0)` for PWL and FT respectively. 
 
-A non-linear least squares regression was fit to the VoxRS leaf contact area observations and is also shown in @fig-lca-ht-ws (dashed lines). This provides improved prediction of the change in leaf contact area from nadir compared to an existing relationship described by @Hedstrom1998a also shown in @fig-lca-ht-ws (dotted lines). Maybe need to show nls relationship... 
+<!-- These figures are generated under the lidar-processing project using scripts 11-13. This generates 100's of GB of data on RAM and therefore scripts 11 and 12 are run on copernicus and the resulting df is sent over to local to run script 13. Can run this locally if we use a larger step across phi and theta angles.  -->
+
+![Plots showing the increase in measured leaf contact area with hydrometeor trajectory angle (left) and mid canopy wind speed (right). Hydrometeor Trajectory Angle is measured as degrees from zenith. Mid canopy wind speed is calculated as a function of hydrometeor trajectory angle by rearanging @eq-ta. The solid lines (obs) represent the observed leaf contact area from VoxRS, the dashed lines (mod) represent predictions from a non-linear least squares regression (nls, blue) and ordinary least squares regression (lm, green) on the VoxRS observed data, and the dotted lines (HP98) represent the predictions from Equation 10 in @Hedstrom1998a. The line color represents the forest plot, FT (black), PWL (red) and the non-linear least squares regression fit to both plots in (green).](../../analysis/lidar-processing/figs/voxrs/scatter/WITH_TREEWELLS_traj_angle_and_wind_phiby_1_thetaby_2_traj_angle_wind_speed_vs_fractional_inc_lca_snow_off_w_mods_hp98_mean_sd_23_072.png){#fig-finclca-ht-ws}
+
+The rate of change in the increase in leaf contact area with increasing trajectory angle, shown in @fig-finclca-ht-ws, is similar for both forest plots FT and PWL until trajectory angles reach approximately 60°. Beyond 60°, the PWL rate of increase slows as it approaches one, while the FT plot initially shows a higher rate of increase before a declining. A non-linear least squares regression using a logistic function and a ordinary least squares regression using a linear function were fit to the FT and PWL observations and are shown in @fig-finclca-ht-ws. The @Hedstrom1998a increase in leaf contact area with trajectory shown in @fig-finclca-ht-ws fails to represent the VoxRS observations.  The logistic function used to model the observations is:  
 
 $$
-LCA^* = LCA + \left(
-\frac{\text{Asym}}{1 + \exp\left(\frac{\text{xmid} - x}{\text{scal}}\right)} - \frac{\text{Asym}}{1 + \exp\left(\frac{\text{xmid}}{\text{scal}}\right)}
+LCA_{inc} = \left(
+\frac{\theta_{max}}{1 + e ^ {\left(\frac{\theta_0 - \theta_h}{\text{k}}\right)}} - \frac{\theta_{max}}{1 + e ^ {\left(\frac{\theta_0}{\text{k}}\right)}}
 \right)
+$${#eq-lca-inc}
+
+where, $LCA_{inc}$ is the increase in leaf contact area, $LCA_{max}$ is the maximum value for $\theta_0$ is the x value of the sigmoid midpoint and $k$ is the logistic growth rate or steepness of the curve. Resulting coefficients for $LCA_{max}$, $theta_0$ and $k$ derived across the PWL and FT forest plots were `r nls_coefs['Asym'] |> as.numeric() |> round (3)`, `r nls_coefs['xmid'] |> as.numeric() |> round (3)` and `r nls_coefs['scal'] |> as.numeric() |> round (3)` respectively.
+
 $$
+LCA^* = LCA + LCA_{inc}
+$${#eq-lca-ac}
 
-@fig-lca-ht-ws shows the increase in leaf contact area for the denser canopy PWL plateaus at more vertical trajectory angles as the leaf contact area approaches complete coverage compared to the sparser canopy of FT which continues to increase until leaf contact area approaches 1 at near horizontal trajectories. A non-linear least squares regression was fit to the FT and PWL observations using a logistic relationship and provides a good fit for the average conditions between each plot. Existing theory proposed by @Hedstrom1998a (dotted lines in @fig-lca-ht-ws) failed to represent the observations collected from this study site.
+where, $LCA^*$ is the leaf contact area adjusted for the increase in leaf contacts due to horizontal trajectory angle and $LCA$ is the leaf contact area measured from nadir.
 
-<!-- This figure is generated under the lidar-processing project using scripts 11-13. This generates 100's of GB of data on RAM and therefore scripts 11 and 12 are run on copernicus and the resulting df is sent over to local to run script 13. Can run this locally if we use a larger step across phi and theta angles.  -->
+Simulated leaf contact area using @eq-lca-ac is shown in @fig-lca-ht-ws for trajectory angles [0°, 1°, ..., 90°] and wind speeds [0 to 10 (m/s)] and is shown to align well with the VoxRS observations for trajectory angles below 60°. Model error statistics shown in @tbl-lca-mod-err, indicate that @eq-lca-ac demonstrated slightly better performance with a mean bias and RMSE of -0.005 and 0.033 respectively, compared to the ordinary least squares regression, with a mean bias of 0.006 and an RMSE of 0.044. The @Hedstrom1998a method exhibited very poor performance.
 
-![Plots showing the relationship between hydrometeor trajectory angle (left) and mid canopy wind speed (right) with leaf contact area. Hydrometeor Trajectory Angle is measured as degrees from zenith. Mid canopy wind speed is calculated as a function of hydrometeor trajectory angle by rearanging @eq-ta. The solid lines (obs) represent the observed leaf contact area from VoxRS, the dashed lines (mod) represent predictions from a non-linear least squares regression on the VoxRS observed data, and the dotted lines (HP98) represent the predictions from Equation 10 in @Hedstrom1998a. The line color represents the forest plot, FT (black), PWL (red) and the non-linear least squares regression fit to both plots in (green).](../../analysis/lidar-processing/figs/voxrs/scatter/WITH_TREEWELLS_traj_angle_and_wind_phiby_1_thetaby_2_traj_angle_wind_speed_vs_lca_w_mods_w_hp98_mean_sd_23_072.png){#fig-lca-ht-ws}
+<!-- These figures are generated under the lidar-processing project using scripts 11-13. This generates 100's of GB of data on RAM and therefore scripts 11 and 12 are run on copernicus and the resulting df is sent over to local to run script 13. Can run this locally if we use a larger step across phi and theta angles.  -->
+
+![Plots showing the relationship between hydrometeor trajectory angle (left) and mid canopy wind speed (right) with leaf contact area. Hydrometeor Trajectory Angle is measured as degrees from zenith. Mid canopy wind speed is calculated as a function of hydrometeor trajectory angle by rearanging @eq-ta. The solid lines (obs) represent the observed leaf contact area from VoxRS, the dashed lines (mod) represent predictions from @eq-lca-ac, and the dotted lines (HP98) represent the predictions from Equation 10 in @Hedstrom1998a. The line color represents the forest plot, FT (black), PWL (red) and the non-linear least squares regression fit to both plots in (green).](../../analysis/lidar-processing/figs/voxrs/scatter/WITH_TREEWELLS_traj_angle_and_wind_phiby_1_thetaby_2_traj_angle_wind_speed_vs_lca_w_mods_w_hp98_mean_sd_23_072.png){#fig-lca-ht-ws}
+
+```{r tbl-lca-mod-err, echo=FALSE}
+#| label: tbl-lca-mod-err
+#| tbl-cap: "Model error metrics calculated for the prediction of leaf contact area from trajectory angle using @eq-lca-inc (nls), using a linear function from the observations in this study (lm), and Equation 10 from @Hedstrom1998a. Mean bias is the difference in the model and observed values, MAE is the mean of the absolute error, RMS Error is the root mean squared error."
+
+mod_error <- readRDS('../../analysis/lidar-processing/data/models/lca_obs_mod_error_tbl.rds')
+
+mod_error |> 
+  knitr::kable(booktabs = TRUE,
+               format = 'latex')
+```
+
 
 # Discussion
 
@@ -390,7 +437,7 @@ The fraction of snowfall intercepted intercepted in this discontinuous subalpine
 
 Existing theories suggests either a positive [@Storck2002] or negative [@Hedstrom1998a] association of air temperature with the maximum canopy storage (@fig-example-wmax). The findings presented in this study deviate from the relationships outlined in @Hedstrom1998a and @Storck2002. Specifically, both @fig-scl-ip and @fig-lai-met-ip showed an absence of a maximum canopy storage capacity. It is likely that a maximum canopy storage value does exist in the study site but was higher than the observed range of canopy storage values presented here. Additionally, in @fig-lai-met-ip, no relationship between air temperature and interception efficiency was observed. As maximum canopy storage value was not present in @fig-scl-w-sf and @fig-scl-ip, a direct link cannot be made between air temperature and $L_{max}$. However, the absence of a discernible relationship between interception efficiency and air temperature suggests that there might not be an influence on $L_{max}$. This absence could also be explained by the concurrent presence of positive [adhesive and cohesive forces, @Storck2002] and negative [branch bending, @Schmidt1990] relationships. These two opposing effects could balance each other out, resulting in no observable effect on interception efficiency in the observations presented in @fig-lai-met-ip. It is also plausible that the influence of wind on interception at this site masked any potential effect of air temperature. 
 
-Empirical evidence to support the theory of increased in canopy contact area with increased wind speed [@Hedstrom1998a] has not been provided in the literature. Automated measurements of interception efficiency showed a slight increase in interception efficiency with increasing wind speed (below 1.5 m s^-1^). At wind speeds above 1.5 m s^-1^ interception efficiency was observed to decrease due to an associated increase in unloading. Measurements of interception efficiency collected by UAV-lidar surveys for a snowfall event with a 1.4 m s^-1^ average wind speed showed a large fraction of snow intercepted on the lee side of individual trees as a result of predominately non-vertical hydrometeor trajectory angles. The dominant hydrometeor trajectory angle was shown to be predicted using event wind speed and direction alone. The plot scale canopy coverage was shown to increase substantially as a result of increasing horizontal angle of hydrometers. The increase in plot scale canopy coverage observed in this study, of from 0.4 with zero wind to near complete coverage with midcanopy wind speeds of 2 m s^-1^ is much higher than the increase calculated using the method proposed in @Hedstrom1998a to scale canopy coverage with wind speed. Using Equation 10 in @Hedstrom1998a, an increase of in canopy coverage of 0.03 is calculated using the same wind speed and forest structure and canopy height of 10 m and forested downwind distance of 100 m. The increase in interception efficiency observed away from individual trees in @fig-lidar-ip-site and the measured increase plot scale canopy coverage using voxel ray sampling in @fig-ht-cc show that Equation 10 in @Hedstrom1998a may not be appropriate for sparse forests. Further investigation is required to test the relationships observed here in dense forest canopies. The large sensitivity of apparent forest cover to mid-canopy wind speed for this discontinuous subalpine forest suggests that this effect should be considered in snow interception models. While, increasing wind has been shown here to increase plot-scale interception, following the deposition of snow in the canopy wind is also known to increase rates of unloading [@Roesch2001; @Bartlett2015]. Poor performance of the @Roesch2001 and @Bartlett2015 algorithms has been shown in the literature [e.g. @Lumbrazo2022]. Since existing studies have not considered the concurrent effect of interception increasing as a result of increasing apparent forest structure due to increasing wind, validations of subsequent ablation parameterizations will likely benefit.
+Empirical evidence to support the theory of increased in canopy contact area with increased wind speed [@Hedstrom1998a] has not been provided in the literature. Automated measurements of interception efficiency showed a slight increase in interception efficiency with increasing wind speed (below 1.5 m s^-1^). At wind speeds above 1.5 m s^-1^ interception efficiency was observed to decrease due to an associated increase in unloading. Measurements of interception efficiency collected by UAV-lidar surveys for a snowfall event with a 1.4 m s^-1^ average wind speed showed a large fraction of snow intercepted on the lee side of individual trees as a result of predominately non-vertical hydrometeor trajectory angles. The dominant hydrometeor trajectory angle was shown to be predicted using event wind speed and direction alone. The plot scale canopy coverage was shown to increase substantially as a result of increasing horizontal angle of hydrometers. The increase in plot scale canopy coverage observed in this study, of from 0.4 with zero wind to near complete coverage with midcanopy wind speeds of 2 m s^-1^ is much higher than the increase calculated using the method proposed in @Hedstrom1998a to scale canopy coverage with wind speed. Using Equation 10 in @Hedstrom1998a, an increase of in canopy coverage of 0.03 is calculated using the same wind speed and forest structure and canopy height of 10 m and forested downwind distance of 100 m. The increase in interception efficiency observed away from individual trees in @fig-lidar-ip-site and the measured increase plot scale canopy coverage using voxel ray sampling in @fig-ht-cc show that Equation 10 in @Hedstrom1998a may not be appropriate for sparse forests. The increase in interception efficiency observed across the forest plots was larger than shown for the subcanopy lysimeters. This may be attributed to the higher canopy coverage above the subcanopy lysimeters which had less room for increased leaf contact area with increasing hydrometeor trajectory. Further investigation is required to test the relationships observed here in dense forest canopies. The large sensitivity of apparent forest cover to mid-canopy wind speed for this discontinuous subalpine forest suggests that this effect should be considered in snow interception models. While, increasing wind has been shown here to increase plot-scale interception, following the deposition of snow in the canopy wind is also known to increase rates of unloading [@Roesch2001; @Bartlett2015]. Poor performance of the @Roesch2001 and @Bartlett2015 algorithms has been shown in the literature [e.g. @Lumbrazo2022]. Since existing studies have not considered the concurrent effect of interception increasing as a result of increasing apparent forest structure due to increasing wind, validations of subsequent ablation parameterizations will likely benefit.
 
 # Conclusions
 
