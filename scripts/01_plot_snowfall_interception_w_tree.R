@@ -175,10 +175,12 @@ event_df_sep_troughs |>
   #                 ymax = lm_tree + (lm_tree*0.3)), alpha = 0.3) +
   # facet_grid(~name) +
   # annotate("text", label = paste("y =", round(coef(lm)[[1]], 2), "*x"), color = "blue", parse = TRUE) +
-  ylab('Canopy Storage (mm)') +
-  xlab('Event Cumulative Snowfall (mm)') +
-  labs(colour = 'Lysimeter Canopy Coverage (-)') +
-  theme(legend.position = 'none') +
+  labs(
+    y = expression("Canopy Snow Load (kg m"^"-2"~")"),  # y-axis label with units in kg m^-2
+    x = expression("Event Cumulative Snowfall (kg m"^"-2"~")")  # x-axis label with units in kg m^-2
+  ) +
+  labs(colour = 'SCL\nCanopy\nCoverage (-)') +
+  # theme(legend.position = 'none') +
   scale_color_manual(values = cc_colours)
 
 ggsave('figs/automated_snowfall_event_periods/cuml_event_snowfall_canopy_storage_sep_scl.png',

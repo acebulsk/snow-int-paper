@@ -5,6 +5,7 @@ source('scripts/lidar_snow_survey/00_load_lidar_meta.R')
 
 ffr_met_wnd_lidar_events <- lidar_events_long_dt |>
   left_join(ffr_met_wnd, by = 'datetime')  |>
+  left_join(ffr_ec, by = 'datetime') |>
   left_join(parsivel, by = 'datetime') |>
   left_join(pwl_sf, by = 'datetime') |>
   left_join(pwl_wind, by = 'datetime') |>
@@ -27,7 +28,9 @@ var_name_dict <- data.frame(
     'Wind Dir. (°)',
     'Wind Dir. (°)',
     'Wind Speed (m/s)',
-    'Wind Speed (m/s)'
+    'Wind Speed (m/s)',
+    'Wind Speed (m/s)',
+    'Wind Dir. (°)'
   ),
   var_stn = c(
     'FT',
@@ -37,7 +40,9 @@ var_name_dict <- data.frame(
     'FT',
     'PWL',
     'FT',
-    'PWL'
+    'PWL',
+    'FT EC 15 m',
+    'FT EC 15 m'
   ),
   name = c(
     'air_temp',
@@ -47,7 +52,9 @@ var_name_dict <- data.frame(
     'ft_wind_dir',
     'pwl_wind_dir',
     'ft_wind_speed',
-    'pwl_wind_speed'
+    'pwl_wind_speed',
+    'ec_wind_speed',
+    'ec_wind_dir'
   )
 )
 
@@ -56,7 +63,8 @@ ffr_met_wnd_lidar_events_fltr <- ffr_met_wnd_lidar_events |>
   mutate(event_cml_sf = cumsum(ppt),
          ppt = ppt*4) |>
   ungroup() |>
-  select(datetime, event_id, all_of(var_name_dict$name))
+  select(datetime, event_id, all_of(var_name_dict$name)) |>
+  mutate(ec_cionco_2_m_wind_speed = ec_wind_speed )
 
 saveRDS(ffr_met_wnd_lidar_events_fltr, 'data/event_met/lidar_events_met.rds')
 
@@ -67,10 +75,14 @@ ffr_met_lidr_events_avg <- ffr_met_wnd_lidar_events_fltr |>
     `RH (%)` = mean(rh),
     `med FT Wind Dir. (°)` = median(ft_wind_dir),
     `med FT Wind Speed (m/s)` = median(ft_wind_speed),
+    `med FT ec 30 m Wind Dir. (°)` = median(ec_wind_dir, na.rm = T),
+    `med FT ec 30 m Wind Speed (m/s)` = median(ec_wind_speed, na.rm = T),
     `med PWL Wind Dir. (°)` = median(pwl_wind_dir),
     `med PWL Wind Speed (m/s)` = median(pwl_wind_speed),
     `mean FT Wind Dir. (°)` = mean(ft_wind_dir),
     `mean FT Wind Speed (m/s)` = mean(ft_wind_speed),
+    `mean FT ec 30 m Wind Dir. (°)` = mean(ec_wind_dir, na.rm = T),
+    `mean FT ec 30 m Wind Speed (m/s)` = mean(ec_wind_speed, na.rm = T),
     `mean PWL Wind Dir. (°)` = mean(pwl_wind_dir),
     `mean PWL Wind Speed (m/s)` = mean(pwl_wind_speed),
     `Cuml. Snowfall (mm)` = sum(ppt)/4
