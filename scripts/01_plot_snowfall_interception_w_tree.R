@@ -184,7 +184,7 @@ event_df_sep_troughs |>
   scale_color_manual(values = cc_colours)
 
 ggsave('figs/automated_snowfall_event_periods/cuml_event_snowfall_canopy_storage_sep_scl.png',
-       width = 4, height = 4)
+       width = 5, height = 4, device = png)
 
 event_df_sep_troughs_avg <- event_df_sep_troughs |>
   group_by(w_tree_event, trough_name) |>

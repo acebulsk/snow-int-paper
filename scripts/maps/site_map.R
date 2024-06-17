@@ -59,7 +59,7 @@ bg <- terra::rast('/media/alex/phd-data/local-usask/analysis/lidar/gis/22_292FT_
 bg_resamp <- terra::rast('/media/alex/phd-data/local-usask/analysis/lidar/gis/22_292FT_RGB_resamp_25cm.tif')
 
 bbox <- st_bbox(lidr_flight_path)
-bbox['xmax'] <- bbox['xmax'] + 50
+bbox['xmax'] <- bbox['xmax'] + 0
 # bbox['ymax'] <- bbox['ymax'] + 50
 main_map <- tm_shape(bg_resamp, bbox = bbox) +
   tm_rgb(colorNA = NULL)  +
@@ -172,7 +172,7 @@ ins_dim = norm_dim(site_sf_buff)
 
 main_vp <- viewport(width = main_dim[1], height = main_dim[2],default.units = 'snpc')
 ins_vp <- viewport(width = ins_dim[1] * 0.3, height = ins_dim[2] * 0.3,
-                  x = unit(15.5, "cm"), y = unit(4.5, "cm"))
+                  x = unit(15.5, "cm"), y = unit(3.5, "cm"))
 
 tmap::tmap_save(
   main_map,
@@ -182,3 +182,4 @@ tmap::tmap_save(
   insets_tm = inset_map,
   insets_vp = ins_vp
 )
+
