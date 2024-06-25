@@ -189,7 +189,11 @@ $${#eq-tf-ode}
 
 where $C_p$ is a function of the canopy coverage $C_c$, $\theta_h$ and $L$. $C_p$ is approximately equal to canopy coverage ($C_c$) for vertical snowfall. However, for non-vertical snowfall $1 > C_p > C_c$.
 
-To determine how forest structure was associated with interception efficiency at different azimuth and zenith angles over the March 13-14 snowfall event, each portion of the hemisphere at each grid location was considered. The relationship between interception efficiency and canopy contact number was found to be linear and thus the Pearson Correlation Coefficient, $\rho_p$ was calculated to quantify the association between a single raster of interception efficiency and the 32'760 rasters containing the canopy contact number hemisphere for each portion of the hemisphere (azimuth [0°, 1°, ..., 359°], zenith angle [0°, 1°, ..., 90°]). 
+## Statistics
+
+To determine how forest structure was associated with interception efficiency at different azimuth and zenith angles over the March 13-14 snowfall event, each portion of the hemisphere at each grid location was considered. The relationship between interception efficiency and canopy contact number was found to be linear and thus the Pearson Correlation Coefficient, $\rho_p$ was calculated using the 'stats' package in R [@R2022] to quantify the association between a single raster of interception efficiency and the 32'760 rasters containing the canopy contact number hemisphere for each portion of the hemisphere (azimuth [0°, 1°, ..., 359°], zenith angle [0°, 1°, ..., 90°]) for each of the 25 cm grid cells across the FT and PWL forest plots. 
+
+Linear and non-linear models, based on observed data and theoretical justification presented in this study, were developed and assessed using the 'stats' package in R [@R2022]. Linear models were fitted using ordinary least squares regression via the 'lm' function to analyze two relationships: (1) between interception efficiency and leaf contact area, and (2) between leaf contact area and trajectory angle. Both models were forced through the origin based on the theoretical justification that the dependent variable should be zero when the independent variable is zero. To assess the performance of the linear models, we calculated four metrics comparing observed and modelled values: mean bias, mean absolute error (MAE), root mean square error (RMSE), and the coefficient of determination (R^2^). Following @Kozak1995, we recognized that the default R^2^ value provided for least squares models forced through the origin by many statistical packages can be misleading. Therefore, we adjusted these R^2^ values using Equation 10 in @Kozak1995. Although we had theoretical justifications for forcing the intercept through the origin, we also employed two statistical tests as described by @Kozak1995 to verify whether a no-intercept model (forced through the origin) was appropriate for our data compared to a with-intercept model (including an intercept). The first test evaluated if the intercept of the with-intercept was significantly different from zero using p-value provided by the 'summary' function from the 'stats' package in R. The second test examined if there was a significant difference between the no-intercept and with-intercept models by testing if the residual sum of squares was different between the no-intercept and full model, assessed via Equation 15 in @Kozak1995. If the first test indicated a significant difference, and the second did not, the no-intercept model could be deemed statistically justified [@Kozak1995]. Non-linear models were fitted using non-linear least squares regression via the 'nls' function in 'stats' package in R. The non-linear models were assessed by comparing predicted values to observed values using three metrics: mean bias, mean absolute error (MAE), and root mean square error (RMSE).
 
 # Results
 
@@ -283,7 +287,7 @@ UAV-lidar measurements of interception efficiency and canopy structure metrics c
 
 ![The Pearson Correlation Coefficient between rasters (25 cm resolution) of interception efficiency and leaf contact area for each grid cell across the study site for each azimuth angles (0°, 1°, ..., 359°) and zenith angles (0°, 1°, ..., 90°) for the FT (left) and PWL (right) forest plots.](../../analysis/lidar-processing/figs/voxrs/hemis/full_hemi_rho_p_cor_lca_ip_23_072_vox_len_0.25m_sa_gridgen_v2.0.0_sa_ft_pwl_.png){#fig-hemi-ip-cc}
 
-@fig-lca-vs-ip shows that the linear relationship between $C_p$ and interception efficiency, when resampled to a 5 m resolution, is stronger when $C_p$ is adjusted for the observed shift in hydrometeor trajectory, with zenith angles (0° – 30°) and azimuth angles (170° – 220°), compared to the nadir leaf contact angle (zenith angle of 0°). The strong association between adjusted $C_p$ has the potential to be a predictor of interception efficiency, before ablation. An equation to represent this linear relationship is proposed here as:
+@fig-lca-vs-ip shows that the linear relationship between $C_p$ and interception efficiency, resampled to a 5 m resolution, is stronger when $C_p$ is adjusted for the observed shift in hydrometeor trajectory, with zenith angles (0° – 30°) and azimuth angles (170° – 220°), compared to the nadir leaf contact angle (zenith angle of 0°). The strong association between adjusted $C_p$ has the potential to be a predictor of interception efficiency, before ablation. An equation to represent this linear relationship is proposed here as:
 
 $$
   \frac{I}{P} = C_p(C_c, \theta_h, L) \cdot \alpha
@@ -291,9 +295,9 @@ $${#eq-lca-ip}
 
 where $\alpha$ is an efficiency constant which determines the fraction of snowflakes that contact the canopy and are stored in the canopy (i.e., intercepted).
 
-Model error statistics are presented in @tbl-ip-mod-err, calculated between the predicted interception efficiency using @eq-lca-ip with different values of $\alpha$, and observed interception efficiency. In the interception efficiency observations collected over the March 13th snowfall event, $\alpha$ values of `r pwl_a_val` and `r ft_a_val` provided the best fit for the PWL and FT plots respectively when using $C_p$ values adjusted to the trajectory angle of the event [@tbl-ip-mod-err]. These statistics demonstrate that the model improved when adjusted for the hydrometeor trajectory angle with R^2^ values of 0.7 and 0.61 for the FT and PWL forest plots, respectively. This adjustment represents a significant improvement from the nadir PWL model, which had an R^2^ of 0.29, and a modest improvement for FT, which had an R^2^ of 0.52.
+Model error statistics are presented in @tbl-ip-mod-err, calculated between the predicted interception efficiency using @eq-lca-ip with different values of $\alpha$, and observed interception efficiency. In the interception efficiency observations collected over the March 13th snowfall event, $\alpha$ values of `r pwl_a_val` and `r ft_a_val` provided the best fit for the PWL and FT plots respectively when using $C_p$ values adjusted to the trajectory angle of the event [@tbl-ip-mod-err]. The vector based model, adjusted for the hydrometeor trajectory angle, had R^2^ values of 0.69 and 0.47 for the FT and PWL forest plots, respectively. The vector based model represents a significant improvement from the nadir models, which had an R^2^ of 0.37 and -0.29, for the FT and PWL forest plots respectively. An ordinary least squares linear regression was also run using @eq-lca-ip with an intercept and showed that all models, aside from the vector based model at FT, had intercepts which were significantly different from 0 (p-value < 0.05). The vector based model for the FT forest plot was slightly different from 0 (p-value < 0.1). The difference in the residual sum of squares between the intercept and no-intercept (forced through the origin) models were found to be insignificant for the vector based FT model (p-value > 0.05), and the remaining three models were found to be significantly different (p-value < 0.001). Based on these two statistical tests suggested by @Kozak1995, forcing the intercept through the origin was not statistically justified for any of the four models. 
 
-![Scatter plots showing the relationship between leaf contact area and interception efficiency rasters resampled to a 5 m grid cell resolution. The Adjusted plots (first column) show the leaf contact area averaged over rasters with zenith angles (0°, 1°, ... 30°) and azimuth angles (170°, 171°, ... 220°). The Nadir plots (second column) show leaf contact area measured from a zenith angle of 0°. The solid lines show the ordinary least squares linear regression fit to the observed data for the PWL (red) and FT (black) forest plots and the light grey dotted line shows a 1:1 line. ](../../analysis/lidar-processing/figs/voxrs/scatter/pwl_ft_lca_vs_ip_phi_nadir_adjusted_resample_w_mods_5m.png){#fig-lca-vs-ip}
+![Scatter plots showing the relationship between leaf contact area and interception efficiency rasters resampled to a 5 m grid cell resolution. The left plot (Nadir) shows leaf contact area measured from a zenith angle of 0°. The right plot (Vector Based) shows the leaf contact area averaged over rasters with zenith angles (0°, 1°, ... 30°) and azimuth angles (170°, 171°, ... 220°). The solid lines show the ordinary least squares linear regression forces through the origin and fit to the observed data for the PWL (red) and FT (black) forest plots and the light grey dotted line shows a 1:1 line. The R^2 values for the four different models are shown in the upper right of each panel calculated following the methods outlined in @Kozak1995.](../../analysis/lidar-processing/figs/voxrs/scatter/pwl_ft_lca_vs_ip_phi_nadir_adjusted_resample_w_mods_5m.png){#fig-lca-vs-ip}
 
 ```{r tbl-ip-mod-err, echo=FALSE}
 #| label: tbl-ip-mod-err
@@ -366,7 +370,6 @@ mod_error |>
   #              format = 'latex')
 ```
 
-
 # Discussion
 
 At the point scale, relatively little influence of meteorology on interception efficiency was found in the observations collected from this discontinuous subalpine forest. A slight increase in interception efficiency was observed at the SCLs with increasing wind speeds below 1.5 m s^-2^ and canopy snow loads below 7 kg m^-2^ and is attributed to an associated increase in the $C_p$ [@fig-lai-met-ip, C & D]. At wind speeds above 2 m s^-1^, interception efficiency was observed to decline by a maximum of 0.1 (-) and could be attributed to increasing hydrometeor velocity leading to increased bouncing of snowflakes off branches and wind-induced unloading [@Roesch2001; @Lumbrazo2022; @Katsushima2023]. The increase in interception efficiency up to canopy snow loads of 7 kg m^-2^ and then subsequent decline is attributed to the position of the SCLs within forest gaps. Timelapse imagery showed that branches surrounding the SCLs compressed at snow loads above 7 kg m^-2^ reducing the canopy coverage above the instruments. This is similar to the theory proposed by @Satterlund1967 that interception efficiency increases as the canopy fills with snow bridging gaps in the canopy, while later declining due to branch bending and decreased canopy coverage. @Hedstrom1998a and @Storck2002 did not observe this initial increase, but are consistent in declining interception efficiency at high snow loads. The observations presented in @fig-lai-met-ip, differ from the @Satterlund1967, @Hedstrom1998a, @Storck2002 and @Moeser2015 theories, in that the decline in interception efficiency at high canopy snow loads was at a rate much slower than has been observed by these studies. The strong exponential decline in interception efficiency observed with increasing event snowfall in Satterlund1967, @Hedstrom1998a, @Storck2002 and @Moeser2015 (see fig X in @Cebulski2024b) may be a result of increased unloading rates as branches compress with heavy snow loads. The longer duration between site visits in [@Satterlund1967; @Hedstrom1998a; @Moeser2015] increase the likelihood of canopy snow ablation in their throughfall measurements compared to the automated 15 minute measurements in this study. This potential inclusion of canopy snow ablation within the interception parameterizations provided in [@Hedstrom1998a; @Satterlund1967; @Moeser2015; @Storck2002] may lead to double counting of unloading when combined with an additional unloading parameterizations.
@@ -396,38 +399,6 @@ We wish to acknowledge financial support from the University of Saskatchewan, Na
 
 The authors declare there are no competing interests.
 
+\pagebreak
+
 # References
-
-::: {#refs}
-:::
-
-\pagebreak
-
-# Tables
-
-<!-- Tables should be self-contained and complement, but not duplicate, information contained in the text. They should be fully editable -- and not pasted as images. Each table should be placed on a separate page, be complete with title and footnotes, and understandable without reference to the text.  To aid placement, ensure that tables are referenced and located within the text (e.g, [Insert Table 1]). -->
-
-```{r scl, echo=FALSE}
-#| label: tbl-scl-lai-cc
-#| tbl-cap: "Canopy structure of the three subcanopy lysimeters (SCL) located proximal to the FT Station. Leaf area index (LAI) and Canopy Coverage was measured using hemispherical photo analysis with the R package hemispheR."
-#| 
-scl_lai_cc <- read.csv('~/local-usask/analysis/interception/data/lai/scl_canopy_metrics.csv') 
-
-scl_lai_cc$Name <- c('SCL Med', 'SCL Low', 'SCL High')
-
-scl_meta <- read.csv('~/local-usask/analysis/interception/data/loadcell/calibrations/load_cell_meta_ac_fortress.csv')
-
-scl_lai_cc |> 
-  arrange(cc) |> 
-  mutate(cc = round(cc, 2)) |> 
-  select(Name, `LAI (-)` = Le, `Canopy Coverage (-)` = cc) |> 
-  knitr::kable(#booktabs = TRUE,
-               #format = 'latex'
-               )
-```
-
-\pagebreak
-
-# Figure Legends
-
-<!-- Figure legends should be concise but comprehensive – the figure and its legend must be understandable without reference to the text. Include definitions of any symbols and define/explain all abbreviations and units of measurement. To aid placement, ensure that figures are referenced and located within the text (e.g. [Insert Figure 1]). Figures should be uploaded as separate files at the time of submission. -->
