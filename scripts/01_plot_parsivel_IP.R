@@ -128,7 +128,7 @@ met_intercept_pv |>
 # particle diameter ----
 
 smry <- met_intercept_pv |>
-  group_by(part_diam_labs) |>
+  group_by(part_diam_labs, name) |>
   # filter(weighed_tree_canopy_load_mm <= 5) |>
   summarise(IP_avg = mean(IP, na.rm = T),
             sd = sd(IP, na.rm = T),
@@ -147,7 +147,8 @@ diam_ip <- met_intercept_pv |>
   xlab(diam_ax_lab) +
   # ylim(ip_y_lims) +
   theme(legend.title = element_blank(),
-        plot.margin = margin(0.5, 0.5, 0.5, .75, "cm"))
+        plot.margin = margin(0.5, 0.5, 0.5, .75, "cm")) +
+  facet_grid(~name)
 diam_ip
 
 
@@ -166,7 +167,7 @@ ggsave('figs/supplement/IP_hydrometeor_diameter.png', width = 5, height = 3)
 # particle velocity ----
 
 smry <- met_intercept_pv |>
-  group_by(part_vel_labs) |>
+  group_by(part_vel_labs, name) |>
   # filter(weighed_tree_canopy_load_mm <= 5) |>
   summarise(IP_avg = mean(IP, na.rm = T),
             sd = sd(IP, na.rm = T),
@@ -186,7 +187,8 @@ vel_ip <- met_intercept_pv |>
   ylim(ip_y_lims) +
   xlim(c(0.6, 1.3)) +
   theme(legend.title = element_blank(),
-        plot.margin = margin(0.5, 0.5, 0.5, .75, "cm"))
+        plot.margin = margin(0.5, 0.5, 0.5, .75, "cm")) +
+  facet_grid(~name)
 vel_ip
 
 

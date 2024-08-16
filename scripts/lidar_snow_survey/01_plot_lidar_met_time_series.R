@@ -63,8 +63,7 @@ ffr_met_wnd_lidar_events_fltr <- ffr_met_wnd_lidar_events |>
   mutate(event_cml_sf = cumsum(ppt),
          ppt = ppt*4) |>
   ungroup() |>
-  select(datetime, event_id, all_of(var_name_dict$name)) |>
-  mutate(ec_cionco_2_m_wind_speed = ec_wind_speed )
+  select(datetime, event_id, all_of(var_name_dict$name))
 
 saveRDS(ffr_met_wnd_lidar_events_fltr, 'data/event_met/lidar_events_met.rds')
 
@@ -106,13 +105,13 @@ for (event in as.character(scan_dates$event_id)) {
 
   ffr_met_wnd_lidar_events_long |>
     filter(event_id == event) |>
-    ggplot(aes(datetime, value, colour = var_stn)) +
-    geom_line() +
+    ggplot(aes(datetime, value, colour = var_stn, group = var_stn)) +
+    geom_point(na.rm = F) +
     facet_grid(rows = vars(var_lab), scales = 'free') +
     ylab(element_blank()) +
     xlab(element_blank()) +
     theme(legend.position = 'bottom') +
-    scale_color_manual(values = c('salmon', 'dodgerblue'), name = 'Station: ')
+    scale_color_manual(values = c('salmon', 'dodgerblue', 'green'), name = 'Station: ')
 
   ggsave(paste0('figs/lidar_periods/met_time_series/met_time_series_', event, '.png'),
          width = 6, height = 8.95)

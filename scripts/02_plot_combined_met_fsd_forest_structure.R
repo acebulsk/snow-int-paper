@@ -9,14 +9,14 @@ source('scripts/01_plot_parsivel_IP.R')
 cowplot::plot_grid(
   # le_ip,
   at_ip,
-  rh_ip,
+  # rh_ip,
   ws_ip,
   w_ip,
   diam_ip,
   vel_ip,
-  nrow = 3,
-  ncol = 2,
+  nrow = 5,
+  ncol = 1,
   labels = 'AUTO'
 )
 
-ggsave('figs/automated_snowfall_event_periods/troughs_met_vs_IP_bin.png', device = png, width = 8.5, height = 11)
+ggsave('figs/automated_snowfall_event_periods/troughs_met_vs_IP__w_parsivel_bins.png', device = png, width = 8.5, height = 11)

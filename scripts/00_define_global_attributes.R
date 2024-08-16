@@ -25,9 +25,9 @@ parsivel <- readRDS('../../analysis/disdrometer/data/disdro_spectrum_processed_a
 ffr_met <- readRDS('../../analysis/met-data-processing/data/ffr_crhm_modelling_obs.rds')
 ffr_met_wnd <- readRDS('../../analysis/met-data-processing/data/ffr_t_rh_u_qaqc_fill.rds')
 # not enough ec wind obs over the event
-# ffr_ec <- readRDS('../../analysis/eddy-cov/data/high-tower/ec_high_tower_30_min_2021_2023_qc_rough.rds') |>
-#   mutate(ec_wind_dir = wind_dir_mag - calg_mag_declination) |>
-#   select(datetime, ec_wind_speed = wind_speed, ec_wind_dir)
+ffr_ec <- readRDS('../../analysis/eddy-cov/data/high-tower/ec_high_tower_30_min_2021_2023_qc_rough.rds') |>
+  mutate(ec_wind_dir = wind_dir_mag - calg_mag_declination) |>
+  select(datetime, ec_wind_speed = wind_speed, ec_wind_dir)
 # ffr_ec <- readRDS('../../analysis/eddy-cov/data/low-tower/low_tower_15min_2021_2023_qc_rough.rds') |>
 #   mutate(ec_wind_dir = wind_dir_mag - calg_mag_declination) |>
 #   select(datetime, ec_wind_speed = wind_speed, ec_wind_dir)

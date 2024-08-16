@@ -5,10 +5,16 @@ library(ggpubr)
 
 ip_y_lims <- c(0.05, 1)
 
+mean_ip_by_trough <- met_intercept |>
+  group_by(name) |>
+  summarise(IP = mean(IP))
+
+saveRDS(mean_ip_by_trough, 'data/mean_ip_by_trough.rds')
+
 # lysimeter data ----
 
 sf_ip_smry <- met_intercept |>
-  group_by(q_sf_labs) |>
+  group_by(q_sf_labs, name) |>
   # filter(weighed_tree_canopy_load_mm <= 5) |>
   summarise(IP_avg = mean(IP, na.rm = T),
             sd = sd(IP, na.rm = T),
@@ -30,11 +36,12 @@ sf_ip <- met_intercept |>
   # xlim(NA, 0) +
   # ylim(ip_y_lims) +
   theme(legend.position = 'none',
-        plot.margin = margin(0.5, 0.5, 0.5, .75, "cm"))
+        plot.margin = margin(0.5, 0.5, 0.5, .75, "cm")) +
+  facet_grid(~name)
 sf_ip
 
 at_ip_smry <- met_intercept |>
-  group_by(temp_labs) |>
+  group_by(temp_labs, name) |>
   # filter(weighed_tree_canopy_load_mm <= 5) |>
   summarise(IP_avg = mean(IP, na.rm = T),
             sd = sd(IP, na.rm = T),
@@ -56,11 +63,12 @@ at_ip <- met_intercept |>
   xlim(-17, 1) +
   # ylim(ip_y_lims) +
   theme(legend.position = 'none',
-        plot.margin = margin(0.5, 0.5, 0.5, .75, "cm"))
+        plot.margin = margin(0.5, 0.5, 0.5, .75, "cm")) +
+  facet_grid(~name)
 at_ip
 
 tice_ip_smry <- met_intercept |>
-  group_by(t_ice_labs) |>
+  group_by(t_ice_labs, name) |>
   # filter(weighed_tree_canopy_load_mm <= 5) |>
   summarise(IP_avg = mean(IP, na.rm = T),
             sd = sd(IP, na.rm = T),
@@ -82,11 +90,12 @@ tice_ip <- met_intercept |>
   xlim(NA, 0) +
   # ylim(ip_y_lims) +
   theme(legend.position = 'none',
-        plot.margin = margin(0.5, 0.5, 0.5, .75, "cm"))
+        plot.margin = margin(0.5, 0.5, 0.5, .75, "cm")) +
+  facet_grid(~name)
 tice_ip
 
 tice_dep_ip_smry <- met_intercept |>
-  group_by(t_ice_dep_labs) |>
+  group_by(t_ice_dep_labs, name) |>
   # filter(weighed_tree_canopy_load_mm <= 5) |>
   summarise(IP_avg = mean(IP, na.rm = T),
             sd = sd(IP, na.rm = T),
@@ -108,11 +117,12 @@ tice_ip <- met_intercept |>
   # xlim(NA, 0) +
   # ylim(ip_y_lims) +
   theme(legend.position = 'none',
-        plot.margin = margin(0.5, 0.5, 0.5, .75, "cm"))
+        plot.margin = margin(0.5, 0.5, 0.5, .75, "cm")) +
+  facet_grid(~name)
 tice_ip
 
 rh_ip_smry <- met_intercept |>
-  group_by(rh_labs) |>
+  group_by(rh_labs, name) |>
   # filter(weighed_tree_canopy_load_mm <= 5) |>
   summarise(IP_avg = mean(IP, na.rm = T),
             sd = sd(IP, na.rm = T),
@@ -135,11 +145,12 @@ rh_ip <- met_intercept |>
   # xlim(NA, 0) +
   # ylim(ip_y_lims) +
   theme(legend.position = 'none',
-        plot.margin = margin(0.5, 0.5, 0.5, .75, "cm"))
+        plot.margin = margin(0.5, 0.5, 0.5, .75, "cm")) +
+  facet_grid(~name)
 rh_ip
 
 Qsi_ip_smry <- met_intercept |>
-  group_by(Qsi_labs) |>
+  group_by(Qsi_labs, name) |>
   # filter(weighed_tree_canopy_load_mm <= 5) |>
   summarise(IP_avg = mean(IP, na.rm = T),
             sd = sd(IP, na.rm = T),
@@ -157,16 +168,17 @@ Qsi_ip <- met_intercept |>
   geom_errorbar(data = Qsi_ip_smry, aes(x = Qsi_labs, ymax = sd_hi, ymin = sd_low), width = .5)  +
   geom_point(data = Qsi_ip_smry, aes(x = Qsi_labs, y = IP_avg), shape = 1, size = 4) +
   ylab(ip_y_ax_lab) +
-  xlab("Relative Humidity (%)") +
+  xlab("Solar Radiation (W m-2)") +
   # scale_fill_viridis_c(option = 'magma')+
   # xlim(NA, 0) +
   # ylim(ip_y_lims) +
   theme(legend.position = 'none',
-        plot.margin = margin(0.5, 0.5, 0.5, .75, "cm"))
+        plot.margin = margin(0.5, 0.5, 0.5, .75, "cm")) +
+  facet_grid(~name)
 Qsi_ip
 
 ws_ip_smry <- met_intercept |>
-  group_by(wind_labs) |>
+  group_by(wind_labs, name) |>
   # filter(weighed_tree_canopy_load_mm <= 5) |>
   summarise(IP_avg = mean(IP, na.rm = T),
             sd = sd(IP, na.rm = T),
@@ -185,11 +197,13 @@ ws_ip <- met_intercept |>
   ylab(ip_y_ax_lab) +
   xlab(wnd_bin_ax_lab)+
   ylim(ip_y_lims)+
-  theme(plot.margin = margin(0.5, 0.5, 0.5, .75, "cm"))
+  theme(plot.margin = margin(0.5, 0.5, 0.5, .75, "cm")) +
+  facet_grid(~name)
+
 ws_ip
 
 w_ip_smry <- met_intercept |>
-  group_by(tree_labs) |>
+  group_by(tree_labs, name) |>
   # filter(u <= 2) |>
   summarise(IP_avg = mean(IP, na.rm = T),
             sd = sd(IP, na.rm = T),
@@ -207,10 +221,11 @@ w_ip <- met_intercept |>
   ylab(ip_y_ax_lab) +
   xlab(w_ax_lab)+
   ylim(ip_y_lims)+
-  theme(plot.margin = margin(0.5, 0.5, 0.5, .75, "cm"))
+  theme(plot.margin = margin(0.5, 0.5, 0.5, .75, "cm")) +
+  facet_grid(~name)
 
 w_ip
-
+plotly::ggplotly()
 cowplot::plot_grid(at_ip, ws_ip, w_ip, nrow = 3, labels = 'AUTO')
 
-ggsave('figs/automated_snowfall_event_periods/troughs_met_vs_IP_bin.png', device = png, width = 8.5, height = 7)
+ggsave('figs/automated_snowfall_event_periods/troughs_met_vs_IP_bin.png', device = png, width = 8.5, height = 8.5)
