@@ -62,30 +62,30 @@ ggsave('figs/examples/wind_speed_vs_traj_angle.png', device = png,
 
 # Plot trajectory angle vs mean contact number
 
-mcn_df <- data.frame(
-  wind_speed,
-  traj_angle_deg_vect,
-  mcn = traj_angle_to_mcn(traj_angle_deg_vect, a, b)
-)
-
-ggplot(mcn_df,
-       aes(traj_angle_deg_vect, mcn)) +
-  geom_line() +
-  ylab(mcn_lab) +
-  xlab(traj_lab) +
-  xlim(c(-90, 0))
-
-ggsave(paste0('figs/examples/traj_angle_vs_contact_number.png'), device = png,
-       width = 6, height = 5)
-
-ggplot(mcn_df,
-       aes(wind_speed, mcn)) +
-  geom_line() +
-  ylab(mcn_lab) +
-  xlab(ws_lab)
-
-ggsave(paste0('figs/examples/wind_speed_vs_contact_number.png'), device = png,
-       width = 6, height = 5)
+# mcn_df <- data.frame(
+#   wind_speed,
+#   traj_angle_deg_vect = ta_u_hm_vel_df$traj_angle_deg_vect,
+#   mcn = traj_angle_to_mcn(ta_u_hm_vel_df$traj_angle_deg_vect, a, b)
+# )
+#
+# ggplot(mcn_df,
+#        aes(traj_angle_deg_vect, mcn)) +
+#   geom_line() +
+#   ylab(mcn_lab) +
+#   xlab(traj_lab) +
+#   xlim(c(-90, 0))
+#
+# ggsave(paste0('figs/examples/traj_angle_vs_contact_number.png'), device = png,
+#        width = 6, height = 5)
+#
+# ggplot(mcn_df,
+#        aes(wind_speed, mcn)) +
+#   geom_line() +
+#   ylab(mcn_lab) +
+#   xlab(ws_lab)
+#
+# ggsave(paste0('figs/examples/wind_speed_vs_contact_number.png'), device = png,
+#        width = 6, height = 5)
 
 # Plot I/P vs wind
 
