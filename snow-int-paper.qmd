@@ -117,7 +117,30 @@ where $u$ is the horizontal wind speed at the top of the canopy which is a funct
 
 ## Study Site
 
-This study was conducted at Fortress Mountain Research Basin (FMRB), AB, -115° W, 51° N, a continental headwater basin situated within the Canadian Rocky Mountains (@fig-site-map). Data from this study was collected between October 2021 and July 2023 within and surrounding two forest plots adjacent to the FMRB Powerline Station (PWL) and Forest Tower Station (FT) at ~2100 m asl. (@fig-site-map). The average annual precipitation at PWL Station from 2013 to 2023 is 1045 mm, with the peak annual snow water equivalent (SWE) reaching 465 mm, typically occurring in late April. The PWL and FT forest plots include discontinuous stands of subalpine fir (Abies lasiocarpa) and Engelmann spruce (Picea engelmannii) trees, with a proportion of 70% and 30% respectively [@Langs2020]. In the early 1900s the majority of vegetation in the FMRB burned during a large forest fire that affected most of the Kananaskis Valley. Following the fire, the forest within the the PWL and FT forest plots has naturally regenerated with minimal disturbance. 
+```{r, include=FALSE}
+# CANOPY 
+ft_mean_ht <- readRDS('../../analysis/lidar-processing/data/lidR_canopy_metrics/frs_s_mean_tree_height.rds') |> 
+  round(2)
+pwl_e_mean_ht <- readRDS('../../analysis/lidar-processing/data/lidR_canopy_metrics/pwl_e_mean_tree_height.rds') |> 
+  round(2)
+
+# these data have canopy metrics even where we do not have snow depths...
+nadir_cc <-
+  readRDS('../../analysis/lidar-processing/data/hemi_stats/full_voxrs_not_filtered_to_swe_traj_angle_w_lca_23_072.rds')
+
+ft_cc_nadir <- nadir_cc |>
+  filter(plot_name == 'FT') |>
+  pull(lca_nadir) |>
+  unique() |> 
+  round(2)
+pwl_cc_nadir <- nadir_cc |>
+  filter(plot_name == 'PWL') |>
+  pull(lca_nadir) |>
+  unique() |> 
+  round(2)
+```
+
+This study was conducted at Fortress Mountain Research Basin (FMRB), AB, -115° W, 51° N, a continental headwater basin situated within the Canadian Rocky Mountains (@fig-site-map). Data from this study was collected between October 2021 and July 2023 within and surrounding two forest plots adjacent to the FMRB Powerline Station (PWL) and Forest Tower Station (FT) at ~2100 m asl. (@fig-site-map). The average annual precipitation at PWL Station from 2013 to 2023 is 1045 mm, with the peak annual snow water equivalent (SWE) reaching 465 mm, typically occurring in late April. The PWL and FT forest plots include discontinuous stands of subalpine fir (Abies lasiocarpa) and Engelmann spruce (Picea engelmannii) trees, with a proportion of 70% and 30% respectively [@Langs2020]. In the early 1900s the majority of vegetation in the FMRB burned during a large forest fire that affected most of the Kananaskis Valley. Following the fire, the forest within the the PWL and FT forest plots has naturally regenerated with minimal disturbance. The average height of the canopy surrounding the plot to the east of the PWL station is `r pwl_e_mean_ht` m and surrounding the forest plot around the FT Station is `r ft_mean_ht` m. The canopy coverage of the PWL and FT forest plots is `r pwl_cc_nadir` and `r ft_cc_nadir` respectively.
 
 ## Meteorological Measurements
 
@@ -249,13 +272,8 @@ Panel B in @fig-lai-met-ip in Wind speed measured at FT Station showed a positiv
 ## The influence of forest structure on snow interception
 
 ```{r, include=FALSE}
-# returns angle in degrees from zenith
-traj_angle_deg <- function(wind_speed, velocity){
-  slope <- wind_speed/velocity
-  angle_deg <- atan(slope) * 180 / pi
+source('../../analysis/disdrometer/scripts/00_source_functions.R')
 
-  return(angle_deg)
-}
 # MET
 snowing_met <- readRDS('data/event_met/lidar_events_met_avgs_snowing.rds') |> 
   filter(event_id == '2023-03-14')
@@ -274,13 +292,6 @@ ft_ta <- traj_angle_deg(ft_ws_avg, hm) |>
   round(0)
 pwl_ta <- traj_angle_deg(pwl_ws_avg, hm) |> 
   round(0)
-
-# CANOPY 
-ft_mean_ht <- readRDS('../../analysis/lidar-processing/data/lidR_canopy_metrics/frs_s_mean_tree_height.rds') |> 
-  round(2)
-
-pwl_e_mean_ht <- readRDS('../../analysis/lidar-processing/data/lidR_canopy_metrics/pwl_e_mean_tree_height.rds') |> 
-  round(2)
 
 # HEMI STATS
 vox_config_id <- "23_072_vox_len_0.25m_sa_gridgen_v2.0.0_sa"
@@ -316,15 +327,27 @@ mod_error <- readRDS('../../analysis/lidar-processing/data/models/lca_vs_ip_mode
 
 ft_a_val <- mod_error$`Model Slope`[mod_error$`Plot Name` == 'FT' & mod_error$`Canopy Metrics` == 'Adjusted'] |> round(2)
 pwl_a_val <- mod_error$`Model Slope`[mod_error$`Plot Name` == 'PWL' & mod_error$`Canopy Metrics` == 'Adjusted'] |> round(2)
+
+ft_10m_example <- readRDS('data/event_met/ft_20230313_wind_speed_traj_angle_10m.rds')
+ft_2m_example <- readRDS('data/event_met/ft_20230313_wind_speed_traj_angle_2m.rds')
+ft_mean_wind_prof_integral <- readRDS('data/event_met/ft_20230313_mean_integral_wind_profile_and_traj.rds')
 ```
 
-UAV-lidar measurements of interception efficiency and canopy structure metrics collected across the study site, provided insights on how the forest canopy influenced subcanopy snow accumulation during the March 13-14 snowfall event. This event totalled 28.4 mm at the PWL snowfall gauge and was characterized by a transition from low rates of snowfall and air temperature near 0°C to higher rates of snowfall late afternoon on March 13 coinciding with air temperatures around -2.5 °C. An average wind speed of `r ft_ws_avg` m s^-1^ and direction of 188° was observed 4.2 m above the ground at FT Station. UAV-lidar measurements of throughfall, used in the calculation of interception efficiency over this event, aligned well with 28 in-situ manual throughfall measurements with a mean bias of -0.001 m and RMSE of 0.024 m. @fig-lidar-ip shows the spatial distribution of interception efficiency across the study site, calculated using @eq-ip and $\Delta SWE_{tf}$ from UAV-lidar measurements, along with $\Delta SWE_{sf}$ from the PWL snowfall gauge. Greater interception efficiency is observed on the north (lee) side of individual trees, which is interpreted to be a result of non-vertical hydrometeor trajectories caused by the steady southerly winds observed over this event. This effect is more apparent within the PWL forest plot, compared to the FT forest plot (@fig-lidar-ip). The average height of the canopy surrounding the plot to the east of the PWL station is `r pwl_e_mean_ht` m and surrounding the forest plot around the FT Station is `r ft_mean_ht` m.
+UAV-lidar measurements of interception efficiency and canopy structure metrics collected across the study site, provided insights on how the forest canopy influenced subcanopy snow accumulation during the March 13-14 snowfall event. This event totalled 28.4 mm at the PWL snowfall gauge and was characterized by a transition from low rates of snowfall and air temperature near 0°C to higher rates of snowfall late afternoon on March 13 coinciding with air temperatures around -2.5 °C. An average wind speed of `r ft_ws_avg` m s^-1^ and direction of 188° was observed 4.2 m above the ground at FT Station. UAV-lidar measurements of throughfall shown in @fig-lidar-tf, used in the calculation of interception efficiency, aligned well with 28 in-situ manual throughfall measurements with a mean bias of -0.001 m and RMSE of 0.024 m. @fig-lidar-ip shows the spatial distribution of interception efficiency across the study site, calculated using @eq-ip and $\Delta SWE_{tf}$ from UAV-lidar measurements, along with $\Delta SWE_{sf}$ from the PWL snowfall gauge. Greater interception efficiency is observed on the north (lee) side of individual trees, which is interpreted to be a result of non-vertical hydrometeor trajectories caused by the steady southerly winds observed over this event. This effect is shown in @fig-lidar-ip to be more apparent within the PWL forest plot, compared to the FT forest plot. This may be attributed to the taller trees and higher canopy coverage within the PWL forest plot compared to the FT forest plot.
 
-![UAV-lidar interception efficiency calculated over the March 13, 2023 24 hr snowfall event for the FT (left) and PWL forest plots (right) at a 25 cm resolution. Transparent areas represent grids that did not have any lidar ground returns (i.e., under dense canopy proximal to tree trunks) or have been masked due to disturbance and thus have no throughfall measurement for the interception efficiency calculation. See the location of the two forest plots within FMRB in @fig-site-map.](../../analysis/lidar-processing/figs/maps/facet_ft_pwl_23_072_23_073_v2.0.0_saip_normalised_resample_0.25.png){#fig-lidar-ip}
+![UAV-lidar throughfall SWE (kg m^-2^) accumulated over the March 13, 2023 24 hr snowfall event for the FT (left) and PWL forest plots (right) at a 25 cm resolution. Transparent areas represent grids that did not have any lidar ground returns (i.e., under dense canopy proximal to tree trunks) or have been masked due to disturbance and thus have no throughfall measurement for the interception efficiency calculation. See the location of the two forest plots within FMRB in @fig-site-map.](../../analysis/lidar-processing/figs/maps/facet_ft_pwl_23_072_23_073_v2.0.0_sa_del_swe_normalised_resample_0.25.png){#fig-lidar-tf}
 
-@fig-hemi-ip-cc presents two hemisphere plots illustrating the relationship between $C_p$ and interception efficiency for both the FT and PWL forest plots. These plots demonstrate a strong correlation between $C_p$ and interception efficiency towards the southern portion of the hemisphere, aligning with the average wind direction observed during the event. For the PWL forest plot, the upper 97.5th percentile of $\rho_p$, was found between zenith angles of 0° – `r pwl_phi_to`° and azimuth angles of `r pwl_theta_from`° – `r pwl_theta_to`°. Similarly, for the FT forest plot, strong correlation was observed between ranges of zenith angles of 0° – `r ft_phi_to`° and azimuth angles of `r ft_theta_from`° – `r ft_theta_to`°. The high correlation coefficients found for non-vertical zenith angles of up to 30° for both PWL and FT are interpreted to be a result of inclined hydrometeor trajectories. At near-nadir zenith angles, @fig-hemi-ip-cc illustrates slightly lower $\rho_p$. This is because $\rho_p$ could not be calculated for some areas directly under the canopy due to missing limited interception efficiency values proximal to the trunks of individual trees as shown in @fig-lidar-ip. Higher $\rho_p$ values at near-nadir trajectory angles would be expected if throughfall measurements were available proximal to the tree trunks. However, this limitation does not significantly alter the interpretation of the results. The predicted hydrometeor trajectory angle of the event, calculated using @eq-ta, was `r ft_ta`°, considering an event measured wind speed of `r ft_ws_avg` m s^-1^ at FT Station and hydrometeor velocity of 0.9 m s^-1^ from PWL Station. This predicted hydrometeor trajectory angle is 25° more horizontal compared to the area of the hemisphere observed to have high correlation between $C_p$ and interception efficiency in @fig-hemi-ip-cc. 
+![UAV-lidar interception efficiency (-) calculated over the March 13, 2023 24 hr snowfall event for the FT (left) and PWL forest plots (right) at a 25 cm resolution. Transparent areas represent grids that did not have any lidar ground returns (i.e., under dense canopy proximal to tree trunks) or have been masked due to disturbance and thus have no throughfall measurement for the interception efficiency calculation. See the location of the two forest plots within FMRB in @fig-site-map.](../../analysis/lidar-processing/figs/maps/facet_ft_pwl_23_072_23_073_v2.0.0_saip_normalised_resample_0.25.png){#fig-lidar-ip}
+
+@fig-hemi-ip-cc presents two hemisphere plots illustrating the relationship between $C_p$ and interception efficiency for both the FT and PWL forest plots. These plots demonstrate a strong correlation between $C_p$ and interception efficiency towards the southern portion of the hemisphere, aligning with the average wind direction observed during the event. For the PWL forest plot, the upper 97.5th percentile of $\rho_p$, was found between zenith angles of 0° – `r pwl_phi_to`° and azimuth angles of `r pwl_theta_from`° – `r pwl_theta_to`°. Similarly, for the FT forest plot, strong correlation was observed between ranges of zenith angles of 0° – `r ft_phi_to`° and azimuth angles of `r ft_theta_from`° – `r ft_theta_to`°. The high correlation coefficients found for non-vertical zenith angles of up to 30° for both PWL and FT are interpreted to be a result of inclined hydrometeor trajectories that averaged around 30° over the event. At near-nadir zenith angles, @fig-hemi-ip-cc illustrates slightly lower $\rho_p$. This is because $\rho_p$ could not be calculated for some areas directly under the canopy due to limited interception efficiency values proximal to the trunks of individual trees as shown in @fig-lidar-ip. Higher $\rho_p$ values at near-nadir trajectory angles would be expected if throughfall measurements were available proximal to the tree trunks. However, this limitation does not significantly alter the interpretation of the results. 
 
 ![The Pearson Correlation Coefficient between rasters (25 cm resolution) of interception efficiency and leaf contact area for each grid cell across the study site for each azimuth angles (0°, 1°, ..., 359°) and zenith angles (0°, 1°, ..., 90°) for the FT (left) and PWL (right) forest plots.](../../analysis/lidar-processing/figs/voxrs/hemis/full_hemi_rho_p_cor_lca_ip_23_072_vox_len_0.25m_sa_gridgen_v2.0.0_sa_ft_pwl_.png){#fig-hemi-ip-cc}
+
+A logarithmic wind speed profile was fit to observed average wind speeds over the March 13-14 snowfall event from three anemometors installed at 3, 4, and 15 m above ground at FT station.
+
+The hydrometeor trajectories over this event were not directly observed but could be estimated following @eq-ta using observed wind speed and mean hydrometeor terminal velocity observed over the event of 0.9 m s^-1^. The wind speed observed over the event followed a logarithmic wind speed profile with height above the snowpack. @fig-wind-profiles shows a higher hydrometeor trajectory angle was predicted for the top of the canopy as a result of the higher wind speed, for example at 10 m a trajectory angle of `r ft_10m_example$traj_angle |> round(2)`° was calculated, compared to a trajectory angle of `r ft_2m_example$traj_angle |> round(2)`° at 2 m above the snowpack. which has higher wind speed, compared to lower levels of the canopy which were observed to have significantly lower wind speeds. The average wind speed observed over the wind profile, calculated as an integral between the displacement height plus roughness hight to the average height of the FT plot trees was `ft_mean_wind_prof_integral$wind_speed |> round(2)` m s^-1^ and the corresponding trajectory angle resulting from this was `ft_mean_wind_prof_integral$traj_angle |> round(2)`°. The trajectory angle resulting from this average wind speed is much higher than the trajectory angle closer to 30° observed in @fig-hemi-ip-cc. The trajectory angles of around 30° would have resulted from a mean wind speed of around 0.5 m s^-1^ and a height above the snowpack of about 1.5 m. This lower height is interpreted to be a result of the conical shape of the needleleaf trees surrounding PWL and FT which have the majority of their neeleleaf elements lower towards the ground. Therefore while the wind speeds were observed to be higher near the top of the canopy, corresponding to higher trajectory angles, the reduced amount of needleleaf elements at this height result in a smaller inpact of these more horizontal trajectories. 
+
+![Wind speed profile fit to average wind speeds over the March 13-14 snowfall event from anemometors at 3, 4, and 15 m above ground at FT station. The wind profile was computed for heights above the snowpack which was 1.47 m on average over the event.](figs/lidar_periods/wind_profile_w_trajectories_20230313.png){#fig-wind-profile}
 
 @fig-lca-vs-ip shows that the linear relationship between $C_p$ and interception efficiency, resampled to a 5 m resolution, is stronger when $C_p$ is adjusted for the observed shift in hydrometeor trajectory, with zenith angles (0° – 30°) and azimuth angles (170° – 220°), compared to the nadir leaf contact angle (zenith angle of 0°). The strong association between adjusted $C_p$ has the potential to be a predictor of interception efficiency, before ablation. An equation to represent this linear relationship is proposed here as:
 
@@ -351,6 +374,8 @@ mod_error |>
 
 ```
 
+Now need to show the increase in C_p at the plot scale and how this is a better predictor of I/P compared to nadir. Then in the following section we will build up how to calculate the increase in plot scale I/P.
+
 ## Combined Effects of Meteorology and Forest Structure
 
 ```{r, include=FALSE}
@@ -373,6 +398,16 @@ ft_perc_inc <- ft_inc / ft_nadir * 100
 nls_coefs <- readRDS('../../analysis/lidar-processing/data/models/ta_vs_lca_nls_coefs.rds')
 ```
 
+NEED TO REORDER THOUGHT PROCESS HERE:
+
+Goal is to predict the plot scale increase in canopy coverage based on wind speed. 
+
+  1. Show obs:
+  
+  ![Observed leaf contact area using VoxRS.](../../analysis/lidar-processing/figs/voxrs/scatter/WITH_TREEWELLS_traj_angle_and_wind_phiby_1_thetaby_2_traj_angle_wind_speed_vs_fractional_inc_lca_mean_sd_23_072.png){#fig-finclca-ht-ws}
+  2. Can calculate lca based on the nadir lca + the increase in lca from nadir
+  
+  
 @fig-finclca-ht-ws shows the observed increase in $C_p$, prior to snowfall on March 13th, for trajectory angles [0°, 1°, ..., 90°] and wind speeds [0 – 10 (m s^-1^)]. Increasing the hydrometeor trajectory angle results in a substantial rise in the observed $C_p$ over relatively common wind speeds. For example, with a wind speed of `r select_wind_speed` m s^-1^ which leads to a trajectory angle of `r ta |> round(0)`° using @eq-ta, the $C_p$ increased by a fraction of `r pwl_inc |> round(2)` and `r ft_inc |> round(2)` for the PWL and FT forest plots respectively in @fig-lca-ht-ws (right panel). This is a percent increase in the plot $C_p$ from nadir of `r pwl_perc_inc |> round(0)`% and `r ft_perc_inc |> round(0)`% for PWL and FT respectively. $C_p$ was also quantified across trajectory angles for both PWL and FT on March 14th, post snowfall, and showed a negligible effect of canopy snow load on $C_p$.
 
 <!-- These figures are generated under the lidar-processing project using scripts 11-13. This generates 100's of GB of data on RAM and therefore scripts 11 and 12 are run on copernicus and the resulting df is sent over to local to run script 13. Can run this locally if we use a larger step across phi and theta angles.  -->
@@ -411,6 +446,10 @@ mod_error |>
   # knitr::kable(booktabs = TRUE,
   #              format = 'latex')
 ```
+
+## Throughfall Model Performance
+
+The ultimate variable we are after is throughfall so need to show the performance of throughfal models. We can do this at the plot/coarse grid resolution where the vector based model works. We can also ignore the vector based soluation and just use the cc_nadir to predict I/P at a smaller grid resolution... if we want a detailed map of throughfall.
 
 # Discussion
 
