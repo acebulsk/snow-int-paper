@@ -129,7 +129,7 @@ pwl_event_ta_estimate <- traj_angle_deg(pwl_wind_estimate, mean_vel)
 # lot of subcanopy snow depths
 
 mcn_df_smry <- readRDS(paste0(
-  '../../analysis/lidar-processing/data//hemi_stats/avg_voxrs_canopy_metrics_over_nadir_and_upper_hemi_2.5thpercentile_FT_PWL.rds'
+  '../../analysis/lidar-processing/data/hemi_stats/avg_voxrs_canopy_metrics_over_nadir_and_upper_hemi_2.5thpercentile_FT_PWL.rds'
 ))
 
 ft_cc_nadir <- mcn_df_smry |>
@@ -203,16 +203,45 @@ pwl_ip_obs <-
 # Vector Based
 errors <- data.frame(
   ip = c(ft_ip_obs, pwl_ip_obs, ft_ip_mod, pwl_ip_mod,ft_cc_nadir, pwl_cc_nadir),
-  group = c('obs','obs', 'vb', 'vb', 'cc_nadir', 'cc_nadir'),
+  group = c('obs','obs', 'vb', 'vb', 'nadir', 'nadir'),
   plot = c('FT', 'PWL', 'FT', 'PWL', 'FT', 'PWL')) |>
   mutate(tf = (1-ip)*event_precip) |>
   pivot_longer(c(ip, tf)) |>
   pivot_wider(names_from = c(group), values_from = value) |>
-  pivot_longer(c(vb, cc_nadir), names_to = 'mod_type', values_to = 'mod_vals') |>
-  mutate(bias_ = obs - mod_vals,
-         bias = obs - mod_vals,
-         MAE = abs(bias))
+  pivot_longer(c(vb, nadir), names_to = 'mod_type', values_to = 'mod_vals') |>
+  mutate(bias = obs - mod_vals,
+         MAE = abs(bias),
+         `Perc. Error` = (bias)/obs*100)
 errors
+
+saveRDS(errors, 'data/model_results/plot_scale_vb_model_error.rds')
+
+# plot accumulated throughfall over the event for each model
+tf_df <- errors |>
+  filter(name == 'tf') |>
+  select(plot:mod_vals,-name) |>
+  pivot_wider(names_from = mod_type, values_from = mod_vals) |>
+  pivot_longer(c(obs, vb, nadir))
+ggplot(tf_df, aes(plot, value, fill = name)) +
+  geom_bar(stat = "identity", position = 'dodge') +
+  labs(
+    y = '𝚫 Throughfall (kg m⁻²)',
+    x = element_blank(),
+    fill = 'Data Type'
+  ) +
+  ylim(c(0, 30)) +
+  geom_hline(aes(yintercept = event_precip, linetype = "𝚫 SWEo \n(kg m⁻²)"), color = "black", show.legend = TRUE) +
+  scale_linetype_manual(values = "dashed", name = NULL) +
+  guides(
+    fill = guide_legend(override.aes = list(linetype = "blank")),
+    linetype = guide_legend(override.aes = list(color = "black"))
+  )
+
+ggsave(
+  'figs/lidar_periods/20230314_event_throughfall_totals_obs_vs_vb_vs_nadir.png',
+  width = 5,
+  height = 3
+)
 
 error_summary <- errors |>
   group_by(plot, name, mod_type) |>
@@ -234,6 +263,8 @@ error_summary_noplots <- errors |>
     bias = mean(bias),
     MAE = mean(MAE)) |>
   arrange(name)
+
+error_summary_noplots
 
 # test at the 5 m grid scale ----
 
@@ -261,6 +292,36 @@ names(pwl_ip_vb_5m) <- 'ip_mod'
 ft_ip_vb_5m <- (ft_cc_nadir_5m + ft_lca_inc)*ft_a
 names(ft_ip_vb_5m) <- 'ip_mod'
 
+pwl_cp_vb_5m <- (pwl_cc_nadir_5m + pwl_lca_inc)
+names(pwl_cp_vb_5m) <- 'C_p_mod'
+ft_cp_vb_5m <- (ft_cc_nadir_5m + ft_lca_inc)
+names(ft_cp_vb_5m) <- 'C_p_mod'
+
+# Leaf Contact Area ----
+
+pwl_cp_df <- c(pwl_ip_5m, pwl_cp_vb_5m) |>
+  terra::as.points() |>
+  as.data.frame(geom="XY") |>
+  # pivot_longer(c(ip_obs, ip_mod)) |>
+  mutate(plot_name = 'PWL')
+
+ft_cp_df <- c(ft_ip_5m, ft_cp_vb_5m) |>
+  terra::as.points() |>
+  as.data.frame(geom="XY") |>
+  # pivot_longer(c(ip_obs, ip_mod)) |>
+  mutate(plot_name = 'FT')
+
+cp_df_5m <- rbind(pwl_cp_df, ft_cp_df)
+
+ggplot(cp_df_5m, aes(C_p_mod, ip_obs)) +
+  geom_point() +
+  geom_abline(aes(slope = 1, intercept = 0, linetype = "1:1 line"), alpha = 0.5) +
+  facet_grid(~plot_name) +
+  lims(
+    y = c(0,NA),
+    x = c(0,NA)
+  )
+
 # IP ----
 
 ## map 5m performance ----
@@ -268,7 +329,6 @@ names(ft_ip_vb_5m) <- 'ip_mod'
 plot(ft_ip_5m - ft_ip_vb_5m)
 
 plot(pwl_ip_5m - pwl_ip_vb_5m)
-
 
 ## plot 5 m performance with vector based adjustment ----
 
