@@ -5,6 +5,7 @@ library(ggpubr)
 library(cowplot)
 library(plotly)
 library(abind)
+library(terra)
 
 source('../../analysis/lidar-processing/scripts/voxrs/voxrs_helper_fns.R')
 source('../../analysis/disdrometer/scripts/00_source_functions.R')
@@ -43,6 +44,7 @@ pwl_wind <- readRDS('../../analysis/met-data-processing/data/pwl_met_qaqc.rds') 
 
 # theme_bw(base_size = 14)
 options(ggplot2.discrete.colour= palette.colors(palette = "R4"))
+options(ggplot2.discrete.fill= palette.colors(palette = "R4")[2:6])
 cc_colours <- c("#9E9E9E",  "#F5C710", "#61D04F")
 
 # [1] "#000000" "#DF536B" "#61D04F" "#2297E6" "#28E2E5" "#CD0BBC" "#F5C710"
