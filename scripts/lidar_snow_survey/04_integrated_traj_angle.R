@@ -1,9 +1,12 @@
 # Determine the trajectory angle at various heights within the canopy
-# Potentially aggregate this based on the portion of canopy elements at each height
+# This is based on the wind speed profile from wind speeds at 3 heights at Forest Tower (see eddy cov repo for derivation)
+# See Stull textbook pg. 677 for fig showing logarithmic relationship starts witin the bit top of the canopy. They also show that the exponential relationship should be used for the top 3/4 of the canopy but we did not see this relationship in our observations.
+# Could potentially aggregate this based on the portion of canopy elements at each height
 # Using gap filled wind speed from forest tower at 4 m
 # snowfall during these events precents the use of canopy top wind from the EC system
 # TODO make plot of traj angle with height and avg wind speed below canopy
 # TODO calculate area of typical needleleaf tree and use this as weighted average for each canopy height slice
+# TODO plot exponential relationship on here from @Cionco1965, minimal trunk space within the forest at FT so do not need initial log equation above the ground
 
 sel_event <- "2023-03-14"
 us_wind_height <- 4.28  # m, this was measured in situ, see joplin notes
@@ -80,6 +83,17 @@ mean_wind_speed <- function(h1, h2, wind_speed_function) {
 ft_mean_speed <- mean_wind_speed(min(heights), max(heights), wind_speed_function)
 ft_mean_speed
 
+# get avg hydrometeor velocity
+select_event <- '2023-03-14'
+ffr_met_wnd_lidar_events <- lidar_events_long_dt |>
+  left_join(ffr_met_wnd)  |>
+  left_join(parsivel, by = 'datetime') |>
+  left_join(pwl_sf) |>
+  filter(event_id == select_event,
+         ppt > 0)
+
+mean_vel <- mean(ffr_met_wnd_lidar_events$part_vel, na.rm = T)
+
 ft_mean_speed_traj <- traj_angle_deg(ft_mean_speed, mean_vel)
 
 saveRDS(
@@ -122,51 +136,54 @@ calculate_zHeight <- function(FittedWspeed, ustar, d_0, z_0m) {
   return(zHeight)
 }
 
-vox_config_id <- "23_072_vox_len_0.25m_sa_gridgen_v2.0.0_sa"
-pwl_hemi_stat <-
-  readRDS(
-    paste0(
-      '../../analysis/lidar-processing/data/hemi_stats/hemi_raw_theta_phi_for_rho_s_upper_2_5th_percentile_',
-      vox_config_id,
-      "_",
-      'PWL_E',
-      '.rds'
-    ))
+# # zenth based on the max phi within the upper 975th percentile of rho
+# this is somewhat arbitrary
+# vox_config_id <- "23_072_vox_len_0.25m_sa_gridgen_v2.0.0_sa"
+# pwl_hemi_stat <-
+#   readRDS(
+#     paste0(
+#       '../../analysis/lidar-processing/data/hemi_stats/hemi_raw_theta_phi_for_rho_s_upper_2_5th_percentile_',
+#       vox_config_id,
+#       "_",
+#       'PWL_E',
+#       '.rds'
+#     ))
+#
+# ft_hemi_stat <-
+#   readRDS(
+#     paste0(
+#       '../../analysis/lidar-processing/data/hemi_stats/hemi_raw_theta_phi_for_rho_s_upper_2_5th_percentile_',
+#       vox_config_id,
+#       "_",
+#       'FSR_S',
+#       '.rds'
+#     ))
+#
+# pwl_best_phi <- max(pwl_hemi_stat$phi_d)
+# ft_best_phi <- max(ft_hemi_stat$phi_d)
 
-ft_hemi_stat <-
-  readRDS(
-    paste0(
-      '../../analysis/lidar-processing/data/hemi_stats/hemi_raw_theta_phi_for_rho_s_upper_2_5th_percentile_',
-      vox_config_id,
-      "_",
-      'FSR_S',
-      '.rds'
-    ))
+# zenith based on the best R2 over the azimuth range
+# big sensitivity if we chose integrated with this one... it gives us 4 mm more interception than we observed
+cor_stats <- readRDS('../../analysis/lidar-processing/data/hemi_stats/r2_vs_integrated_and_single_zentith.rds')
 
-pwl_phi_to <- max(pwl_hemi_stat$phi_d)
-ft_phi_to <- max(ft_hemi_stat$phi_d)
+cor_smry <- cor_stats |>
+  group_by(plot_name, group) |>
+  summarise(peak_r2 = max(r2),
+            phi_at_peak_r2 = phi_d[which.max(r2)])
 
-# get avg hydrometeor velocity
-select_event <- '2023-03-14'
-ffr_met_wnd_lidar_events <- lidar_events_long_dt |>
-  left_join(ffr_met_wnd)  |>
-  left_join(parsivel, by = 'datetime') |>
-  left_join(pwl_sf) |>
-  filter(event_id == select_event,
-         ppt > 0)
+pwl_best_phi <- cor_smry$phi_at_peak_r2[cor_smry$plot_name == 'PWL' & cor_smry$group == 'Single Zenith']
+ft_best_phi <- cor_smry$phi_at_peak_r2[cor_smry$plot_name == 'FT' & cor_smry$group == 'Single Zenith']
 
-mean_vel <- mean(ffr_met_wnd_lidar_events$part_vel, na.rm = T)
+# ## PWL ----
 
-## PWL ----
-
-pwl_select_wind <- wind_speed(pwl_phi_to, mean_vel)
+pwl_select_wind <- wind_speed(pwl_best_phi, mean_vel)
 
 # this is the height above the snowpack which is about 1.5 m for this event
 pwl_wind_height_of_event <- calculate_zHeight(pwl_select_wind,event_avg_ustar, ft_wp_pars$d_0, ft_wp_pars$z_0m)
 
 ## FT ----
 
-ft_select_wind <- wind_speed(ft_phi_to, mean_vel)
+ft_select_wind <- wind_speed(ft_best_phi, mean_vel)
 
 ft_wind_height_of_event <- calculate_zHeight(ft_select_wind,event_avg_ustar, ft_wp_pars$d_0, ft_wp_pars$z_0m)
 
@@ -178,6 +195,7 @@ ft_wind_height_of_event <- calculate_zHeight(ft_select_wind,event_avg_ustar, ft_
 wind_vars <- data.frame(
   plot = c('FT', 'PWL'),
   wind_speed = c(ft_select_wind, pwl_select_wind),
-  traj_angle = c(pwl_phi_to, ft_phi_to),
+  traj_angle = c(pwl_best_phi, ft_best_phi),
   height_of_wind = c(ft_wind_height_of_event, pwl_wind_height_of_event)
 )
+
