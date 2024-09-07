@@ -25,6 +25,15 @@ pwl_ip_obs_rast <-
 paste0('Given the height of wind deemed important for PWL: ', pwl_wind_height_of_event |> round(2),
        ' and FT: ', ft_wind_height_of_event |> round(2), '. This was based on the zone of heighest correlation of the hemisphere and canopy contacts and I/P.')
 
+ws_pars <- data.frame(
+  plot = c('PWL', 'FT'),
+  event_mean_snow_depth = event_sd,
+  wind_height_of_event = c(pwl_wind_height_of_event, ft_wind_height_of_event),
+  best_trajectory = c(pwl_best_phi, ft_best_phi),
+  best_wind = c(pwl_select_wind, ft_select_wind)
+)
+
+saveRDS(ws_pars, 'data/model_results/wind_speed_height_match_hemi_traj.rds')
 # First need the wind speed at the specified heights above
 
 heights <- seq(ft_wp_pars$d_0+ft_wp_pars$z_0m, 12, 0.1)
