@@ -210,7 +210,7 @@ ggplot(at_ip, aes(x = temp_binned, y = IP, fill = name)) +
 
 # fails normality test so should probabliy use wilcox.test
 at_ip_ttest <- at_ip |>
-  mutate(group = ifelse(t < -6, 'cold', 'warm'))
+  mutate(group = ifelse(t < t_th, 'cold', 'warm'))
 
 # Visualize the data
 ggplot(at_ip_ttest, aes(x = group, y = IP, fill = name)) +
@@ -368,7 +368,7 @@ ggplot(wind_ip, aes(x = wind_binned, y = IP, fill = name)) +
 
 # fails normality test so should probabliy use wilcox.test
 wind_ip_ttest <- wind_ip |>
-  mutate(group = ifelse(u < 1, 'calm', 'windy'))
+  mutate(group = ifelse(u < u_th, 'calm', 'windy'))
 
 # Visualize the data
 ggplot(wind_ip_ttest, aes(x = group, y = IP, fill = name)) +
@@ -606,7 +606,7 @@ ggplot(w_ip, aes(x = tree_binned, y = IP, fill = name)) +
 # fails normality test so should probabliy use wilcox.test
 tree_ip_ttest <- w_ip |>
   filter(is.na(w) == F) |>
-  mutate(group = factor(ifelse(w < 10, 'low', 'high'),
+  mutate(group = factor(ifelse(w < w_th, 'low', 'high'),
                         levels = c('low', 'high')))
 
 # Visualize the data
