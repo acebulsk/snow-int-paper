@@ -90,7 +90,7 @@ w_ip <- met_intercept_tree |>
   geom_errorbar(data = w_ip_smry, aes(x = tree_labs, ymax = sd_hi, ymin = sd_low), width = .5)  +
   geom_point(data = w_ip_smry, aes(x = tree_labs, y = IP_avg), colour = 'black', shape = 1, size = 4) +
   ylab(ip_y_ax_lab) +
-  xlab(w_ax_lab)+
+  xlab(w_tree_ax_lab)+
   ylim(ip_y_lims)+
   theme(plot.margin = margin(0.5, 0.5, 0.5, .75, "cm"))
 

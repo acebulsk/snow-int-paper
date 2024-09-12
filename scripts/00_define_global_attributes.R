@@ -68,6 +68,7 @@ diam_ax_lab <- 'Hydrometeor Diameter (mm)'
 vel_ax_lab <- 'Hydrometeor Velocity (m/s)'
 le_ax_lab <- 'Leaf Area Index (-)'
 cc_ax_lab <- 'Canopy Coverage (-)'
+w_tree_ax_lab <- "Initial Canopy Snow Load (kg m⁻²)"
 
 label_bin_fn <- function(bins){
   (bins[-1] + bins[-length(bins)]) / 2
