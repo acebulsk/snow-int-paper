@@ -74,7 +74,15 @@ ggplot(event_wind_profile |>
     y = c(0, NA),
     x = c(0, NA)
   ) +
-  facet_wrap(~name, scales = 'free')
+  facet_wrap(~name, scales = 'free') +
+  geom_point(
+    data = . %>% filter(name == 'Simulated Wind Speed (m/s)'),
+    aes(x = event_avg_wind, y = us_wind_height - event_sd),
+    shape = 24,        # Filled triangle point-up
+    color = 'red',
+    fill = 'red',      # Fill color (for filled shapes)
+    size = 4           # Increase point size
+  )
 
 ggsave('figs/lidar_periods/wind_profile_w_trajectories_20230313.png',width = 8, height = 3.5)
 
@@ -216,12 +224,13 @@ pwl_lca <- pwl_cc_nadir + pwl_lca_inc
 #
 # pwl_a <- ip_model_coefs |> filter(`Plot Name` == 'PWL', `Canopy Metrics` ==
 # select_ip_model) |> pull(`Model Slope`)
-#
-# ft_ip_mod <- ft_lca * ft_a
-# pwl_ip_mod <- pwl_lca * pwl_a
 
-ft_ip_mod <- ft_lca
-pwl_ip_mod <- pwl_lca
+# force to 1 as per above
+ft_a <- 1
+pwl_a <- 1
+
+ft_ip_mod <- ft_lca * ft_a
+pwl_ip_mod <- pwl_lca * pwl_a
 
 # found these actually did pretty well but vector based still better
 # ft_ip_mod <- ft_cc_nadir # could agrue IP == nadir canopy coverage as in rainfall params
