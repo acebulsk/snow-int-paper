@@ -7,6 +7,11 @@ source('scripts/lidar_snow_survey/01_plot_lidar_met_time_series.R')
 met_w_snowfall <- ffr_met_wnd_lidar_events |>
   filter(ppt > 0.1)
 
+marmet <- ffr_met_wnd_lidar_events |>
+  filter(event_id == '2023-03-14') |>
+  pivot_longer(c(ft_wind_speed, pwl_wind_speed))
+ggplot(marmet, aes(datetime, value, colour = name)) + geom_line()
+
 ffr_met_wnd_lidar_events_snowing <- met_w_snowfall |>
   group_by(event_id) |>
   mutate(event_cml_sf = cumsum(ppt),
@@ -22,16 +27,12 @@ ffr_met_wnd_lidar_events_snowing <- met_w_snowfall |>
     `mean FT Wind Dir. (°)` = mean(ft_wind_dir),
     `mean FT Wind Speed (m/s)` = mean(ft_wind_speed),
     `mean PWL Wind Dir. (°)` = mean(pwl_wind_dir),
-    `mean PWL Wind Speed (m/s)` = mean(pwl_wind_speed),
-    `Cuml. Snowfall (mm)` = sum(ppt)/4
-  )
+    `mean PWL Wind Speed (m/s)` = mean(pwl_wind_speed))
 
 saveRDS(ffr_met_wnd_lidar_events_snowing, 'data/event_met/lidar_events_met_avgs_snowing.rds')
 
 for (event in as.character(scan_dates$event_id)) {
   ffr_met_wnd_event <- met_w_snowfall[as.character(met_w_snowfall$event_id) == event, ]
-
-  event_wind_stats <-
 
   p <- weatherdash::wind_rose(ffr_met_wnd_event,
                               'datetime',
@@ -40,7 +41,7 @@ for (event in as.character(scan_dates$event_id)) {
                               dir_res = 30,
                               ws_res = .5,
                               ws_max = 5,
-                              plot_title = 'FT',
+                              # plot_title = 'FT',
                               spd_unit = 'm/s'
   )
 
@@ -55,7 +56,7 @@ for (event in as.character(scan_dates$event_id)) {
                               dir_res = 30,
                               ws_res = .5,
                               ws_max = 5,
-                              plot_title = 'PWL',
+                              # plot_title = 'PWL',
                               spd_unit = 'm/s'
   )
 
