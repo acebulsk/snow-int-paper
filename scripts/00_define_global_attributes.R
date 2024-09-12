@@ -10,6 +10,11 @@ library(terra)
 source('../../analysis/lidar-processing/scripts/voxrs/voxrs_helper_fns.R')
 source('../../analysis/disdrometer/scripts/00_source_functions.R')
 
+scl_names_dict <- data.frame(
+  name = c('sparse_forest', 'medium_density_forest', 'dense_forest'),
+  scl_names_new = factor(c('Sparse', 'Mixed', 'Closed'), levels = c(c('Sparse', 'Mixed', 'Closed')))
+)
+
 met_intercept <- readRDS('../../analysis/interception/data/storm_analysis/continuous_throughfall_data_binned_met_select_events.rds')  |>
   filter(q_sf > 0,
          d_tf > 0.01,
@@ -18,7 +23,8 @@ met_intercept <- readRDS('../../analysis/interception/data/storm_analysis/contin
   mutate(
     q_int = q_sf - q_tf,
     IP = q_int / q_sf) |>
-  filter(IP < 1)
+  filter(IP < 1) |>
+  left_join(scl_names_dict)
 
 calg_mag_declination <- 13.5 # deg + east in 2020 https://www.ngdc.noaa.gov/geomag/magfield-wist/
 
@@ -62,7 +68,6 @@ diam_ax_lab <- 'Hydrometeor Diameter (mm)'
 vel_ax_lab <- 'Hydrometeor Velocity (m/s)'
 le_ax_lab <- 'Leaf Area Index (-)'
 cc_ax_lab <- 'Canopy Coverage (-)'
-w_ax_lab <- 'Initial Canopy Snow Load (mm)'
 
 label_bin_fn <- function(bins){
   (bins[-1] + bins[-length(bins)]) / 2
