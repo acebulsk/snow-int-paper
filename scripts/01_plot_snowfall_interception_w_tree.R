@@ -307,8 +307,8 @@ model_summaries <- lm_nest |>
   mutate(
     offset_y = case_when(
       cc == 0.73 ~ 0,
-      cc == 0.78  ~ .03,
-      cc == 0.82  ~ .06
+      cc == 0.78  ~ .04,
+      cc == 0.82  ~ .08
     )
   )
 
@@ -321,7 +321,7 @@ event_df_sep_troughs_avg |>
   labs(colour = 'SCL\nCanopy\nCoverage (-)') +
   theme(legend.position = 'right') +
   scale_color_manual(values = cc_colours) +
-  facet_grid(cols = vars(pretty_name), scales = 'free') +
+  facet_wrap(~pretty_name, nrow = 3, scales = 'free') +
   xlab(element_blank()) +
   geom_text(data = model_summaries,
             aes(x = -Inf, y = .85 - offset_y,
@@ -332,7 +332,7 @@ event_df_sep_troughs_avg |>
             hjust = -0.1, vjust = 1.1, size = 3, fontface = 'bold')
 
 ggsave('figs/automated_snowfall_event_periods/event_avg_temp_wind_cuml_snow_vs_IP_colour_troughs.png',
-       width = 10, height = 3.5)
+       width = 5, height = 7)
 
 # plotly::ggplotly()
 
