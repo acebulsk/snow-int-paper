@@ -36,7 +36,7 @@ bad_names <- c('EC low',
                'TB4')
 
 scl_name_dict <- data.frame(name = c('SCL 1', 'SCL 2', 'SCL 3'),
-                            new_name = c('SCL Med', 'SCL Low', 'SCL High'))
+                            new_name = c('SCL Mixed', 'SCL Sparse', 'SCL Dense'))
 
 inst_coords <- sf::read_sf('../../analysis/interception/data/lai/instrument_coords.gpkg') |>
   filter(!name %in% bad_names) |>

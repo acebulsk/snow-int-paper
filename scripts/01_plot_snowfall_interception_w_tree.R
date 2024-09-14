@@ -203,12 +203,12 @@ pretty_table <- event_avgs_maxmin |>
   ) |>
   cols_align(align = "center")  |>
   cols_width(
-    w_tree_event ~ px(80),           # Set width for 'Start Date' column
-    duration ~ px(80),               # Set width for 'Duration (Hrs)' column
+    w_tree_event ~ px(95),           # Set width for 'Start Date' column
+    duration ~ px(70),               # Set width for 'Duration (Hrs)' column
     ends_with("_t") ~ px(50),         # Set equal width for Air Temperature columns
     ends_with("_u") ~ px(50),         # Set equal width for Wind Speed columns
     ends_with("_IP_troughs") ~ px(50),# Set equal width for Interception Efficiency columns
-    total_snowfall ~ px(80)          # Set width for 'Total Snowfall' column
+    total_snowfall ~ px(70)          # Set width for 'Total Snowfall' column
   ) |>
   fmt_number(
     columns = c(starts_with("min_"), starts_with("mean_"), starts_with("max_"), total_snowfall),
@@ -218,6 +218,8 @@ pretty_table <- event_avgs_maxmin |>
 pretty_table
 
 saveRDS(pretty_table, 'data/event_avgs_maxmin_pretty_gt_table.rds')
+
+gt::gtsave(pretty_table, 'figs/event_avgs_maxmin_pretty_gt_table.pdf')
 
 # plot cuml canopy load using the avg of the troughs ----
 

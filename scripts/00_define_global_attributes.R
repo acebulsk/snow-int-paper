@@ -7,6 +7,7 @@ library(plotly)
 library(abind)
 library(terra)
 library(modelr)
+library(gt)
 
 source('../../analysis/lidar-processing/scripts/voxrs/voxrs_helper_fns.R')
 source('../../analysis/disdrometer/scripts/00_source_functions.R')
