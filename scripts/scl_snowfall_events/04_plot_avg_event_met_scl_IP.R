@@ -1,0 +1,126 @@
+# Script to plot the average met and SCL IP over each event
+
+# look at trends in met avgs ----
+event_df_sep_troughs_avg <- event_df_sep_troughs |>
+  group_by(w_tree_event, trough_name) |>
+  summarise(event_del_sf = max(cuml_snow),
+            event_del_i = cuml_int_troughs[which.max(cuml_snow)],
+            IP = event_del_i/event_del_sf,
+            t = mean(t),
+            u = mean(u),
+            cc = first(cc)) |>
+  group_by(trough_name) |>
+  pivot_longer(c(event_del_sf, t, u)) |>
+  left_join(var_name_dict)
+
+# Add R-squared values to the dataset
+y_col <- 'IP'
+x_col <- 'value'
+lm_nest <- event_df_sep_troughs_avg |>
+  group_by(pretty_name, cc) |>
+  nest() |>
+  mutate(model = map(data, ~lm(as.formula(paste(y_col, "~", x_col)), data = .x)),
+         resids = map2(data, model, add_residuals),
+         preds = map2(data, model, add_predictions),
+         glance = map(model, broom::glance))
+model_summaries <- lm_nest |>
+  unnest(glance) |>
+  select(pretty_name, cc, r.squared,adj.r.squared, p.value) |>
+  mutate(
+    offset_y = case_when(
+      cc == 0.73 ~ 0,
+      cc == 0.78  ~ .05,
+      cc == 0.82  ~ .1
+    )
+  )
+
+event_df_sep_troughs_avg |>
+  ggplot() +
+  geom_point(aes(value, IP, colour = cc, group = cc)) +
+  geom_smooth(aes(value, IP, colour = cc, group = cc), method = 'lm', se = F, linetype = 'solid')+
+  ylab("Interception Efficiency (-)") +
+  # xlab('Event Total Snowfall (mm)') +
+  labs(colour = 'SCL\nCanopy\nCoverage (-)') +
+  theme(legend.position = 'right') +
+  scale_color_manual(values = cc_colours) +
+  facet_wrap(~pretty_name, nrow = 3, scales = 'free') +
+  xlab(element_blank()) +
+  ylim(c(NA, 1)) +
+  geom_text(data = model_summaries,
+            aes(x = -Inf, y = (1 - offset_y),
+                label = sprintf("R² = %.3f%s",
+                                adj.r.squared,
+                                ifelse(p.value < 0.05, "*", "")),
+                colour = cc),
+            hjust = -.1, vjust = 1.1, size = 3, fontface = 'bold')
+
+ggsave('figs/automated_snowfall_event_periods/event_avg_temp_wind_cuml_snow_vs_IP_colour_troughs.png',
+       width = 5, height = 7)
+
+# plotly::ggplotly()
+
+# use this method if you want to try binning
+
+# sf_breaks <- seq(
+#   0,
+#   50,
+#   5)
+#
+# sf_labs <- label_bin_fn(sf_breaks)
+#
+# event_df_sep_troughs_avg$event_del_sf_bin <-
+#   cut(event_df_sep_troughs_avg$event_del_sf,
+#       sf_breaks,
+#       include.lowest = T)
+#
+# event_df_sep_troughs_avg$event_del_sf_bin_lab <-
+#   cut(event_df_sep_troughs_avg$event_del_sf,
+#       sf_breaks,
+#       labels = sf_labs,
+#       include.lowest = T) |> as.character() |> as.numeric()
+#
+# event_df_sep_troughs_smry <- event_df_sep_troughs_avg |>
+#   group_by(event_del_sf_bin_lab, event_del_sf_bin) |>
+#   # filter(weighed_tree_canopy_load_mm <= 5) |>
+#   summarise(IP_avg = mean(IP, na.rm = T),
+#             sd = sd(IP, na.rm = T),
+#             sd_low = IP_avg - sd,
+#             sd_hi = IP_avg + sd,
+#             ci_low = quantile(IP,0.05),
+#             ci_hi = quantile(IP, 0.95),
+#             n = n()) |>
+#   filter(n >= 3)
+
+# sel_ip <- event_df_sep_troughs |>
+#   select(w_tree_event, datetime, Tree = IP_tree, SCL = IP_troughs) |>
+#   pivot_longer(c(Tree, SCL), names_to = 'inst', values_to = 'IP')
+#
+# event_df_sep_troughs |>
+#   rename(Tree = cuml_int_tree, SCL = cuml_int_troughs) |>
+#   pivot_longer(c(Tree, SCL)) |>
+#   select(-t) |>
+#   left_join(event_avgs |> select(w_tree_event, t)) |>
+#   filter(w_tree_event %in% low_wind_events) |>
+#   ggplot(aes(cuml_snow, value, colour = t, group = t)) +
+#   geom_line() + scale_color_viridis_c(option = 'magma', end = .90) +
+#   facet_grid(~name) +
+#   ylab('Canopy Storage (mm)') +
+#   xlab('Snowfall (mm)') +
+#   labs(colour = temp_ax_lab)sel_W <- event_df_sep_troughs |>
+#   ungroup() |>
+#   select(datetime, Tree = cuml_int_tree, SCL = cuml_int_troughs) |>
+#   pivot_longer(c(Tree, SCL), names_to = 'inst', values_to = 'W')
+
+# left_join(sel_ip, sel_W, by = c('datetime', 'inst')) |>
+#   left_join(event_avgs |> select(w_tree_event, t)) |>
+#   filter(w_tree_event %in% low_wind_events) |>
+#   ggplot(aes(W, IP, colour = t, group = t)) +
+#   geom_line() + scale_color_viridis_c(option = 'magma', end = .90) +
+#   facet_grid(~inst) +
+#   ylab('Interception Efficiency (-)') +
+#   xlab('Canopy Storage (mm)') +
+#   labs(colour = temp_ax_lab)
+#
+# ggsave('figs/interception/canopy_storage_VS_IP_scl_tree.png', width = 7, height = 3)
+
+# plotly::ggplotly()

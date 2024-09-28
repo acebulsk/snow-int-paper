@@ -208,33 +208,6 @@ ft_lca <- ft_cc_nadir + ft_lca_inc
 
 pwl_lca <- pwl_cc_nadir + pwl_lca_inc
 
-# Calculate the interception efficiency for the event Originally used an alpha
-# value based on the association between lca and ip however this only worked
-# when using earler iterations of the zenith angle choice, and since we are
-# using the nadir lca as a basis (which follows the 1:1 line in the original
-# plot just with a lot of scatter) we can see we are better off not using an
-# alpha value but just need to increase the lca by some factor select_ip_model
-
-# <- 'Vector Based' select_ip_model <- 'Single Zenith Single Theta'
-# ip_model_coefs <-
-# readRDS('../../analysis/lidar-processing/data/models/lca_vs_ip_model_error_ft_pwl_nadir_adj.rds')
-#
-# ft_a <- ip_model_coefs |> filter(`Plot Name` == 'FT', `Canopy Metrics` ==
-# select_ip_model) |> pull(`Model Slope`)
-#
-# pwl_a <- ip_model_coefs |> filter(`Plot Name` == 'PWL', `Canopy Metrics` ==
-# select_ip_model) |> pull(`Model Slope`)
-
-# force to 1 as per above
-ft_a <- 1
-pwl_a <- 1
-
-ft_ip_mod <- ft_lca * ft_a
-pwl_ip_mod <- pwl_lca * pwl_a
-
-# found these actually did pretty well but vector based still better
-# ft_ip_mod <- ft_cc_nadir # could agrue IP == nadir canopy coverage as in rainfall params
-# pwl_ip_mod <- pwl_cc_nadir # could agrue IP == nadir canopy coverage as in rainfall params
 
 # Error Analysis
 library(terra)
@@ -246,9 +219,53 @@ pwl_ip_obs <- pwl_ip_obs_rast |>
   values() |>
   mean(na.rm = T)
 
+# Calculate the interception efficiency for the event
+
+# select_ip_model <- 'Vector Based'
+# ip_model_coefs <-
+# readRDS('../../analysis/lidar-processing/data/models/lca_vs_ip_model_error_ft_pwl_nadir_adj.rds')
+#
+# ft_a <- ip_model_coefs |> filter(`Plot Name` == 'FT', `Canopy Metrics` ==
+# select_ip_model) |> pull(`Model Slope`)
+#
+# pwl_a <- ip_model_coefs |> filter(`Plot Name` == 'PWL', `Canopy Metrics` ==
+# select_ip_model) |> pull(`Model Slope`)
+
+# force to 1
+# ft_a <- 1
+# pwl_a <- 1
+
+alpha <- seq(.6, 1, by = 0.0001)
+cal_alpha_df <- data.frame(
+  alpha = alpha,
+  ft_ip_mod = ft_lca * alpha,
+  ft_ip_obs = ft_ip_obs,
+  pwl_ip_mod = pwl_lca * alpha,
+  pwl_ip_obs = pwl_ip_obs
+) |>
+  mutate(
+    ft_bias = ft_ip_obs - ft_ip_mod,
+    pwl_bias = pwl_ip_obs - pwl_ip_mod,
+    mean_bias = (ft_bias + pwl_bias) / 2
+  )
+
+ggplot(cal_alpha_df |> pivot_longer(c(ft_bias, pwl_bias, mean_bias)), aes(alpha, value, colour = name)) +
+  geom_line()
+
+alpha_plot_scale <- cal_alpha_df$alpha[which.min(abs(cal_alpha_df$mean_bias))]
+
+ft_ip_mod <- ft_lca * alpha_plot_scale
+pwl_ip_mod <- pwl_lca * alpha_plot_scale
+
+saveRDS(alpha_plot_scale, 'data/model_results/alpha_plot_scale.rds')
+
+# found these actually did pretty well but vector based still better
+# ft_ip_mod <- ft_cc_nadir # could agrue IP == nadir canopy coverage as in rainfall params
+# pwl_ip_mod <- pwl_cc_nadir # could agrue IP == nadir canopy coverage as in rainfall params
+
 # Vector Based
 errors <- data.frame(
-  ip = c(ft_ip_obs, pwl_ip_obs, ft_ip_mod, pwl_ip_mod,ft_cc_nadir, pwl_cc_nadir),
+  ip = c(ft_ip_obs, pwl_ip_obs, ft_ip_mod, pwl_ip_mod, ft_cc_nadir, pwl_cc_nadir),
   group = c('UAV-lidar','UAV-lidar', 'VB-model', 'VB-model', 'Nadir-model', 'Nadir-model'),
   plot = c('FT', 'PWL', 'FT', 'PWL', 'FT', 'PWL')) |>
   mutate(tf = (1-ip)*event_precip) |>
@@ -325,192 +342,192 @@ error_summary_noplots
 # you get coarser/worse as you get finer. The differences between the two plots
 # in terms of the error also get smaller at coarser resolutions.
 
-rsmpl_res <- 5
-rsmpl_fact <- rsmpl_res/0.25
-agg_fn <- 'mean'
-min_n_cells <- 25
-pwl_tf_025 <- rast("../../analysis/lidar-processing/data/dsm_swe/23_072_23_073_v2.0.0_sa_PWL_E_swe_normalised_resample_0.25_crop_mask.tif")
-pwl_tf_rsmpl <- resample_rast(pwl_tf_025, rsmpl_fact, agg_fn, min_n_cells)
-names(pwl_tf_rsmpl) <- 'tf_obs'
-ft_tf_025 <- rast("../../analysis/lidar-processing/data/dsm_swe/23_072_23_073_v2.0.0_sa_FSR_S_swe_normalised_resample_0.25_crop_mask.tif")
-ft_tf_rsmpl <- resample_rast(ft_tf_025, rsmpl_fact, agg_fn, min_n_cells)
-names(ft_tf_rsmpl) <- 'tf_obs'
-
-pwl_ip_025 <- rast("../../analysis/lidar-processing/data/dsm_ip/23_072_23_073_v2.0.0_sa_PWL_E_ip_normalised_resample_0.25_crop_mask.tif")
-pwl_ip_rsmpl <- resample_rast(pwl_ip_025, rsmpl_fact, agg_fn, min_n_cells)
-names(pwl_ip_rsmpl) <- 'ip_obs'
-ft_ip_025 <- rast("../../analysis/lidar-processing/data/dsm_ip/23_072_23_073_v2.0.0_sa_FSR_S_ip_normalised_resample_0.25_crop_mask.tif")
-ft_ip_rsmpl <- resample_rast(ft_ip_025, rsmpl_fact, agg_fn, min_n_cells)
-names(ft_ip_rsmpl) <- 'ip_obs'
-
-pwl_cc_nadir_025m <- rast('../../analysis/lidar-processing/data/dsm_cpy_metrics/23_072_vox_len_0.25m_sa_gridgen_v2.0.0_sa_PWL_E_nadir_lca_0.25m_crop_mask.tif')
-pwl_cc_nadir_rsmpl <- resample_rast(pwl_cc_nadir_025m, rsmpl_fact, agg_fn, min_n_cells)
-ft_cc_nadir_025m <- rast('../../analysis/lidar-processing/data/dsm_cpy_metrics/23_072_vox_len_0.25m_sa_gridgen_v2.0.0_sa_FSR_S_nadir_lca_0.25m_crop_mask.tif')
-ft_cc_nadir_rsmpl <- resample_rast(ft_cc_nadir_025m, rsmpl_fact, agg_fn, min_n_cells)
-
-# compute interception efficiency using the vector based model
-
-pwl_ip_vb_rsmpl <- (pwl_cc_nadir_rsmpl + pwl_lca_inc)*pwl_a
-names(pwl_ip_vb_rsmpl) <- 'ip_mod'
-ft_ip_vb_rsmpl <- (ft_cc_nadir_rsmpl + ft_lca_inc)*ft_a
-names(ft_ip_vb_rsmpl) <- 'ip_mod'
-
-# IP ----
-
-## map Xm performance ----
-
-plot(ft_ip_rsmpl - ft_ip_vb_rsmpl)
-
-plot(pwl_ip_rsmpl - pwl_ip_vb_rsmpl)
-
-
-## plot resampled performance with vector based adjustment ----
-
-pwl_ip_df <- c(pwl_ip_rsmpl, pwl_ip_vb_rsmpl) |>
-  terra::as.points() |>
-  as.data.frame(geom="XY") |>
-  # pivot_longer(c(ip_obs, ip_mod)) |>
-  mutate(plot_name = 'PWL')
-
-ft_ip_df <- c(ft_ip_rsmpl, ft_ip_vb_rsmpl) |>
-  terra::as.points() |>
-  as.data.frame(geom="XY") |>
-  # pivot_longer(c(ip_obs, ip_mod)) |>
-  mutate(plot_name = 'FT')
-
-ip_df_rsmpl <- rbind(pwl_ip_df, ft_ip_df)
-
-ggplot(ip_df_rsmpl, aes(ip_obs, ip_mod)) +
-  geom_point() +
-  geom_abline(aes(slope = 1, intercept = 0, linetype = "1:1 line"), alpha = 0.5) +
-  facet_grid(~plot_name)
-
-error_tbl_vb <- ip_df_rsmpl |>
-  mutate(diff = ip_obs - ip_mod) |>
-  group_by(plot_name) |>
-  summarise(
-    `Mean Bias` = mean(diff, na.rm = T),
-    # `Max Error` = diff[which.max(abs(diff))],
-    MAE = mean(abs(diff), na.rm = T),
-    `RMS Error` = sqrt(mean(diff ^ 2, na.rm = T)),
-    group = 'Vector Based')
-
-## plot resampled performance using nadir cc as ip proxy ----
-
-pwl_ip_df <- c(pwl_ip_rsmpl, pwl_cc_nadir_rsmpl) |>
-  terra::as.points() |>
-  as.data.frame(geom="XY") |>
-  # pivot_longer(c(ip_obs, ip_mod)) |>
-  mutate(plot_name = 'PWL')
-
-ft_ip_df <- c(ft_ip_rsmpl, ft_cc_nadir_rsmpl) |>
-  terra::as.points() |>
-  as.data.frame(geom="XY") |>
-  # pivot_longer(c(ip_obs, ip_mod)) |>
-  mutate(plot_name = 'FT')
-
-ip_df_rsmpl <- rbind(pwl_ip_df, ft_ip_df)
-
-ggplot(ip_df_rsmpl, aes(ip_obs, lca)) +
-  geom_point() +
-  geom_abline(aes(slope = 1, intercept = 0, linetype = "1:1 line"), alpha = 0.5) +
-  facet_grid(~plot_name)
-
-error_tbl_cc_nadir <- ip_df_rsmpl |>
-  mutate(diff = ip_obs - lca) |>
-  group_by(plot_name) |>
-  summarise(
-    `Mean Bias` = mean(diff, na.rm = T),
-    # `Max Error` = diff[which.max(abs(diff))],
-    MAE = mean(abs(diff), na.rm = T),
-    `RMS Error` = sqrt(mean(diff ^ 2, na.rm = T)),
-    group = 'Nadir')
-
-error_tb_ip <- rbind(error_tbl_vb, error_tbl_cc_nadir)
-error_tb_ip
-
-# Throughfall ----
-
-# calculate throughfall using vector based I/P
-
-pwl_tf_vb_rsmpl <- (1-pwl_ip_vb_rsmpl) * event_precip
-names(pwl_tf_vb_rsmpl) <- 'tf_mod'
-ft_tf_vb_rsmpl <- (1-ft_ip_vb_rsmpl) * event_precip
-names(ft_tf_vb_rsmpl) <- 'tf_mod'
-
-plot(ft_tf_rsmpl - ft_tf_vb_rsmpl)
-
-plot(pwl_tf_rsmpl - pwl_tf_vb_rsmpl)
-
-pwl_tf_df <- c(pwl_tf_rsmpl, pwl_tf_vb_rsmpl) |>
-  terra::as.points() |>
-  as.data.frame(geom="XY") |>
-  # pivot_longer(c(ip_obs, ip_mod)) |>
-  mutate(plot_name = 'PWL')
-
-ft_tf_df <- c(ft_tf_rsmpl, ft_tf_vb_rsmpl) |>
-  terra::as.points() |>
-  as.data.frame(geom="XY") |>
-  # pivot_longer(c(ip_obs, ip_mod)) |>
-  mutate(plot_name = 'FT')
-
-tf_df_rsmpl <- rbind(pwl_tf_df, ft_tf_df)
-
-ggplot(tf_df_rsmpl, aes(tf_obs, tf_mod)) +
-  geom_point() +
-  geom_abline(aes(slope = 1, intercept = 0, linetype = "1:1 line"), alpha = 0.5) +
-  facet_grid(~plot_name)
-
-error_tbl_tf_vb <- tf_df_rsmpl |>
-  mutate(diff = tf_obs - tf_mod) |>
-  group_by(plot_name) |>
-  summarise(
-    `Mean Bias` = mean(diff, na.rm = T),
-    # `Max Error` = diff[which.max(abs(diff))],
-    MAE = mean(abs(diff), na.rm = T),
-    `RMS Error` = sqrt(mean(diff ^ 2, na.rm = T)),
-    group = 'Vector Based')
-
-# calculate throughfall using cc nadir as proxy for I/P
-
-pwl_tf_vb_rsmpl <- (1-pwl_cc_nadir_rsmpl) * event_precip
-names(pwl_tf_vb_rsmpl) <- 'tf_mod'
-ft_tf_vb_rsmpl <- (1-ft_cc_nadir_rsmpl) * event_precip
-names(ft_tf_vb_rsmpl) <- 'tf_mod'
-
-plot(ft_tf_rsmpl - ft_tf_vb_rsmpl)
-
-plot(pwl_tf_rsmpl - pwl_tf_vb_rsmpl)
-
-pwl_tf_df <- c(pwl_tf_rsmpl, pwl_tf_vb_rsmpl) |>
-  terra::as.points() |>
-  as.data.frame(geom="XY") |>
-  # pivot_longer(c(ip_obs, ip_mod)) |>
-  mutate(plot_name = 'PWL')
-
-ft_tf_df <- c(ft_tf_rsmpl, ft_tf_vb_rsmpl) |>
-  terra::as.points() |>
-  as.data.frame(geom="XY") |>
-  # pivot_longer(c(ip_obs, ip_mod)) |>
-  mutate(plot_name = 'FT')
-
-tf_df_rsmpl <- rbind(pwl_tf_df, ft_tf_df)
-
-ggplot(tf_df_rsmpl, aes(tf_obs, tf_mod)) +
-  geom_point() +
-  geom_abline(aes(slope = 1, intercept = 0, linetype = "1:1 line"), alpha = 0.5) +
-  facet_grid(~plot_name)
-
-error_tbl_tf_nadir <- tf_df_rsmpl |>
-  mutate(diff = tf_obs - tf_mod) |>
-  group_by(plot_name) |>
-  summarise(
-    `Mean Bias` = mean(diff, na.rm = T),
-    # `Max Error` = diff[which.max(abs(diff))],
-    MAE = mean(abs(diff), na.rm = T),
-    `RMS Error` = sqrt(mean(diff ^ 2, na.rm = T)),
-    group = 'Nadir')
-
-tf_error <- rbind(error_tbl_tf_vb,
-                  error_tbl_tf_nadir)
-tf_error
+# rsmpl_res <- 5
+# rsmpl_fact <- rsmpl_res/0.25
+# agg_fn <- 'mean'
+# min_n_cells <- 25
+# pwl_tf_025 <- rast("../../analysis/lidar-processing/data/dsm_swe/23_072_23_073_v2.0.0_sa_PWL_E_swe_normalised_resample_0.25_crop_mask.tif")
+# pwl_tf_rsmpl <- resample_rast(pwl_tf_025, rsmpl_fact, agg_fn, min_n_cells)
+# names(pwl_tf_rsmpl) <- 'tf_obs'
+# ft_tf_025 <- rast("../../analysis/lidar-processing/data/dsm_swe/23_072_23_073_v2.0.0_sa_FSR_S_swe_normalised_resample_0.25_crop_mask.tif")
+# ft_tf_rsmpl <- resample_rast(ft_tf_025, rsmpl_fact, agg_fn, min_n_cells)
+# names(ft_tf_rsmpl) <- 'tf_obs'
+#
+# pwl_ip_025 <- rast("../../analysis/lidar-processing/data/dsm_ip/23_072_23_073_v2.0.0_sa_PWL_E_ip_normalised_resample_0.25_crop_mask.tif")
+# pwl_ip_rsmpl <- resample_rast(pwl_ip_025, rsmpl_fact, agg_fn, min_n_cells)
+# names(pwl_ip_rsmpl) <- 'ip_obs'
+# ft_ip_025 <- rast("../../analysis/lidar-processing/data/dsm_ip/23_072_23_073_v2.0.0_sa_FSR_S_ip_normalised_resample_0.25_crop_mask.tif")
+# ft_ip_rsmpl <- resample_rast(ft_ip_025, rsmpl_fact, agg_fn, min_n_cells)
+# names(ft_ip_rsmpl) <- 'ip_obs'
+#
+# pwl_cc_nadir_025m <- rast('../../analysis/lidar-processing/data/dsm_cpy_metrics/23_072_vox_len_0.25m_sa_gridgen_v2.0.0_sa_PWL_E_nadir_lca_0.25m_crop_mask.tif')
+# pwl_cc_nadir_rsmpl <- resample_rast(pwl_cc_nadir_025m, rsmpl_fact, agg_fn, min_n_cells)
+# ft_cc_nadir_025m <- rast('../../analysis/lidar-processing/data/dsm_cpy_metrics/23_072_vox_len_0.25m_sa_gridgen_v2.0.0_sa_FSR_S_nadir_lca_0.25m_crop_mask.tif')
+# ft_cc_nadir_rsmpl <- resample_rast(ft_cc_nadir_025m, rsmpl_fact, agg_fn, min_n_cells)
+#
+# # compute interception efficiency using the vector based model
+#
+# pwl_ip_vb_rsmpl <- (pwl_cc_nadir_rsmpl + pwl_lca_inc)*pwl_a
+# names(pwl_ip_vb_rsmpl) <- 'ip_mod'
+# ft_ip_vb_rsmpl <- (ft_cc_nadir_rsmpl + ft_lca_inc)*ft_a
+# names(ft_ip_vb_rsmpl) <- 'ip_mod'
+#
+# # IP ----
+#
+# ## map Xm performance ----
+#
+# plot(ft_ip_rsmpl - ft_ip_vb_rsmpl)
+#
+# plot(pwl_ip_rsmpl - pwl_ip_vb_rsmpl)
+#
+#
+# ## plot resampled performance with vector based adjustment ----
+#
+# pwl_ip_df <- c(pwl_ip_rsmpl, pwl_ip_vb_rsmpl) |>
+#   terra::as.points() |>
+#   as.data.frame(geom="XY") |>
+#   # pivot_longer(c(ip_obs, ip_mod)) |>
+#   mutate(plot_name = 'PWL')
+#
+# ft_ip_df <- c(ft_ip_rsmpl, ft_ip_vb_rsmpl) |>
+#   terra::as.points() |>
+#   as.data.frame(geom="XY") |>
+#   # pivot_longer(c(ip_obs, ip_mod)) |>
+#   mutate(plot_name = 'FT')
+#
+# ip_df_rsmpl <- rbind(pwl_ip_df, ft_ip_df)
+#
+# ggplot(ip_df_rsmpl, aes(ip_obs, ip_mod)) +
+#   geom_point() +
+#   geom_abline(aes(slope = 1, intercept = 0, linetype = "1:1 line"), alpha = 0.5) +
+#   facet_grid(~plot_name)
+#
+# error_tbl_vb <- ip_df_rsmpl |>
+#   mutate(diff = ip_obs - ip_mod) |>
+#   group_by(plot_name) |>
+#   summarise(
+#     `Mean Bias` = mean(diff, na.rm = T),
+#     # `Max Error` = diff[which.max(abs(diff))],
+#     MAE = mean(abs(diff), na.rm = T),
+#     `RMS Error` = sqrt(mean(diff ^ 2, na.rm = T)),
+#     group = 'Vector Based')
+#
+# ## plot resampled performance using nadir cc as ip proxy ----
+#
+# pwl_ip_df <- c(pwl_ip_rsmpl, pwl_cc_nadir_rsmpl) |>
+#   terra::as.points() |>
+#   as.data.frame(geom="XY") |>
+#   # pivot_longer(c(ip_obs, ip_mod)) |>
+#   mutate(plot_name = 'PWL')
+#
+# ft_ip_df <- c(ft_ip_rsmpl, ft_cc_nadir_rsmpl) |>
+#   terra::as.points() |>
+#   as.data.frame(geom="XY") |>
+#   # pivot_longer(c(ip_obs, ip_mod)) |>
+#   mutate(plot_name = 'FT')
+#
+# ip_df_rsmpl <- rbind(pwl_ip_df, ft_ip_df)
+#
+# ggplot(ip_df_rsmpl, aes(ip_obs, lca)) +
+#   geom_point() +
+#   geom_abline(aes(slope = 1, intercept = 0, linetype = "1:1 line"), alpha = 0.5) +
+#   facet_grid(~plot_name)
+#
+# error_tbl_cc_nadir <- ip_df_rsmpl |>
+#   mutate(diff = ip_obs - lca) |>
+#   group_by(plot_name) |>
+#   summarise(
+#     `Mean Bias` = mean(diff, na.rm = T),
+#     # `Max Error` = diff[which.max(abs(diff))],
+#     MAE = mean(abs(diff), na.rm = T),
+#     `RMS Error` = sqrt(mean(diff ^ 2, na.rm = T)),
+#     group = 'Nadir')
+#
+# error_tb_ip <- rbind(error_tbl_vb, error_tbl_cc_nadir)
+# error_tb_ip
+#
+# # Throughfall ----
+#
+# # calculate throughfall using vector based I/P
+#
+# pwl_tf_vb_rsmpl <- (1-pwl_ip_vb_rsmpl) * event_precip
+# names(pwl_tf_vb_rsmpl) <- 'tf_mod'
+# ft_tf_vb_rsmpl <- (1-ft_ip_vb_rsmpl) * event_precip
+# names(ft_tf_vb_rsmpl) <- 'tf_mod'
+#
+# plot(ft_tf_rsmpl - ft_tf_vb_rsmpl)
+#
+# plot(pwl_tf_rsmpl - pwl_tf_vb_rsmpl)
+#
+# pwl_tf_df <- c(pwl_tf_rsmpl, pwl_tf_vb_rsmpl) |>
+#   terra::as.points() |>
+#   as.data.frame(geom="XY") |>
+#   # pivot_longer(c(ip_obs, ip_mod)) |>
+#   mutate(plot_name = 'PWL')
+#
+# ft_tf_df <- c(ft_tf_rsmpl, ft_tf_vb_rsmpl) |>
+#   terra::as.points() |>
+#   as.data.frame(geom="XY") |>
+#   # pivot_longer(c(ip_obs, ip_mod)) |>
+#   mutate(plot_name = 'FT')
+#
+# tf_df_rsmpl <- rbind(pwl_tf_df, ft_tf_df)
+#
+# ggplot(tf_df_rsmpl, aes(tf_obs, tf_mod)) +
+#   geom_point() +
+#   geom_abline(aes(slope = 1, intercept = 0, linetype = "1:1 line"), alpha = 0.5) +
+#   facet_grid(~plot_name)
+#
+# error_tbl_tf_vb <- tf_df_rsmpl |>
+#   mutate(diff = tf_obs - tf_mod) |>
+#   group_by(plot_name) |>
+#   summarise(
+#     `Mean Bias` = mean(diff, na.rm = T),
+#     # `Max Error` = diff[which.max(abs(diff))],
+#     MAE = mean(abs(diff), na.rm = T),
+#     `RMS Error` = sqrt(mean(diff ^ 2, na.rm = T)),
+#     group = 'Vector Based')
+#
+# # calculate throughfall using cc nadir as proxy for I/P
+#
+# pwl_tf_vb_rsmpl <- (1-pwl_cc_nadir_rsmpl) * event_precip
+# names(pwl_tf_vb_rsmpl) <- 'tf_mod'
+# ft_tf_vb_rsmpl <- (1-ft_cc_nadir_rsmpl) * event_precip
+# names(ft_tf_vb_rsmpl) <- 'tf_mod'
+#
+# plot(ft_tf_rsmpl - ft_tf_vb_rsmpl)
+#
+# plot(pwl_tf_rsmpl - pwl_tf_vb_rsmpl)
+#
+# pwl_tf_df <- c(pwl_tf_rsmpl, pwl_tf_vb_rsmpl) |>
+#   terra::as.points() |>
+#   as.data.frame(geom="XY") |>
+#   # pivot_longer(c(ip_obs, ip_mod)) |>
+#   mutate(plot_name = 'PWL')
+#
+# ft_tf_df <- c(ft_tf_rsmpl, ft_tf_vb_rsmpl) |>
+#   terra::as.points() |>
+#   as.data.frame(geom="XY") |>
+#   # pivot_longer(c(ip_obs, ip_mod)) |>
+#   mutate(plot_name = 'FT')
+#
+# tf_df_rsmpl <- rbind(pwl_tf_df, ft_tf_df)
+#
+# ggplot(tf_df_rsmpl, aes(tf_obs, tf_mod)) +
+#   geom_point() +
+#   geom_abline(aes(slope = 1, intercept = 0, linetype = "1:1 line"), alpha = 0.5) +
+#   facet_grid(~plot_name)
+#
+# error_tbl_tf_nadir <- tf_df_rsmpl |>
+#   mutate(diff = tf_obs - tf_mod) |>
+#   group_by(plot_name) |>
+#   summarise(
+#     `Mean Bias` = mean(diff, na.rm = T),
+#     # `Max Error` = diff[which.max(abs(diff))],
+#     MAE = mean(abs(diff), na.rm = T),
+#     `RMS Error` = sqrt(mean(diff ^ 2, na.rm = T)),
+#     group = 'Nadir')
+#
+# tf_error <- rbind(error_tbl_tf_vb,
+#                   error_tbl_tf_nadir)
+# tf_error
