@@ -1,5 +1,5 @@
 # Bring values into environment for manuscript
-
+setwd('~/local-usask/working-papers/snow-int-paper/') # need this to run for the thesis-outline proj
 source('../../analysis/disdrometer/scripts/00_source_functions.R')
 library(dplyr)
 library(ggpubr)
@@ -179,8 +179,17 @@ ft_nadir <- ft$lca_nadir |> unique()
 pwl_frac_inc <- pwl_inc / pwl_nadir
 ft_frac_inc <- ft_inc / ft_nadir
 
-pwl_nls_coefs <- readRDS('../../analysis/lidar-processing/data/models/ta_vs_lca_nls_coefs_pwl.rds')
-ft_nls_coefs <- readRDS('../../analysis/lidar-processing/data/models/ta_vs_lca_nls_coefs_pwl.rds')
+pwl_nls_coefs <- readRDS('../../analysis/lidar-processing/data/models/ta_vs_lca_nls_coefs_pwl.rds') |> round(2)
+ft_nls_coefs <- readRDS('../../analysis/lidar-processing/data/models/ta_vs_lca_nls_coefs_ft.rds') |> round(2)
+lca_mod_error <- readRDS('../../analysis/lidar-processing/data/models/lca_obs_mod_error_tbl.rds')
+
+nls_coefs_error <- data.frame(
+  Plot = c('PWL', 'FT'),
+  Asym = c(pwl_nls_coefs['Asym'], ft_nls_coefs['Asym']),
+  xmid = c(pwl_nls_coefs['xmid'], ft_nls_coefs['xmid']),
+  scal = c(pwl_nls_coefs['scal'], ft_nls_coefs['scal'])
+)
+
 
 
 ft_wp_pars <- readRDS(
