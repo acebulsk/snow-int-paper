@@ -2,8 +2,8 @@
 .Rhistory
 .RData
 .Ruserdata
-
-/.quarto/
+revisions/
+.quarto/
 *.pdf
 *.docx
 *.html

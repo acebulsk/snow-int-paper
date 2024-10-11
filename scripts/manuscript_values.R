@@ -7,9 +7,9 @@ library(ggpubr)
 ## data and methods ----
 # CANOPY
 ft_mean_ht <- readRDS('../../analysis/lidar-processing/data/lidR_canopy_metrics/frs_s_mean_tree_height.rds') |>
-  round(2)
+  round(1)
 pwl_mean_ht <- readRDS('../../analysis/lidar-processing/data/lidR_canopy_metrics/pwl_e_mean_tree_height.rds') |>
-  round(2)
+  round(1)
 
 # these data have canopy metrics even where we do not have snow depths...
 nadir_cc <-
@@ -208,7 +208,7 @@ vb_plot_scale_err <- readRDS('figs/lidar_periods/23_072_23_073_plot_scale_vb_mod
          # MAE,
          `Perc. Error`)
 
-pwl_vb_tf_mod <- vb_plot_scale_err$mod_val[vb_plot_scale_err$plot == 'PWL' & vb_plot_scale_err$mod_type == 'VB-model' & vb_plot_scale_err$val_name == 'tf'] |> round(2)
+pwl_vb_tf_mod <- vb_plot_scale_err$mod_val[vb_plot_scale_err$plot == 'PWL' & vb_plot_scale_err$mod_type == 'VB-model' & vb_plot_scale_err$val_name == 'tf'] |> round(1)
 ft_vb_tf_mod <- vb_plot_scale_err$mod_val[vb_plot_scale_err$plot == 'FT' & vb_plot_scale_err$mod_type == 'VB-model' & vb_plot_scale_err$val_name == 'tf'] |> round(1)
 pwl_vb_tf_obs <- vb_plot_scale_err$obs_val[vb_plot_scale_err$plot == 'PWL' & vb_plot_scale_err$mod_type == 'VB-model' & vb_plot_scale_err$val_name == 'tf'] |> round(1)
 ft_vb_tf_obs <- vb_plot_scale_err$obs_val[vb_plot_scale_err$plot == 'FT' & vb_plot_scale_err$mod_type == 'VB-model' & vb_plot_scale_err$val_name == 'tf'] |> round(1)

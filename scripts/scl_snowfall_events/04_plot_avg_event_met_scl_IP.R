@@ -37,7 +37,16 @@ model_summaries <- lm_nest |>
 event_df_sep_troughs_avg |>
   ggplot() +
   geom_point(aes(value, IP, colour = cc, group = cc)) +
-  geom_smooth(aes(value, IP, colour = cc, group = cc), method = 'lm', se = F, linetype = 'solid')+
+
+  # Conditionally add the smooth line where p.value < 0.05
+  geom_smooth(
+    data = event_df_sep_troughs_avg |>
+      left_join(model_summaries, by = c('pretty_name', 'cc')) |>  # Join the summaries
+      filter(p.value < 0.05),                   # Filter where p-value < 0.05
+    aes(value, IP, colour = cc, group = cc),
+    method = 'lm', se = F, linetype = 'solid'
+  ) +
+
   ylab("Interception Efficiency (-)") +
   # xlab('Event Total Snowfall (mm)') +
   labs(colour = 'SCL\nCanopy\nCoverage (-)') +
