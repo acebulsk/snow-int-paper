@@ -1,0 +1,45 @@
+# modified the original select_storms_datetime_wide.csv file to have times that start when precip is occuring and cuts off before unloading is observed in the trough or weighed tree. Aka have time constraints that are independent of when the snow surveys were conducted. The original datetimes were established to align the instrument data with the snow surveys. Here we are selecting shorter periods of each event where there should be less unloading and redistribution going on. ,,,,,,
+from,to,w_tree_event,event_starts_late,quality,bad_troughs,notes
+2021-12-23 00:00:00,2021-12-23 15:00:00,2021-12-23,F,2,“”,windy and low IP
+2022-01-02 07:00:00,2022-01-02 11:00:00,2022-01-02,F,1,“”,
+2022-01-03 03:15:00,2022-01-03 16:15:00,2022-01-02,F,1,“”,cut off early due to noisey precip data
+2022-01-07 00:15:00,2022-01-07 08:00:00,2022-01-02,F,2,“”,canopy seems at capacity here low IP throughout
+2022-01-07 18:30:00,2022-01-08 08:00:00,2022-01-02,F,1,“”,delayed start here due to 5 m/s wind causing some unloading at the begining of event 
+2022-01-17 19:45:00,2022-01-18 07:30:00,2022-01-17,F,2,"""sparse_forest, dense_forest”",medium trough only sparse and dense unloading a lot here 
+2022-01-31 08:00:00,2022-01-31 20:00:00,2022-01-31,F,1,“”,gap of no precip inbetween with small trough increases throughout will have to filter 
+2022-02-01 08:30:00,2022-02-01 09:45:00,2022-01-31,F,1,“”,gap of no precip inbetween with small trough increases throughout will have to filter 
+2022-02-16 01:45:00,2022-02-16 09:00:00,2022-02-14,F,3,“”,ver small increment and has both abnormally low IP and high IP
+2022-02-19 12:15:00,2022-02-19 20:30:00,2022-02-19,F,1,“”,cut this one off early before troughs start to unload
+2022-03-01 19:00:00,2022-03-01 22:00:00,2022-03-01,F,2,“”,started this one late prior to is too warm and mostly melt and drip probs some melt and drip here too so troughs are tf and unld
+2022-03-03 12:45:00,2022-03-04 01:45:00,2022-03-01,F,2,“dense_forest”,maybe remove dense trough smaller long duration event with some precip gaps will need to filter
+2022-03-07 13:00:00,2022-03-07 23:45:00,2022-03-07,F,1,"""sparse_forest, dense_forest”",medium trough only sparse and dense unloading a lot here 
+2022-03-14 13:15:00,2022-03-14 17:30:00,2022-03-14,F,1,“”,
+2022-03-15 13:00:00,2022-03-15 18:30:00,2022-03-14,F,1,“”,
+2022-03-19 20:45:00,2022-03-20 00:45:00,2022-03-19,F,2,“”,not sure why such low IP.. sparse and medium trough.. avg of all three would be required here
+2022-03-23 23:45:00,2022-03-24 00:15:00,2022-03-23,F,2,“”,very short had to cut off early before all troughs unload
+2022-03-24 01:15:00,2022-03-24 02:15:00,2022-03-23,F,1,“”,
+2022-03-24 04:15:00,2022-03-24 05:45:00,2022-03-23,F,1,“”,
+2022-03-24 06:45:00,2022-03-24 07:15:00,2022-03-23,F,1,“”,
+2022-04-04 13:30:00,2022-04-04 15:45:00,2022-04-04,F,2,“”,maybe drip and melt to start
+2022-04-18 20:45:00,2022-04-19 11:45:00,2022-04-18,F,1,“”,low IP due to melt and drip maybe 
+2022-04-22 00:00:00,2022-04-22 20:00:00,2022-04-22,F,3,“”,too warm all melt and drip
+2022-05-09 00:00:00,2022-05-09 05:15:00,2022-05-09,F,1,“”,sparse trough a bit too much load .. avg of all three okay 
+2022-05-19 12:00:00,2022-05-19 15:00:00,2022-05-19,F,1,“”,had to cut off a lot of this event due to unloading 
+2022-05-19 21:45:00,2022-05-19 23:30:00,2022-05-19,F,1,“”,had to cut off a lot of this event due to unloading 
+2022-05-20 06:45:00,2022-05-20 07:45:00,2022-05-19,F,1,“”,
+2022-06-13 17:00:00,2022-06-14 08:00:00,2022-06-13,F,3,“”,drip show
+2022-11-27 19:30:00,2022-11-27 20:00:00,2022-11-27,T,4,“”,do not use too much unloading obs on timelapse from event start
+2022-12-01 04:30:00,2022-12-01 08:45:00,2022-12-01,T,1,“”,
+2022-12-17 01:30:00,2022-12-17 17:00:00,2022-12-17,F,4,“”,suspect pluvio and troughs here
+2022-12-20 10:30:00,2022-12-20 19:45:00,2022-12-17,F,4,“”,suspect pluvio and troughs here
+2022-12-27 04:00:00,2022-12-27 12:00:00,2022-12-27,F,1,“”,
+2023-01-27 04:00:00,2023-01-27 09:15:00,2023-01-27,F,2,“”,sparse medium have much lower IP
+2023-01-27 15:45:00,2023-01-27 20:30:00,2023-01-27,F,2,“”,sparse medium have much lower IP
+2023-02-19 19:00:00,2023-02-20 11:00:00,2023-02-19,F,2,"""sparse_forest, dense_forest”",medium trough only sparse and dense unloading a lot here 
+2023-02-20 21:00:00,2023-02-21 02:15:00,2023-02-19,F,2,"""sparse_forest, dense_forest”",medium trough only sparse and dense unloading a lot here 
+2023-02-26 17:15:00,2023-02-26 19:30:00,2023-02-26,F,1,“”,
+2023-03-13 13:00:00,2023-03-14 10:00:00,2023-03-13,F,1,“”,Updated to extend pre and post was shorter before due to low IP due to high temps started late to avoid above 0 temps and ended early due to unload obs 
+2023-03-24 12:15:00,2023-03-25 04:30:00,2023-03-24,F,1,“”,low IP warm temps maybe decreasing LAI due to bending branches
+2023-04-01 18:15:00,2023-04-02 08:00:00,2023-04-01,F,1,“”,
+2023-04-10 22:30:00,2023-04-11 06:45:00,2023-04-10,F,1,"""sparse_forest, dense_forest”",medium trough only sparse and dense unloading a lot here 
+2023-05-08 05:15:00,2023-05-08 06:30:00,2023-05-08,F,1,"""sparse_forest, dense_forest”",medium trough only sparse and dense unloading a lot here 
