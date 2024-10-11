@@ -1,7 +1,5 @@
 # plot wind rose for each fsd event period
 
-source('scripts/lidar_snow_survey/01_plot_lidar_met_time_series.R')
-
 # wind rose plots
 
 met_w_snowfall <- ffr_met_wnd_lidar_events |>

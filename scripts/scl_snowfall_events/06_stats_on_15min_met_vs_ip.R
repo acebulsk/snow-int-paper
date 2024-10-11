@@ -675,7 +675,8 @@ w_test_1 <- tree_ip_ttest |>
 w_test_2 <- tree_ip_ttest |>
   group_by(name) |>
   summarise(
-    w_test = list(wilcox.test(IP[group == "calm"], IP[group == "windy"], alternative = "less") %>% tidy())
+    w_test = list(wilcox.test(IP[group == "low"], IP[group == "high"], alternative = "less") %>% tidy())
   ) %>%
   unnest(cols = c(w_test)) |>
   mutate(calm_greater_than_windy = ifelse(p.value > 0.05, TRUE, FALSE))
+

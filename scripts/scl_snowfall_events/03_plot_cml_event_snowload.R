@@ -19,16 +19,16 @@ ggsave('figs/automated_snowfall_event_periods/cuml_event_snowfall_canopy_storage
        width = 4, height = 4)
 
 # as above but separate out the troughs ----
-scl_lai_cc <- read.csv('~/local-usask/analysis/interception/data/lai/scl_canopy_metrics.csv') |>
+scl_lai_cc_fltr <- scl_lai_cc |>
   arrange(cc) |>
   mutate(cc = factor(round(cc, 2), levels = sort(unique(round(cc, 2)))))
 
-scl_lai_cc$trough_name <- c('sparse_forest', 'medium_density_forest', 'dense_forest')
+scl_lai_cc_fltr$trough_name <- c('sparse_forest', 'medium_density_forest', 'dense_forest')
 
 event_df_sep_troughs <- storm_dates_long |>
   left_join(met_df) |>
   left_join(q_tf_scl) |>
-  left_join(scl_lai_cc) |>
+  left_join(scl_lai_cc_fltr) |>
   group_by(w_tree_event, trough_name) |>
   filter(p > 0,
          p > q_tf,

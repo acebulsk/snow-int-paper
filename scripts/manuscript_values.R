@@ -1,19 +1,26 @@
 # Bring values into environment for manuscript
 setwd('~/local-usask/working-papers/snow-int-paper/') # need this to run for the thesis-outline proj
-source('../../analysis/disdrometer/scripts/00_source_functions.R')
+# source('../../analysis/disdrometer/scripts/00_source_functions.R')
 library(dplyr)
 library(ggpubr)
 
+source('scripts/01_load_processed_data.R')
+
 ## data and methods ----
+lidar_data_path <- 'data/lidar-data/'
 # CANOPY
-ft_mean_ht <- readRDS('../../analysis/lidar-processing/data/lidR_canopy_metrics/frs_s_mean_tree_height.rds') |>
+ft_mean_ht <- readRDS(paste0(lidar_data_path, 'frs_s_mean_tree_height.rds')) |>
   round(1)
-pwl_mean_ht <- readRDS('../../analysis/lidar-processing/data/lidR_canopy_metrics/pwl_e_mean_tree_height.rds') |>
+pwl_mean_ht <- readRDS(paste0(lidar_data_path, 'pwl_e_mean_tree_height.rds')) |>
   round(1)
 
 # these data have canopy metrics even where we do not have snow depths...
 nadir_cc <-
-  readRDS('../../analysis/lidar-processing/data/hemi_stats/full_voxrs_not_filtered_to_swe_traj_angle_w_lca_23_072.rds')
+  readRDS(
+    paste0(
+      lidar_data_path,
+      'stats/full_voxrs_not_filtered_to_swe_traj_angle_w_lca_23_072.rds'
+    ))
 
 ft_cc_nadir <- nadir_cc |>
   filter(plot_name == 'FT') |>
@@ -50,15 +57,11 @@ sf_event_t_range <- c(min(sf_event_avgs$min_t), max(sf_event_avgs$max_t)) |> rou
 sf_event_u_range <- c(min(sf_event_avgs$min_u), max(sf_event_avgs$max_u)) |> round(1)
 # sf_event_ip_range <- c(min(sf_event_avgs$min_IP_troughs), max(sf_event_avgs$max_IP_troughs))
 
-scl_lai_cc <- read.csv('~/local-usask/analysis/interception/data/lai/scl_canopy_metrics.csv')
-
 scl_lai_cc$Name <- c('Mixed', 'Sparse', 'Closed')
-
-scl_meta <- read.csv('~/local-usask/analysis/interception/data/loadcell/calibrations/load_cell_meta_ac_fortress.csv')
 
 ### snow survey ----
 
-lai_measurements <- read.csv('../../analysis/interception/data/lai/results/2023_compiled_lai_vza_15_60.csv')  |>
+lai_measurements <- read.csv('data/hemisphere-photo-data/2023_compiled_lai_vza_15_60.csv')  |>
   filter(vza == 60)
 
 cc_range <- paste(round(min(lai_measurements$cc), 2), '–', round(max(lai_measurements$cc), 2))
@@ -105,7 +108,7 @@ vox_config_id <- "23_072_vox_len_0.25m_sa_gridgen_v2.0.0_sa"
 pwl_hemi_stat <-
   readRDS(
     paste0(
-      '../../analysis/lidar-processing/data/hemi_stats/hemi_raw_theta_phi_for_rho_s_upper_2_5th_percentile_',
+      'data/lidar-data/stats/hemi_raw_theta_phi_for_rho_s_upper_2_5th_percentile_',
       vox_config_id,
       "_",
       'PWL_E',
@@ -115,7 +118,7 @@ pwl_hemi_stat <-
 ft_hemi_stat <-
   readRDS(
     paste0(
-      '../../analysis/lidar-processing/data/hemi_stats/hemi_raw_theta_phi_for_rho_s_upper_2_5th_percentile_',
+      'data/lidar-data/stats/hemi_raw_theta_phi_for_rho_s_upper_2_5th_percentile_',
       vox_config_id,
       "_",
       'FSR_S',
@@ -129,8 +132,7 @@ pwl_theta_from <- min(pwl_hemi_stat$theta_d) |> round()
 ft_theta_from <- min(ft_hemi_stat$theta_d) |> round()
 
 # then found the phi which had the best rho based on the theta range above
-cor_stats <-
-  readRDS('../../analysis/lidar-processing/data/hemi_stats/r2_vs_integrated_and_single_zentith.rds')
+
 # find the zenith corresponding to the highest R value
 cor_smry <- cor_stats |>
   group_by(plot_name, group) |>
@@ -146,7 +148,7 @@ pwl_best_phi <- cor_smry$phi_at_peak_r2[cor_smry$plot_name == 'PWL' & cor_smry$g
 ft_best_phi <- cor_smry$phi_at_peak_r2[cor_smry$plot_name == 'FT' & cor_smry$group == 'Single Zenith']
 
 # model error stats
-mod_error <- readRDS('../../analysis/lidar-processing/data/models/lca_vs_ip_model_error_ft_pwl_nadir_adj.rds')
+mod_error <- readRDS('data/lidar-data/stats/lca_vs_ip_model_error_ft_pwl_nadir_adj.rds')
 
 ft_a_val <- mod_error$`Model Slope`[mod_error$`Plot Name` == 'FT' & mod_error$`Canopy Metrics` == 'Vector Based'] |> round(2)
 pwl_a_val <- mod_error$`Model Slope`[mod_error$`Plot Name` == 'PWL' & mod_error$`Canopy Metrics` == 'Vector Based'] |> round(2)
@@ -164,7 +166,7 @@ ft_mean_wind_speed_prof_integral <- ft_mean_wind_prof_integral$wind_speed |> rou
 
 ### Combined effects ----
 
-hemi_stats <- readRDS('../../analysis/lidar-processing/data/hemi_stats/full_voxrs_not_filtered_to_swe_traj_angle_w_lca_23_072.rds') |>
+hemi_stats <- readRDS('data/lidar-data/stats/full_voxrs_not_filtered_to_swe_traj_angle_w_lca_23_072.rds') |>
   mutate(find_wind = abs(1-wind_speed))
 
 select_wind_speed <- 1
@@ -179,9 +181,9 @@ ft_nadir <- ft$lca_nadir |> unique()
 pwl_frac_inc <- pwl_inc / pwl_nadir
 ft_frac_inc <- ft_inc / ft_nadir
 
-pwl_nls_coefs <- readRDS('../../analysis/lidar-processing/data/models/ta_vs_lca_nls_coefs_pwl.rds') |> round(2)
-ft_nls_coefs <- readRDS('../../analysis/lidar-processing/data/models/ta_vs_lca_nls_coefs_ft.rds') |> round(2)
-lca_mod_error <- readRDS('../../analysis/lidar-processing/data/models/lca_obs_mod_error_tbl.rds')
+pwl_nls_coefs <- readRDS('data/lidar-data/models/ta_vs_lca_nls_coefs_pwl.rds') |> round(2)
+ft_nls_coefs <- readRDS('data/lidar-data/models/ta_vs_lca_nls_coefs_ft.rds') |> round(2)
+lca_mod_error <- readRDS('data/lidar-data/models/lca_obs_mod_error_tbl.rds')
 
 nls_coefs_error <- data.frame(
   Plot = c('PWL', 'FT'),
@@ -190,10 +192,8 @@ nls_coefs_error <- data.frame(
   scal = c(pwl_nls_coefs['scal'], ft_nls_coefs['scal'])
 )
 
-
-
 ft_wp_pars <- readRDS(
-  '../../analysis/eddy-cov/data/forest_tower_wind_profile_params_clean_ec_events.rds'
+  'data/wind-profile-data/forest_tower_wind_profile_params_clean_ec_events.rds'
 ) |> select(-ustar) # need to calculate based on the event wind speed
 
 ### Throughfall model performance ----

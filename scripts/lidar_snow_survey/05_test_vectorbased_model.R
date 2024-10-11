@@ -1,24 +1,7 @@
 # Script to test model of shifted trajectory angle
 # Run 04 first for some of the objects below
 
-base_path <- '../../analysis/lidar-processing/data/dsm_ip/'
-pre_post_id <- '23_072_23_073'
-# pre_post_id <- '23_026_23_027' # if comparing to this one need to update the event totals for precip and wind, similar avg wind on this event from differing directions so may also have a wind effect
-
-vox_config_id <- '_v2.0.0_sa_'
-ip_config_id <- '_ip_normalised_resample_0.25_crop_mask'
-
-# need the interception efficiency obs to validate the model
-plot <- 'FSR_S'
-ft_ip_obs_rast <-
-  rast(paste0(base_path, pre_post_id, vox_config_id, plot, ip_config_id, '.tif'))
-
-plot <- 'PWL_E'
-pwl_ip_obs_rast <-
-  rast(paste0(base_path, pre_post_id, vox_config_id, plot, ip_config_id, '.tif'))
-
 # also validate the model using the observed lca for the given zenith angle range
-
 
 # Calculate the event trajectory angle ----
 
@@ -168,7 +151,7 @@ pwl_event_ta <- traj_angle_deg(pwl_wind, mean_vel)
 # because our measurements are inherently underestimates since we are missing a
 # lot of subcanopy snow depths
 
-pwl_cc_nadir_025 <- readRDS('../../analysis/lidar-processing/data/hemi_stats/pwl_lca_avg_event_theta_for_each_phi.rds') |>
+pwl_cc_nadir_025 <- pwl_cc_025 |>
   as.data.frame() |>
   filter(phi_d == 0)
 
@@ -176,7 +159,7 @@ pwl_cc_nadir <- pwl_cc_nadir_025 |>
   pull(lca) |>
   mean(na.rm = T)
 
-ft_cc_nadir_025 <- readRDS('../../analysis/lidar-processing/data/hemi_stats/ft_lca_avg_event_theta_for_each_phi.rds') |>
+ft_cc_nadir_025 <- ft_cc_025 |>
   as.data.frame() |>
   filter(phi_d == 0)
 
@@ -186,16 +169,10 @@ ft_cc_nadir <- ft_cc_nadir_025 |>
 
 # Calculate the resulting increase in leaf contact area based on trajectory angle ----
 
-ft_nls_coefs <-
-  readRDS('../../analysis/lidar-processing/data/models/ta_vs_lca_nls_coefs_ft.rds')
-
 ft_lca_inc <- logistic_origin(x = ft_event_ta,
                               Asym = ft_nls_coefs['Asym'],
                               xmid = ft_nls_coefs['xmid'],
                               scal = ft_nls_coefs['scal'])  |> as.numeric()
-
-pwl_nls_coefs <-
-  readRDS('../../analysis/lidar-processing/data/models/ta_vs_lca_nls_coefs_pwl.rds')
 
 pwl_lca_inc <- logistic_origin(x = pwl_event_ta,
                               Asym = pwl_nls_coefs['Asym'],
@@ -210,7 +187,6 @@ pwl_lca <- pwl_cc_nadir + pwl_lca_inc
 
 
 # Error Analysis
-library(terra)
 
 ft_ip_obs <- ft_ip_obs_rast |>
   values() |>
@@ -531,3 +507,4 @@ error_summary_noplots
 # tf_error <- rbind(error_tbl_tf_vb,
 #                   error_tbl_tf_nadir)
 # tf_error
+

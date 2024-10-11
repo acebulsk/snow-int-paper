@@ -89,21 +89,21 @@ ggsave('figs/examples/wind_speed_vs_traj_angle.png', device = png,
 
 # Plot I/P vs wind
 
-ip_df <- mcn_df |>
-  mutate(`I/P` = mcn_to_ip(mcn, j, k))
-
-ggplot(ip_df, aes(mcn, `I/P`)) +
-  geom_line()  +
-  ylab(ip_lab) +
-  xlab(mcn_lab)
-
-ggsave(paste0('figs/examples/contact_number_vs_ip.png'), device = png,
-       width = 6, height = 5)
-
-ggplot(ip_df, aes(wind_speed, `I/P`)) +
-  geom_line()+
-  ylab(ip_lab) +
-  xlab(ws_lab)
-
-ggsave(paste0('figs/examples/wind_speed_vs_ip.png'), device = png,
-       width = 6, height = 5)
+# ip_df <- mcn_df |>
+#   mutate(`I/P` = mcn_to_ip(mcn, j, k))
+#
+# ggplot(ip_df, aes(mcn, `I/P`)) +
+#   geom_line()  +
+#   ylab(ip_lab) +
+#   xlab(mcn_lab)
+#
+# ggsave(paste0('figs/examples/contact_number_vs_ip.png'), device = png,
+#        width = 6, height = 5)
+#
+# ggplot(ip_df, aes(wind_speed, `I/P`)) +
+#   geom_line()+
+#   ylab(ip_lab) +
+#   xlab(ws_lab)
+#
+# ggsave(paste0('figs/examples/wind_speed_vs_ip.png'), device = png,
+#        width = 6, height = 5)

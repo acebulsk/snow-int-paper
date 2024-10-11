@@ -164,7 +164,6 @@ calculate_zHeight <- function(FittedWspeed, ustar, d_0, z_0m) {
 
 # zenith based on the best R2 over the azimuth range
 # big sensitivity if we chose integrated with this one... it gives us 4 mm more interception than we observed
-cor_stats <- readRDS('../../analysis/lidar-processing/data/hemi_stats/r2_vs_integrated_and_single_zentith.rds')
 
 cor_smry <- cor_stats |>
   group_by(plot_name, group) |>

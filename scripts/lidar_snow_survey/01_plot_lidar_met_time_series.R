@@ -1,8 +1,6 @@
 # met data from takeoff on pre flight to landing on post flight
 # may also want to just look at from snowfall start to landing on post flight
 
-source('scripts/lidar_snow_survey/00_load_lidar_meta.R')
-
 ffr_met_wnd_lidar_events <- lidar_events_long_dt |>
   left_join(ffr_met_wnd, by = 'datetime')  |>
   left_join(ffr_ec, by = 'datetime') |>

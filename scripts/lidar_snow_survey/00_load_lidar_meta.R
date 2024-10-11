@@ -1,4 +1,6 @@
 source('scripts/00_define_global_attributes.R')
+#source('scripts/centralize_processed_data.R') # only need to run if making changes to raw data processing
+source('scripts/load_processed_data.R')
 
 pre_events <- c('22_045', '23_026', '23_072')
 post_events <- c('22_047', '23_027', '23_073')
@@ -49,3 +51,4 @@ lidar_events_long_dt <-
                     select(from = from,
                            to = to,
                            event_id), to_long)
+

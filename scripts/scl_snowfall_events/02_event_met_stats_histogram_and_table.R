@@ -23,10 +23,6 @@ to_long <- function(from, to, w_tree_event, storm_id, bad_troughs){
 
 storm_dates_long <- purrr::pmap_dfr(storm_dates_wide, to_long)
 
-met_df <- readRDS('../../analysis/met-data-processing/data/ffr_crhm_modelling_obs.rds')
-
-load_df <- readRDS('../../analysis/interception/data/loadcell/treefort_load_main_cal_plv_fsd_mm.rds')
-
 # ggplot(load_df, aes(datetime, value)) +
 #   geom_line() +
 #   facet_grid(rows = vars(name), scales = 'free')
@@ -70,7 +66,7 @@ q_tf_scl_avg <- q_tf_scl |>
 #                  '2023-03-13')
 
 event_df <- storm_dates_long |>
-  left_join(met_df) |>
+  left_join(ffr_met) |>
   left_join(q_int_tree) |>
   left_join(q_tf_scl_avg) |>
   group_by(w_tree_event) |>
