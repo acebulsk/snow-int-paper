@@ -7,3 +7,5 @@ revisions/
 *.pdf
 *.docx
 *.html
+_extensions
+/.quarto/
