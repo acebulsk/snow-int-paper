@@ -1,9 +1,5 @@
 # plot 15 minute interval binned met data and IP
 
-library(tidyverse)
-library(ggpubr)
-library(modelr)
-
 ip_y_lims <- c(0.05, 1)
 
 mean_ip_by_trough <- met_intercept |>
@@ -43,9 +39,17 @@ lm_nest <- met_intercept |>
          resids = map2(data, model, add_residuals),
          preds = map2(data, model, add_predictions),
          glance = map(model, broom::glance))
-model_summaries <- lm_nest |>
+
+at_model_summaries <- lm_nest |>
   unnest(glance) |>
-  select(scl_names_new, r.squared, adj.r.squared, p.value)
+  mutate(n = df.residual + 2,
+         name = x_col) |>
+  select(scl_names_new,
+         name,
+         r.squared,
+         adj.r.squared,
+         p.value,
+         n)
 
 at_ip_smry <- met_intercept |>
   group_by(temp_labs, scl_names_new) |>
@@ -77,13 +81,13 @@ at_ip <- met_intercept |>
   #               label = sprintf("R² = %.3f\np = %.3e", adj.r.squared, p.value)),
   #           hjust = -0.1, vjust = 1.1, size = 3) +
   # stat_smooth(aes(x = .data[[x_col]], y = .data[[y_col]]), method = "lm", colour = 'red', linetype = 'dashed', se = F) +  # Add regression line
-  facet_grid(~scl_names_new) +
-  geom_text(data = model_summaries,
-            aes(x = -Inf, y = Inf,
-                label = sprintf("R² = %.3f%s",
-                                adj.r.squared,
-                                ifelse(p.value < 0.05, "*", ""))),
-            hjust = -0.1, vjust = 1.1, size = 3)
+  facet_grid(~scl_names_new) #+
+  # geom_text(data = at_model_summaries,
+  #           aes(x = -Inf, y = Inf,
+  #               label = sprintf("R² = %.3f%s",
+  #                               adj.r.squared,
+  #                               ifelse(p.value < 0.05, "*", ""))),
+  #           hjust = -0.1, vjust = 1.1, size = 3)
 at_ip
 
 ### wind speed ----
@@ -100,9 +104,11 @@ lm_nest <- met_intercept |>
          resids = map2(data, model, add_residuals),
          preds = map2(data, model, add_predictions),
          glance = map(model, broom::glance))
-model_summaries <- lm_nest |>
+
+u_model_summaries <- lm_nest |>
   unnest(glance) |>
-  select(scl_names_new, r.squared, adj.r.squared, p.value)
+  mutate(n = df.residual + 2, name = x_col) |>
+  select(scl_names_new, name, r.squared, adj.r.squared, p.value, n)
 
 ws_ip_smry <- met_intercept |>
   group_by(wind_labs, scl_names_new) |>
@@ -125,18 +131,18 @@ ws_ip <- met_intercept |>
   xlab(wnd_bin_ax_lab)+
   ylim(ip_y_lims)+
   theme(plot.margin = margin(0.5, 0.5, 0.5, .75, "cm")) +
-  facet_grid(~scl_names_new) +
+  facet_grid(~scl_names_new) #+
   # stat_smooth(aes(x = .data[[x_col]], y = .data[[y_col]]), method = "lm", colour = 'red', linetype = 'dashed', se = F) +  # Add regression line
   # geom_text(data = model_summaries,
   #           aes(x = -Inf, y = Inf,
   #               label = sprintf("R² = %.3f\np = %.3e", adj.r.squared, p.value)),
   #           hjust = -0.1, vjust = 1.1, size = 3)
-  geom_text(data = model_summaries,
-            aes(x = -Inf, y = Inf,
-                label = sprintf("R² = %.3f%s",
-                                adj.r.squared,
-                                ifelse(p.value < 0.05, "*", ""))),
-            hjust = -0.1, vjust = 1.1, size = 3)
+  # geom_text(data = model_summaries,
+  #           aes(x = -Inf, y = Inf,
+  #               label = sprintf("R² = %.3f%s",
+  #                               adj.r.squared,
+  #                               ifelse(p.value < 0.05, "*", ""))),
+  #           hjust = -0.1, vjust = 1.1, size = 3)
 ws_ip
 
 # canopy snow load ----
@@ -153,9 +159,10 @@ lm_nest <- met_intercept |>
          resids = map2(data, model, add_residuals),
          preds = map2(data, model, add_predictions),
          glance = map(model, broom::glance))
-model_summaries <- lm_nest |>
-  unnest(glance) |>
-  select(scl_names_new, r.squared, adj.r.squared, p.value)
+w_model_summaries <- lm_nest |>
+  unnest(glance)  |>
+  mutate(n = df.residual + 2, name = x_col) |>
+  select(scl_names_new, name, r.squared, adj.r.squared, p.value, n)
 
 w_ip_smry <- met_intercept |>
   group_by(tree_labs, scl_names_new) |>
@@ -177,7 +184,7 @@ w_ip <- met_intercept |>
   xlab(expression("Initial Canopy Snow Load (kg" ~ m^{-2} * ")"))+
   ylim(ip_y_lims)+
   theme(plot.margin = margin(0.5, 0.5, 0.5, .75, "cm")) +
-  facet_grid(~scl_names_new) +
+  facet_grid(~scl_names_new) #+
   # stat_smooth(aes(x = .data[[x_col]], y = .data[[y_col]]), method = "lm", colour = 'red', linetype = 'dashed', se = F) +  # Add regression line
 # geom_text(data = model_summaries,
 #           aes(x = -Inf, y = Inf,
@@ -185,18 +192,35 @@ w_ip <- met_intercept |>
 #                               adj.r.squared,
 #                               ifelse(p.value < 0.05, "*", ""))),
 #           hjust = -0.1, vjust = 1.1, size = 3)
-  geom_text(data = model_summaries,
-            aes(x = -Inf, y = Inf,
-                label = sprintf("R² = %.3f%s",
-                                adj.r.squared,
-                                ifelse(p.value < 0.05, "*", ""))),
-            hjust = -0.1, vjust = 1.1, size = 3)
+  # geom_text(data = model_summaries,
+  #           aes(x = -Inf, y = Inf,
+  #               label = sprintf("R² = %.3f%s",
+  #                               adj.r.squared,
+  #                               ifelse(p.value < 0.05, "*", ""))),
+  #           hjust = -0.1, vjust = 1.1, size = 3)
 
 w_ip
 plotly::ggplotly()
 cowplot::plot_grid(at_ip, ws_ip, w_ip, nrow = 3, labels = 'AUTO')
 
 ggsave('figs/automated_snowfall_event_periods/troughs_met_vs_IP_bin.png', device = png, width = 8.5, height = 8.5)
+
+# write out regression stats table
+
+model_summaries <- rbind(
+  at_model_summaries,
+  u_model_summaries,
+  w_model_summaries
+) |> left_join(var_name_dict) |>
+  left_join(scl_lai_cc, by = c('scl_names_new' = 'Name')) |>
+  select(pretty_name,
+         scl_names_new,
+         cc,
+         r.squared,
+         adj.r.squared, p.value, n)
+
+saveRDS(model_summaries,
+        'data/lysimeter-data/lysimter_15min_avg_regression_stats.rds')
 
 # other plots not used currently ----
 #

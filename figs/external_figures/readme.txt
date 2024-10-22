@@ -1,0 +1,1 @@
+These figures can be reproduced by running the code within the repository https://github.com/acebulsk/lidar-processing. Just search the scripts for the figure names that have the same filename as those found in this folder.

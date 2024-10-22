@@ -26,7 +26,7 @@ scl_lai_cc_fltr <- scl_lai_cc |>
 scl_lai_cc_fltr$trough_name <- c('sparse_forest', 'medium_density_forest', 'dense_forest')
 
 event_df_sep_troughs <- storm_dates_long |>
-  left_join(met_df) |>
+  left_join(ffr_met) |>
   left_join(q_tf_scl) |>
   left_join(scl_lai_cc_fltr) |>
   group_by(w_tree_event, trough_name) |>
@@ -58,3 +58,4 @@ event_df_sep_troughs |>
 
 ggsave('figs/automated_snowfall_event_periods/cuml_event_snowfall_canopy_storage_sep_scl.png',
        width = 5, height = 4, device = png)
+

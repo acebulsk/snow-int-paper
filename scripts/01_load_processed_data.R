@@ -2,6 +2,7 @@
 # centralize_processed_data.R script for origin of files.
 
 scl_lai_cc <- read.csv('data/hemisphere-photo-data/scl_canopy_metrics.csv')
+scl_lai_cc$Name <- c('Mixed', 'Sparse', 'Closed')
 
 throughfall_periods <- read.csv('data/lysimeter-data/select_storms_datetime_wide_independent_snow_surveys.csv', skip = 1)
 
@@ -39,41 +40,43 @@ pwl_wind <- readRDS('data/met-data/pwl_met_qaqc.rds') |>
     # sd_wind_dir = WindDir_SD1_WVT
   )
 
+# LIDAR DATA ----
+
 cor_stats <-
   readRDS('data/lidar-data/stats/r2_vs_integrated_and_single_zentith.rds')
 
-base_path <- '../../analysis/lidar-processing/data/dsm_ip/'
-lidr_data_path <- 'data/lidar-data/'
-pre_post_id <- '23_072_23_073'
-vox_config_id <- '_v2.0.0_sa_'
-ip_config_id <- '_ip_normalised_resample_0.25_crop_mask'
-plot <- 'FSR_S'
-ft_ip_obs_rast <- rast(
-  paste0(
-    lidr_data_path,
-    paste0(pre_post_id, vox_config_id, plot, ip_config_id, '.tif')
-  ))
-plot <- 'PWL_E'
-pwl_ip_obs_rast <- rast(
-  paste0(
-    lidr_data_path,
-    paste0(pre_post_id, vox_config_id, plot, ip_config_id, '.tif')
-  ))
-
-ft_cc_025 <- readRDS(paste0(
-  lidar_data_stats_path,
-  'ft_lca_avg_event_theta_for_each_phi.rds'))
-
-pwl_cc_025 <- readRDS(paste0(
-  lidar_data_stats_path,
-  'pwl_lca_avg_event_theta_for_each_phi.rds'))
-
-ft_nls_coefs <- readRDS(
-  paste0(
-    lidar_data_models_path,
-    'ta_vs_lca_nls_coefs_ft.rds'))
-
-pwl_nls_coefs <- readRDS(
-  paste0(
-    lidar_data_models_path,
-    'ta_vs_lca_nls_coefs_pwl.rds'))
+# base_path <- '../../analysis/lidar-processing/data/dsm_ip/'
+# lidr_data_path <- 'data/lidar-data/'
+# pre_post_id <- '23_072_23_073'
+# vox_config_id <- '_v2.0.0_sa_'
+# ip_config_id <- '_ip_normalised_resample_0.25_crop_mask'
+# plot <- 'FSR_S'
+# ft_ip_obs_rast <- rast(
+#   paste0(
+#     lidr_data_path,
+#     paste0(pre_post_id, vox_config_id, plot, ip_config_id, '.tif')
+#   ))
+# plot <- 'PWL_E'
+# pwl_ip_obs_rast <- rast(
+#   paste0(
+#     lidr_data_path,
+#     paste0(pre_post_id, vox_config_id, plot, ip_config_id, '.tif')
+#   ))
+#
+# ft_cc_025 <- readRDS(paste0(
+#   lidar_data_stats_path,
+#   'ft_lca_avg_event_theta_for_each_phi.rds'))
+#
+# pwl_cc_025 <- readRDS(paste0(
+#   lidar_data_stats_path,
+#   'pwl_lca_avg_event_theta_for_each_phi.rds'))
+#
+# ft_nls_coefs <- readRDS(
+#   paste0(
+#     lidar_data_models_path,
+#     'ta_vs_lca_nls_coefs_ft.rds'))
+#
+# pwl_nls_coefs <- readRDS(
+#   paste0(
+#     lidar_data_models_path,
+#     'ta_vs_lca_nls_coefs_pwl.rds'))

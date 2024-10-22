@@ -90,12 +90,13 @@ pretty_names_vect <- c(
   "Snowfall Rate (mm/hr)",
   "Canopy Load (mm)",
   "Interception Efficiency (-)",
-  "Cumulative Snowfall (kg m⁻²)"
+  "Cumulative Snowfall (kg m⁻²)",
+  "Initial Canopy Snow Load (kg m⁻²)"
 )
 
 var_name_dict <-
   data.frame(
-    name = c('t', 'rh', 'u', 'p', 'cuml_int_troughs', 'IP_troughs', 'event_del_sf'),
+    name = c('t', 'rh', 'u', 'p', 'cuml_int_troughs', 'IP_troughs', 'event_del_sf', 'weighed_tree_canopy_load_mm'),
     pretty_name = pretty_names_vect
   )
 

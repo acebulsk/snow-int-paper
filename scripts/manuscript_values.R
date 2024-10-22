@@ -4,6 +4,7 @@ setwd('~/local-usask/working-papers/snow-int-paper/') # need this to run for the
 library(dplyr)
 library(ggpubr)
 
+source('scripts/00_define_global_attributes.R')
 source('scripts/01_load_processed_data.R')
 
 ## data and methods ----
@@ -57,8 +58,6 @@ sf_event_t_range <- c(min(sf_event_avgs$min_t), max(sf_event_avgs$max_t)) |> rou
 sf_event_u_range <- c(min(sf_event_avgs$min_u), max(sf_event_avgs$max_u)) |> round(1)
 # sf_event_ip_range <- c(min(sf_event_avgs$min_IP_troughs), max(sf_event_avgs$max_IP_troughs))
 
-scl_lai_cc$Name <- c('Mixed', 'Sparse', 'Closed')
-
 ### snow survey ----
 
 lai_measurements <- read.csv('data/hemisphere-photo-data/2023_compiled_lai_vza_15_60.csv')  |>
@@ -76,6 +75,11 @@ mean_ip_by_trough <- readRDS('data/mean_ip_by_trough.rds')
 mean_ip_sparse <- mean_ip_by_trough$IP[mean_ip_by_trough == 'sparse_forest'] |> round(2)
 mean_ip_med <- mean_ip_by_trough$IP[mean_ip_by_trough == 'mixed'] |> round(2)
 mean_ip_dense <- mean_ip_by_trough$IP[mean_ip_by_trough == 'dense_forest'] |> round(2)
+
+lysimeter_event_mod_smry <-
+  readRDS('data/lysimeter-data/lysimter_event_avg_regression_stats.rds')
+lysimeter_15min_mod_smry <-
+  readRDS('data/lysimeter-data/lysimter_15min_avg_regression_stats.rds')
 
 ### Influence of forest structure
 

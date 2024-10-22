@@ -16,23 +16,31 @@ event_df_sep_troughs_avg <- event_df_sep_troughs |>
 # Add R-squared values to the dataset
 y_col <- 'IP'
 x_col <- 'value'
+
 lm_nest <- event_df_sep_troughs_avg |>
-  group_by(pretty_name, cc) |>
+  group_by(pretty_name, cc, trough_name) |>
   nest() |>
   mutate(model = map(data, ~lm(as.formula(paste(y_col, "~", x_col)), data = .x)),
          resids = map2(data, model, add_residuals),
          preds = map2(data, model, add_predictions),
          glance = map(model, broom::glance))
+
 model_summaries <- lm_nest |>
   unnest(glance) |>
-  select(pretty_name, cc, r.squared,adj.r.squared, p.value) |>
+  ungroup() |>
+  left_join(scl_names_dict, by = c('trough_name' = 'name')) |>
+  select(pretty_name, scl_names_new, cc, r.squared,adj.r.squared, p.value, df.residual) |>
   mutate(
     offset_y = case_when(
       cc == 0.73 ~ 0,
       cc == 0.78  ~ .05,
       cc == 0.82  ~ .1
-    )
-  )
+    ),
+    n = df.residual + 2
+  ) |>
+  select(-df.residual)
+
+saveRDS(model_summaries, 'data/lysimeter-data/lysimter_event_avg_regression_stats.rds')
 
 event_df_sep_troughs_avg |>
   ggplot() +
@@ -53,15 +61,16 @@ event_df_sep_troughs_avg |>
   theme(legend.position = 'right') +
   scale_color_manual(values = cc_colours) +
   facet_wrap(~pretty_name, nrow = 3, scales = 'free') +
-  xlab(element_blank()) +
-  ylim(c(NA, 1)) +
-  geom_text(data = model_summaries,
-            aes(x = -Inf, y = (1 - offset_y),
-                label = sprintf("R² = %.3f%s",
-                                adj.r.squared,
-                                ifelse(p.value < 0.05, "*", "")),
-                colour = cc),
-            hjust = -.1, vjust = 1.1, size = 3, fontface = 'bold')
+  xlab(element_blank()) #+
+  # ylim(c(NA, 1)) #+
+  # show above model R2 and significance on the graph, decided to move to table
+  # geom_text(data = model_summaries,
+  #           aes(x = -Inf, y = (1 - offset_y),
+  #               label = sprintf("R² = %.3f%s",
+  #                               adj.r.squared,
+  #                               ifelse(p.value < 0.05, "*", "")),
+  #               colour = cc),
+  #           hjust = -.1, vjust = 1.1, size = 3, fontface = 'bold')
 
 ggsave('figs/automated_snowfall_event_periods/event_avg_temp_wind_cuml_snow_vs_IP_colour_troughs.png',
        width = 5, height = 7)

@@ -50,7 +50,7 @@ ggplot(event_wind_profile |>
   geom_line() +
   labs(
     y = 'Height Above Snowpack (m)',
-    x = 'Average Wind Speed (m/s)',
+    x = element_blank(),
     # title = 'March 13-14, 2023 Wind Profile'
   ) +
   lims(
