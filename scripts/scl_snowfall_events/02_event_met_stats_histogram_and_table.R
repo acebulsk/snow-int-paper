@@ -169,7 +169,13 @@ saveRDS(event_avgs_maxmin, 'data/event_avgs_maxmin.rds')
 
 # pretty table of event met stats ----
 pretty_table <- event_avgs_maxmin |>
-  # select(w_tree_event, variable, min, mean, max, total_snowfall) |>
+  select(
+    w_tree_event,
+    starts_with('min'),
+    starts_with('mean'),
+    starts_with('max'),
+    total_snowfall
+  ) |>
   gt() |>
   tab_spanner(
     label = "Air Temperature (°C)",
@@ -183,9 +189,12 @@ pretty_table <- event_avgs_maxmin |>
     label = "Interception Efficiency (-)",
     columns = ends_with("_IP_troughs")
   ) |>
+  # tab_options(
+  #   table.font.size = "10px"
+  # ) |>
   cols_label(
     w_tree_event = "Start Date",
-    duration = 'Duration (Hrs)',
+    # duration = 'Duration (Hrs)',
     min_t = "Min",
     mean_t = "Mean",
     max_t = "Max",
@@ -199,12 +208,12 @@ pretty_table <- event_avgs_maxmin |>
   ) |>
   cols_align(align = "center")  |>
   cols_width(
-    w_tree_event ~ px(95),           # Set width for 'Start Date' column
-    duration ~ px(70),               # Set width for 'Duration (Hrs)' column
+    w_tree_event ~ px(90),           # Set width for 'Start Date' column
+    # duration ~ px(60),               # Set width for 'Duration (Hrs)' column
     ends_with("_t") ~ px(50),         # Set equal width for Air Temperature columns
     ends_with("_u") ~ px(50),         # Set equal width for Wind Speed columns
     ends_with("_IP_troughs") ~ px(50),# Set equal width for Interception Efficiency columns
-    total_snowfall ~ px(70)          # Set width for 'Total Snowfall' column
+    total_snowfall ~ px(80)          # Set width for 'Total Snowfall' column
   ) |>
   fmt_number(
     columns = c(starts_with("min_"), starts_with("mean_"), starts_with("max_"), total_snowfall),
@@ -215,4 +224,4 @@ pretty_table
 
 saveRDS(pretty_table, 'data/event_avgs_maxmin_pretty_gt_table.rds')
 
-gt::gtsave(pretty_table, 'figs/event_avgs_maxmin_pretty_gt_table.pdf')
+# gt::gtsave(pretty_table, 'figs/event_avgs_maxmin_pretty_gt_table.pdf')

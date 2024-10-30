@@ -75,6 +75,41 @@ event_df_sep_troughs_avg |>
 ggsave('figs/automated_snowfall_event_periods/event_avg_temp_wind_cuml_snow_vs_IP_colour_troughs.png',
        width = 5, height = 7)
 
+# plot wide for pptx
+
+event_df_sep_troughs_avg |>
+  ggplot() +
+  geom_point(aes(value, IP, colour = cc, group = cc)) +
+
+  # Conditionally add the smooth line where p.value < 0.05
+  geom_smooth(
+    data = event_df_sep_troughs_avg |>
+      left_join(model_summaries, by = c('pretty_name', 'cc')) |>  # Join the summaries
+      filter(p.value < 0.05),                   # Filter where p-value < 0.05
+    aes(value, IP, colour = cc, group = cc),
+    method = 'lm', se = F, linetype = 'solid'
+  ) +
+
+  ylab("Interception Efficiency (-)") +
+  # xlab('Event Total Snowfall (mm)') +
+  labs(colour = 'SCL\nCanopy\nCoverage (-)') +
+  theme(legend.position = 'right') +
+  scale_color_manual(values = cc_colours) +
+  facet_wrap(~pretty_name, ncol = 3, scales = 'free') +
+  xlab(element_blank()) #+
+# ylim(c(NA, 1)) #+
+# show above model R2 and significance on the graph, decided to move to table
+# geom_text(data = model_summaries,
+#           aes(x = -Inf, y = (1 - offset_y),
+#               label = sprintf("R² = %.3f%s",
+#                               adj.r.squared,
+#                               ifelse(p.value < 0.05, "*", "")),
+#               colour = cc),
+#           hjust = -.1, vjust = 1.1, size = 3, fontface = 'bold')
+
+ggsave('figs/automated_snowfall_event_periods/event_avg_temp_wind_cuml_snow_vs_IP_colour_troughs_wide.png',
+       width = 8.5, height = 3)
+
 # plotly::ggplotly()
 
 # use this method if you want to try binning

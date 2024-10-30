@@ -201,7 +201,7 @@ w_ip <- met_intercept |>
 
 w_ip
 plotly::ggplotly()
-cowplot::plot_grid(at_ip, ws_ip, w_ip, nrow = 3, labels = 'AUTO')
+cowplot::plot_grid(at_ip, ws_ip, w_ip, nrow = 3, labels = c('a', 'b', 'c'))
 
 ggsave('figs/automated_snowfall_event_periods/troughs_met_vs_IP_bin.png', device = png, width = 8.5, height = 8.5)
 
