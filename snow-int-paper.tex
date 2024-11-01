@@ -223,14 +223,14 @@ inherently coupled canopy snow accumulation and ablation processes. This
 leads to difficulty in diagnosing processes and adding possible errors
 to simulations when incorporated as canopy interception routines in
 models that already account for canopy snow ablation. This study
-evaluates the theory underpinning these parameterizations using
-high-temporal resolution and fine-scale measurements of throughfall for
-events with minimal snow ablation and redistribution in both the canopy
-and on the ground. The relationship between these throughfall
-measurements, event meteorology, and a novel lidar-based measurement of
-canopy structure are assessed in two subalpine forest plots in the
-Canadian Rockies. Contrary to existing theories, no association of
-canopy snow load or air temperature with interception efficiency was
+evaluates the theory underpinning parameterizations of initial snow
+interception using high-temporal resolution and fine-scale measurements
+of throughfall for events with minimal snow ablation and redistribution
+in both the canopy and on the ground. The relationship between these
+throughfall measurements, event meteorology, and a novel lidar-based
+canopy strucutre measurement are assessed in two subalpine forest plots
+in the Canadian Rockies. Contrary to existing theories, no association
+of canopy snow load or air temperature with interception efficiency was
 observed. Instead, canopy structure emerged as the primary factor
 governing snow accumulation. A wind-driven snowfall event demonstrated
 that non-vertical hydrometeor trajectories can significantly increase
@@ -284,11 +284,14 @@ current and future subcanopy snowpacks.
 Hedstrom \& Pomeroy (1998), working in the cold continental boreal
 forest, proposed that initial snow interception efficiency was
 controlled by the maximum canopy load which itself was a function of
-leaf area index and air temperature. Unloading was found to be an
+leaf area index and new snow density. Unloading was found to be an
 exponential function of time and observed only days or weeks after the
 interception event. Storck et al. (2002), working in temperate coastal
-forests, emphasized the role of air temperature in controlling the
-maximum canopy snow load. Gelfan et al. (2004) demonstrated accurate
+forests, emphasized the role of leaf area index and air temperature in
+controlling the maximum canopy snow load. The opposing relationship
+between air temperature and maximum canopy snow load in the Hedstrom \&
+Pomeroy (1998) and Storck et al. (2002) parameterizations is shown in
+Clark et al. (2015) Figure 4. Gelfan et al. (2004) demonstrated accurate
 subcanopy snowpack simulations at study sites in Russia by treating the
 Hedstrom \& Pomeroy (1998) and Storck et al. (2002) parameterizations
 separately while using a step-based function to choose either
@@ -302,20 +305,20 @@ parameterizations from different studies (e.g., Roesch et al., 2001).
 The coupling of ablation processes within existing snow interception
 models (Hedstrom \& Pomeroy, 1998; Storck et al., 2002) may contribute
 to overestimates of throughfall, canopy snow unloading, and canopy snow
-melt when combined with other canopy snow ablation parameterizations.
-Additional observations of snow interception that exclude ablation
-processes could help determine the applicability of the interception
-theories proposed by Hedstrom \& Pomeroy (1998) and Storck et al.
-(2002). Hedstrom \& Pomeroy's (1998) theory also suggests that moderate
-wind speeds, which can result in more horizontal hydrometeor
-trajectories and increase the snow-leaf contact area and interception
-efficiency at the plot scale. This association has also been shown in
-rainfall interception studies to decrease throughfall of rain (Herwitz
-\& Slye, 1995; Van Stan et al., 2011). Despite this importance for
-rainfall, the relationship proposed by Hedstrom \& Pomeroy (1998), has
-typically not been included in snow accumulation models (Clark et al.,
-2020; Mahat \& Tarboton, 2014) and empirical testing of this
-relationship is lacking.
+melt when combined with other canopy snow ablation parameterizations
+(Cebulski \& Pomeroy, 2024). Additional observations of snow
+interception that exclude ablation processes could help determine the
+applicability of the interception theories proposed by Hedstrom \&
+Pomeroy (1998) and Storck et al. (2002). Hedstrom \& Pomeroy's (1998)
+theory also suggests that moderate wind speeds, which can result in more
+horizontal hydrometeor trajectories and increase the snow-leaf contact
+area and interception efficiency at the plot scale. This association has
+also been shown in rainfall interception studies to decrease throughfall
+of rain (Herwitz \& Slye, 1995; Van Stan et al., 2011). Despite this
+importance for rainfall, the relationship proposed by Hedstrom \&
+Pomeroy (1998), has typically not been included in snow accumulation
+models (Clark et al., 2020; Mahat \& Tarboton, 2014) as empirical
+testing of this relationship is lacking.
 
 The objective of this paper is to evaluate the theories underlying
 existing snow interception models using high spatial and temporal
@@ -339,26 +342,30 @@ address the following research questions:
 
 \section{Theory}\label{theory}
 
-\subsection{Snow Interception}\label{snow-interception}
+\subsection{Snow interception}\label{snow-interception}
 
 The canopy snow load, \(L\) (kg m\textsuperscript{-2}) can be estimated
 from the mass balance:
 
 \begin{equation}\phantomsection\label{eq-canopy-mass-bal}{
 \frac{dL}{dt} = 
-q_{sf} - q_{tf} - q_{unld} - q_{drip} - q_{wind}^{veg} - q_{sub}^{veg}
+q_{sf} + q_{ros} - q_{tf} - q_{unld} - q_{drip} - q_{wind}^{veg} - q_{sub}^{veg}
 }\end{equation}
 
 where \(q_{sf}\) is the snowfall rate (kg m\textsuperscript{-2}
-s\textsuperscript{-1}), \(q_{tf}\) is the throughfall rate (kg
-m\textsuperscript{-2} s\textsuperscript{-1}), \(q_{unld}\) is the canopy
-snow unloading rate (kg m\textsuperscript{-2} s\textsuperscript{-1}),
-\(q_{drip}\) is the canopy snow drip rate due to canopy snowmelt (kg
-m\textsuperscript{-2} s\textsuperscript{-1}), \(q_{wind}^{veg}\) is the
-wind transport rate in or out of the control volume (kg
-m\textsuperscript{-2} s\textsuperscript{-1}), and \(q_{sub}^{veg}\) is
-the intercepted snow sublimation rate (kg m\textsuperscript{-2}
-s\textsuperscript{-1}).
+s\textsuperscript{-1}), \(q_{ros}\) (kg m\textsuperscript{-2}
+s\textsuperscript{-1}) is the rate of rainfall falling on snow
+intercepted in the canopy, \(q_{tf}\) (kg m\textsuperscript{-2}
+s\textsuperscript{-1}) is the throughfall rate (kg m\textsuperscript{-2}
+s\textsuperscript{-1}), \(q_{unld}\) is the canopy snow unloading rate
+(kg m\textsuperscript{-2} s\textsuperscript{-1}), \(q_{drip}\) is the
+canopy snow drip rate due to canopy snowmelt (kg m\textsuperscript{-2}
+s\textsuperscript{-1}), \(q_{wind}^{veg}\) is the wind transport rate in
+or out of the control volume (kg m\textsuperscript{-2}
+s\textsuperscript{-1}), and \(q_{sub}^{veg}\) is the intercepted snow
+sublimation rate (kg m\textsuperscript{-2} s\textsuperscript{-1}).
+Figure 1 in Cebulski \& Pomeroy (2024) presents a visual representation
+of this mass balance.
 
 During periods with low air temperatures and low wind speeds,
 \(q_{unld}\), \(q_{drip}\), \(q_{wind}^{veg}\), and \(q_{sub}^{veg}\)
@@ -376,8 +383,8 @@ and throughfall, \(q_{tf}\) can be calculated as:
 q_{tf} = \left(1 - \frac{I}{P} \right) \cdot q_{sf}
 }\end{equation}
 
-\subsection{Hydrometeor Trajectory
-Angle}\label{hydrometeor-trajectory-angle}
+\subsection{Hydrometeor trajectory
+angle}\label{hydrometeor-trajectory-angle}
 
 The trajectory angle, \(\theta_h\) of a hydrometeor as the departure in
 degrees (°) from a vertical plane, is shown in Herwitz \& Slye (1995) to
@@ -394,9 +401,9 @@ s\textsuperscript{-1}), which is a function of the hydrometeor diameter,
 speed, \(u_z\) at height above ground, \(z\). This assumes the
 hydrometeors are following fluid points in the atmosphere.
 
-\section{Data and Methods}\label{data-and-methods}
+\section{Data and methods}\label{data-and-methods}
 
-\subsection{Study Site}\label{study-site}
+\subsection{Study site}\label{study-site}
 
 This study was conducted at Fortress Mountain Research Basin (FMRB),
 Alberta, Canada, -115° W, 51° N, a continental headwater basin in the
@@ -424,7 +431,7 @@ Following the fire, the forest within the PWL and FT forest plots has
 naturally regenerated, though some trees have been removed for road
 clearing and creation of a snow study plot.
 
-\begin{figure}
+\begin{figure}[H]
 
 \centering{
 
@@ -440,7 +447,7 @@ of Fortress Mountain Research basin.}
 \end{figure}%
 
 \subsection{Meteorological
-Measurements}\label{meteorological-measurements}
+measurements}\label{meteorological-measurements}
 
 Measurements of air temperature and relative humidity (Vaisala model
 HMP155A), wind speed and direction (RM Young model 86000 2-D ultrasonic
@@ -469,19 +476,21 @@ dimensionless von Kármán Constant (0.4).
 To determine the displacement height and roughness length parameters the
 function ``optim'' from the stats R package (R Core Team, 2024) was
 used. The parameters found for the wind speed profile include a
-roughness length of 0.50 m and displacement height of 0.58 m. At PWL
-station, the snowfall rate was measured by an Alter-shielded OTT Pluvio
-weighing precipitation gauge 2.6 m above ground, corrected for
-undercatch following phase correction by Harder \& Pomeroy (2013) and
-catch efficiency by Smith (2007). Wind speed for undercatch correction
-was measured by a 3-cup anemometer (Met One model 014A) at a height of
-2.6 m at PWL station. An optical disdrometer (OTT Parsivel2) provided
-measurements of hydrometeor particle size and vertical velocity. All
-measurements were recorded at 15-min intervals using Campbell Scientific
-dataloggers, except the Parsivel2 which was recorded at 1-minute
-intervals by an onsite computer.
+roughness length of 0.50 m and displacement height of 0.58 m. See the
+supporting information for more information on the development and
+testing of the wind profile. At PWL station, the snowfall rate was
+measured by an Alter-shielded OTT Pluvio weighing precipitation gauge
+2.6 m above ground, corrected for undercatch following phase correction
+by Harder \& Pomeroy (2013) and catch efficiency by Smith (2007). Wind
+speed for undercatch correction was measured by a 3-cup anemometer (Met
+One model 014A) at a height of 2.6 m at PWL station. An optical
+disdrometer (OTT Parsivel2) provided measurements of hydrometeor
+particle size and vertical velocity. All measurements were recorded at
+15-min intervals using Campbell Scientific dataloggers, except the
+Parsivel2 which was recorded at 1-minute intervals by an onsite
+computer.
 
-\subsection{Lysimeter Measurements}\label{lysimeter-measurements}
+\subsection{Lysimeter measurements}\label{lysimeter-measurements}
 
 Three subcanopy lysimeters (SCLs) were installed surrounding the FT
 Station (Figure~\ref{fig-site-map}) to provide 15-minute interval
@@ -543,7 +552,7 @@ Closed & 2.11 & 0.82 \\
 
 \end{longtable}
 
-\begin{figure}
+\begin{figure}[H]
 
 \centering{
 
@@ -561,8 +570,8 @@ right side of each image).}
 
 \end{figure}%
 
-\subsection{UAV-Lidar Data Collection and
-Processing}\label{uav-lidar-data-collection-and-processing}
+\subsection{UAV-Lidar data cCollection and
+processing}\label{uav-lidar-data-ccollection-and-processing}
 
 The UAV (FreeFly Alta X) payload included a REIGL miniVUX-2 airborne
 laser scanner, an Applanix APX-20 inertial measurement unit (IMU) and
@@ -591,10 +600,10 @@ to a 0.25 m grid cell resolution was conducted using the `Terra' R
 package (Hijmans, 2024). More details on the UAV-lidar processing
 workflow are provided in the supporting information.
 
-\subsection{Snow Surveys}\label{snow-surveys}
+\subsection{Snow surveys}\label{snow-surveys}
 
-\subsubsection{In-situ Snow Depth and
-Density}\label{in-situ-snow-depth-and-density}
+\subsubsection{In-situ snow depth and
+density}\label{in-situ-snow-depth-and-density}
 
 Twelve in-situ fresh snow surveys (six pre- and post-snowfall event
 pairs) provided measurements of subcanopy throughfall depth and density
@@ -625,7 +634,7 @@ above the crust layer was interpreted as throughfall over the event. In
 the absence of a defined crust layer, the difference in pre- and
 post-event snow depth to ground was interpreted as event throughfall.
 
-\subsubsection{UAV-Lidar Snow Depth}\label{uav-lidar-snow-depth}
+\subsubsection{UAV-Lidar snow depth}\label{uav-lidar-snow-depth}
 
 Two uncrewed aerial vehicle (UAV) lidar surveys were conducted before
 and after a 24-hour snowfall event that occurred between March
@@ -639,7 +648,7 @@ weighed tree, and time-lapse imagery. The change in elevation between
 the two UAV-lidar surveys was interpreted as the increase in snow
 accumulation, \(\Delta HS\) over the snowfall event.
 
-\subsection{UAV-Lidar Canopy Metrics}\label{uav-lidar-canopy-metrics}
+\subsection{UAV-Lidar canopy metrics}\label{uav-lidar-canopy-metrics}
 
 To characterize the canopy structure, the voxel ray sampling (VoxRS)
 methodology for lidar data analysis was employed, as developed by
@@ -671,8 +680,8 @@ and \(L\). \(C_p\) is approximately equal to canopy coverage (\(C_c\))
 for vertical snowfall trajectories. However, for non-vertical snowfall
 \(1 > C_p > C_c\).
 
-\subsection{Statistics and Regression
-Models}\label{statistics-and-regression-models}
+\subsection{Statistics and regression
+models}\label{statistics-and-regression-models}
 
 To determine how forest structure was associated with interception
 efficiency at different azimuth and zenith angles over the March 13---14
@@ -718,7 +727,7 @@ Figure~\ref{fig-scl-w-sf} for certain troughs during specific events was
 caused by damage to the subcanopy lysimeter wiring due to animals and
 heavy snow loads.
 
-\begin{figure}
+\begin{figure}[H]
 
 \centering{
 
@@ -789,7 +798,7 @@ Start Date & Min & Mean & Max & Min & Mean & Max & Min & Mean & Max & Total Snow
 
 \setstretch{1.5}
 
-\begin{figure}
+\begin{figure}[H]
 
 \centering{
 
@@ -819,7 +828,7 @@ efficiency in the mixed canopy, which is open towards the prevailing
 wind direction, was not associated with wind speed (\emph{p}
 \textgreater{} 0.05).
 
-\begin{figure}
+\begin{figure}[H]
 
 \centering{
 
@@ -887,15 +896,17 @@ Wind Speed (m/s) & Closed & 0.82 & 0.192 & 0.030 & 20 \\
 \end{longtable}
 
 Fifteen-minute interval measurements of interception efficiency and air
-temperature were not associated, despite significant relationships for
-the sparse and mixed canopies (\emph{R}\textsuperscript{2} \textless{}
-0.03, \emph{p} \textless{} 0.05), due to low predictive power (Figure
-6a). The average interception efficiency across differing bins of air
-temperature also does not show any systematic trend (Figure 6a).
-However, a significantly greater median interception efficiency
-(\emph{p} \textless{} 0.05) was found for binned measurements with air
-temperatures below -6 °C compared to those with warmer air temperatures
-using non-parametric Wilcoxon signed rank test.
+temperature shown in Figure 6a were not associated, despite significant
+relationships for the sparse and mixed canopies
+(\emph{R}\textsuperscript{2} \textless{} 0.03, \emph{p} \textless{}
+0.05), due to low predictive power
+(Table~\ref{tbl-lysimeter-15min-stats}). The average interception
+efficiency across differing bins of air temperature also does not show
+any systematic trend (Figure 6a). However, a significantly greater
+median interception efficiency (\emph{p} \textless{} 0.05) was found for
+binned measurements with air temperatures below -6 °C compared to those
+with warmer air temperatures using non-parametric Wilcoxon signed rank
+test.
 
 Mean wind speed was weakly associated with interception efficiency for
 the sparse (\emph{R}\textsuperscript{2} = 0.1, \emph{p} \textgreater{}
@@ -931,7 +942,7 @@ rank-test. Additional statistics from ordinary least squares regression
 test on the 15-minute interval measurements are provided in
 Table~\ref{tbl-lysimeter-15min-stats}.
 
-\begin{figure}
+\begin{figure}[H]
 
 \centering{
 
@@ -1025,7 +1036,7 @@ integrating the wind speed from the surface to the mean canopy height of
 FT plot. The corresponding trajectory angle calculated using
 Equation~\ref{eq-ta} from this integrated wind speed was 61.5°.
 
-\begin{figure}
+\begin{figure}[H]
 
 \centering{
 
@@ -1037,9 +1048,7 @@ Equation~\ref{eq-ta} from this integrated wind speed was 61.5°.
 length and displacement height parameters derived from anemometers at 2,
 3, 4.3, and 13.5 m above ground at FT station over snow free periods and
 friction velocity estimated over the March 13--14\textsuperscript{th}
-snowfall event. The red triangle shows the mean observed wind speed at
-4.3 m height (2.8 m above the snowpack) measured at the FT station over
-the event.}
+snowfall event.}
 
 \end{figure}%
 
@@ -1065,7 +1074,7 @@ may be attributed to the taller trees and higher canopy coverage of the
 PWL forest plot compared to the FT forest plot, as for the same
 trajectory angle a taller tree will produce a larger downwind footprint.
 
-\begin{figure}
+\begin{figure}[H]
 
 \centering{
 
@@ -1095,7 +1104,7 @@ correlation coefficients found for non-vertical zenith angles for both
 PWL and FT are hypothesized to result from non-vertical hydrometeor
 trajectories.
 
-\begin{figure}
+\begin{figure}[H]
 
 \centering{
 
@@ -1132,7 +1141,7 @@ of snowflakes that contact the \(C_p\) elements and are stored in the
 canopy (i.e., intercepted) before canopy snow unloading or ablation
 processes begin.
 
-\begin{figure}
+\begin{figure}[H]
 
 \centering{
 
@@ -1184,6 +1193,8 @@ required to derive the \(C_p\) values used in this analysis are rarely
 available and thus more accessible methods to estimate \(C_p\) must be
 obtained to use Equation~\ref{eq-lca-ip} which are described in the
 following section.
+
+\pagebreak
 
 \begin{longtable}[]{@{}
   >{\raggedright\arraybackslash}p{(\columnwidth - 12\tabcolsep) * \real{0.1149}}
@@ -1266,7 +1277,7 @@ quantified across trajectory angles for both PWL and FT on March
 in \(C_p\) compared to \(C_p\) measured on March 13\textsuperscript{th}
 without snow in the canopy.
 
-\begin{figure}
+\begin{figure}[H]
 
 \centering{
 
@@ -1384,8 +1395,8 @@ nls & PWL & 0.0010 & 0.0040 & 0.0054 & 0.9990 \\
 
 \end{longtable}
 
-\subsection{Throughfall Model
-Performance}\label{throughfall-model-performance}
+\subsection{Throughfall model
+performance}\label{throughfall-model-performance}
 
 The performance of Equations 9, 10, and 11 in estimating event
 throughfall was assessed against UAV-lidar measurements of throughfall
@@ -1421,7 +1432,7 @@ observed for FT, with the percent error in predicted throughfall
 declining from -3.6\% with the nadir-model to -1.4\% with the
 vector-based model.
 
-\begin{figure}
+\begin{figure}[H]
 
 \centering{
 
@@ -1442,6 +1453,8 @@ the accumulated SWE (kg m⁻²) over the snowfall event to the PWL station
 open clearing.}
 
 \end{figure}%
+
+\pagebreak
 
 \begin{longtable}[]{@{}
   >{\raggedright\arraybackslash}p{(\columnwidth - 14\tabcolsep) * \real{0.0633}}
@@ -1713,14 +1726,14 @@ Research Council of Canada, Global Water Futures Programme, Environment
 and Climate Change Canada, Alberta Innovates, Canada Foundation for
 Innovation, and the Canada Research Chairs Programme. We thank Madison
 Harasyn, Hannah Koslowsky, Kieran Lehan, Lindsey Langs and Fortress
-Mountain Resort for their help in the field. Madison Harasyn, Alistair
-Wallace, and Rob White contributed to developing the UAV-lidar
-processing workflow.
+Mountain Resort for their help in the field. Jacob Staines, Madison
+Harasyn, Alistair Wallace, and Rob White contributed to developing the
+UAV-lidar processing workflow.
 
 \section{Data Availability}\label{data-availability}
 
 The data that support the findings in this study are available at
-https://github.com/acebulsk/snow-int-paper.
+https://doi.org/10.5281/zenodo.14018893.
 
 \pagebreak
 
@@ -1752,6 +1765,11 @@ Betts, A. K., \& Ball, J. H. (1997). {Albedo over the boreal forest}.
 Calder, I. R. (1990). \emph{{Evaporation in the uplands}} (p. 148).
 Wiley.
 
+\bibitem[\citeproctext]{ref-Cebulski2024b}
+Cebulski, A., \& Pomeroy, J. W. (2024). {The theoretical underpinnings
+of snow interception and ablation parameterizations}. \emph{Wiley
+Interdisciplinary Reviews: Water}, \emph{In Review}.
+
 \bibitem[\citeproctext]{ref-Chianucci2023}
 Chianucci, F., \& Macek, M. (2023). {hemispheR: an R package for fisheye
 canopy image analysis}. \emph{Agricultural and Forest Meteorology}.
@@ -1762,6 +1780,15 @@ Cionco, R. M. (1965). {A Mathematical Model for Air Flow in a Vegetative
 Canopy}. \emph{Journal of Applied Meteorology (1962)}, \emph{4}(4),
 517--522.
 https://doi.org/\url{https://doi.org/10.1175/1520-0450(1965)004\%3C0517:AMMFAF\%3E2.0.CO;2}
+
+\bibitem[\citeproctext]{ref-Clark2015b}
+Clark, M. P., Nijssen, B., Lundquist, J. D., Kavetski, D., Rupp, D. E.,
+Woods, R. A., Freer, J. E., Gutmann, E. D., Wood, A. W., Gochis, D. J.,
+Rasmussen, R. M., Tarboton, D. G., Mahat, V., Flerchinger, G. N., \&
+Marks, D. G. (2015). {A unified approach for process-based hydrologic
+modeling: 2. Model implementation and case studies}. \emph{Water
+Resources Research}, \emph{51}(4), 2515--2542.
+https://doi.org/\url{https://doi.org/10.1002/2015WR017200}
 
 \bibitem[\citeproctext]{ref-Clark2020}
 Clark, M. P., Wood, A., Nijssen, B., Bennett, A., Knoben, W., \&
@@ -2152,7 +2179,7 @@ A comparison of UAV-liar and in-situ snow survey measurements over the
 March 13--14th snowfall event and associated error metrics are shown in
 Figure~\ref{fig-lidar-vs-fsd-sd}.
 
-\begin{figure}
+\begin{figure}[H]
 
 \centering{
 
@@ -2186,6 +2213,28 @@ and full model, assessed via Equation 15 in Kozak \& Kozak (1995). If
 the first test indicated a significant difference, and the second did
 not, the no-intercept model could be deemed statistically justified
 (Kozak \& Kozak, 1995).
+
+\subsection{Wind Speed Profile}\label{wind-speed-profile}
+
+The displacement height (\(d_0\), m) and roughness length of momentum
+(\(z_0\), m) were estimated over five events where the anemometers were
+known to be clean of snow. The mean wind speed of each event for the
+three different anemometers is shown in Figure~\ref{fig-ws-events}.
+
+\begin{figure}[H]
+
+\centering{
+
+\includegraphics{figs/supplement/FFT_wind_profile_raw_obs.png}
+
+}
+
+\caption{\label{fig-ws-events}Wind profiles showing the average wind
+speed at differing heights above the surface snowpack. Wind speeds were
+averaged for three anemometers over five events when the anemometers
+were known to be clean of snow.}
+
+\end{figure}%
 
 
 
