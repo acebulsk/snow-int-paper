@@ -57,15 +57,15 @@ ggplot(event_wind_profile |>
     y = c(0, NA),
     x = c(0, NA)
   ) +
-  facet_wrap(~name, scales = 'free') +
-  geom_point(
-    data = . %>% filter(name == 'Simulated Wind Speed (m/s)'),
-    aes(x = event_avg_wind, y = us_wind_height - event_sd),
-    shape = 24,        # Filled triangle point-up
-    color = 'red',
-    fill = 'red',      # Fill color (for filled shapes)
-    size = 4           # Increase point size
-  )
+  facet_wrap(~name, scales = 'free') #+
+  # geom_point(
+  #   data = . %>% filter(name == 'Simulated Wind Speed (m/s)'),
+  #   aes(x = event_avg_wind, y = us_wind_height - event_sd),
+  #   shape = 24,        # Filled triangle point-up
+  #   color = 'red',
+  #   fill = 'red',      # Fill color (for filled shapes)
+  #   size = 4           # Increase point size
+  # )
 
 ggsave('figs/lidar_periods/wind_profile_w_trajectories_20230313.png',width = 8, height = 3.5)
 
