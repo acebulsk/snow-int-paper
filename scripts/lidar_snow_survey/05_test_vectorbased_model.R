@@ -39,7 +39,7 @@ ggplot(event_wind_profile, aes(wind_speed, height)) +
     title = 'March 13-14, 2023 Wind Profile'
   )
 
-ggsave('figs/lidar_periods/wind_profile_20230313.png',width = 4, height = 3.5)
+# ggsave('figs/lidar_periods/wind_profile_20230313.png',width = 4, height = 3.5)
 
 ggplot(event_wind_profile |>
          rename(
