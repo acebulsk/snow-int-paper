@@ -1,6 +1,9 @@
 # plot time series of scl data and met for each selected interception event and
 # wind rose is below
 
+script('scripts/00_define_global_attributes.R')
+script('scripts/01_load_processed_data.R')
+
 events <- met_intercept$storm_id |> unique()
 
 # plot event averages ----

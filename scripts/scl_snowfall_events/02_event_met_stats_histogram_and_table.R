@@ -189,6 +189,10 @@ pretty_table <- event_avgs_maxmin |>
     label = "Interception Efficiency (-)",
     columns = ends_with("_IP_troughs")
   ) |>
+  tab_spanner(
+    label = md("Snowfall (kg $\\text{m}^{-2}$)"),
+    columns = total_snowfall
+  ) |>
   # tab_options(
   #   table.font.size = "10px"
   # ) |>
@@ -204,7 +208,7 @@ pretty_table <- event_avgs_maxmin |>
     min_IP_troughs = "Min",
     mean_IP_troughs = "Mean",
     max_IP_troughs = "Max",
-    total_snowfall = "Total Snowfall (mm)"
+    total_snowfall = "Total"
   ) |>
   cols_align(align = "center")  |>
   cols_width(
