@@ -46,13 +46,13 @@ source('scripts/manuscript_values.R')
 
 **Authors:**
 
-A. Cebulski^1^ (ORCID ID - 0000-0001-7910-5056)
+Alexander Charles Cebulski^1^ (ORCID ID - 0000-0001-7910-5056)
 
-J.W. Pomeroy^1^ (ORCID ID - 0000-0002-4782-7457)
+John Willard Pomeroy^1^ (ORCID ID - 0000-0002-4782-7457)
 
 ^1^Centre for Hydrology, University of Saskatchewan, Canmore, Canada
 
-**Corresponding Author:** A. Cebulski, alexcebulski@gmail.com
+**Corresponding Author:** A. Cebulski, 50 Lincoln Park, Canmore, Alberta, Canada, T1W 3E9, alexcebulski@gmail.com
 
 **Abstract:** Snow accumulation models differ in how snow interception and ablation processes are represented and thus their application to diverse climates and forest types is uncertain. Existing parameterizations of initial snow interception before unloading include inherently coupled canopy snow accumulation and ablation processes. This leads to difficulty in diagnosing processes and adding possible errors to simulations when incorporated as canopy interception routines in models that already account for canopy snow ablation. This study evaluates the theory underpinning parameterizations of initial snow interception using high-temporal resolution and fine-scale measurements of throughfall for events with minimal snow ablation and redistribution in both the canopy and on the ground. The relationship between these throughfall measurements, event meteorology, and a novel lidar-based canopy structure measurement are assessed in two subalpine forest plots in the Canadian Rockies. Contrary to existing theories, no association of canopy snow load or air temperature with interception efficiency was observed. Instead, canopy structure emerged as the primary factor governing snow accumulation. A wind-driven snowfall event demonstrated that non-vertical hydrometeor trajectories can significantly increase snow-leaf contact area, thereby enhancing initial interception before ablation. Prediction of interception efficiency for this event improved dramatically when adjusted for hydrometeor trajectory angle based on a wind speed at one-third of the canopy height. Snow-leaf contact area showed a high sensitivity to wind speed, increasing by up to `r round(ft_frac_inc * 100, 0)`% with a 1 m s^-1^ wind speed. The study proposes a new parameterization that calculates throughfall, independent of processes that ablate snow from the canopy, as a function of snow-leaf contact area adjusted for hydrometeor trajectory angle. This new parameterization successfully estimated subcanopy snow accumulation for a snowfall event at two forest plots measured using lidar and snow surveys. By separating canopy snow ablation from snow interception processes, this new model offers potentially improved prediction of subcanopy snow accumulation when combined with canopy snow ablation parameterizations.
 
