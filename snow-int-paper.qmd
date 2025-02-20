@@ -357,6 +357,19 @@ C_{inc} = \left(
 \right)
 $${#eq-lca-inc}
 
+Revised model is:
+
+$$
+C_{p} = 1 - (V_f)^{\left(\frac{1}{\cos(\theta_h)}\right)^k}
+$$
+where $C_p$ is the is the plot scale leaf contact area (-), $V_f$ is the sky-view factor or gap fraction, $\theta_h$ is the trajectory angle of a hydrometeor, and k is calculated as:
+
+$$
+k = H_t\cdot w
+$$
+
+where $H_t$ is the average canopy height (m) and $w$ is a scaling parameter found to be equal to 0.24 in this study. 
+
 where $C^{max}_{inc}$ is the maximum value of $C_{inc}$, $\theta_0$ is the x-value of the sigmoid midpoint and $k$ is the logistic growth rate or steepness of the curve. The coefficients resulting from the non-linear least squares regression fit of @eq-lca-inc to the VoxRS dataset are presented in @tbl-lca-coefs. Simulated $C_p$ using @eq-lca-ac is shown in the dashed lines in the top row of @fig-lca-ht-ws and follows the VoxRS-measured mean $C_p$ closely. Model error statistics shown in @tbl-lca-mod-err demonstrate that @eq-lca-inc performed well, with a mean bias and RMSE of 0.001 (-) and 0.0054 (-) respectively for PWL, and -0.0004 (-) and 0.0079 (-) for FT. In contrast, @tbl-lca-mod-err reveals that the @Hedstrom1998a method produced significantly less accurate estimates of $C_p$, with a mean bias and RMSE of -0.201 (-) and 0.233 (-) respectively for PWL, and -0.260 (-) and 0.324 (-) for FT.
 
 ```{r tbl-lca-coefs, echo=FALSE}
