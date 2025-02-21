@@ -185,16 +185,14 @@ ft_nadir <- ft$lca_nadir |> unique()
 pwl_frac_inc <- pwl_inc / pwl_nadir
 ft_frac_inc <- ft_inc / ft_nadir
 
-pwl_nls_coefs <- readRDS('data/lidar-data/models/ta_vs_lca_nls_coefs_pwl.rds') |> round(2)
-ft_nls_coefs <- readRDS('data/lidar-data/models/ta_vs_lca_nls_coefs_ft.rds') |> round(2)
-lca_mod_error <- readRDS('data/lidar-data/models/lca_obs_mod_error_tbl.rds')
+nls_sin_coefs <- readRDS('data/lidar-data/models/ta_vs_lca_nls_sin_fn_fit_both_ft_pwl_coefs.rds') |> round(2)
+lca_mod_error <- readRDS('data/lidar-data/models/lca_obs_mod_sin_fn_error_tbl.rds') |> mutate(Model = ifelse(Model == 'nls', 'Eq. 10', Model))
+pwl_errs_nls <- lca_mod_error |> filter(Model == 'nls', Plot == 'PWL') |> mutate(across(where(is.numeric), \(x) round(x, digits = 2))) |> rename(MB = `Mean Bias`, RMSE = `RMS Error`)
+ft_errs_nls <- lca_mod_error |> filter(Model == 'nls', Plot == 'FT') |> mutate(across(where(is.numeric), \(x) round(x, digits = 2))) |> rename(MB = `Mean Bias`, RMSE = `RMS Error`)
+pwl_errs_hp <- lca_mod_error |> filter(Model == 'HP98', Plot == 'PWL') |> mutate(across(where(is.numeric), \(x) round(x, digits = 2))) |> rename(MB = `Mean Bias`, RMSE = `RMS Error`)
+ft_errs_hp <- lca_mod_error |> filter(Model == 'HP98', Plot == 'FT') |> mutate(across(where(is.numeric), \(x) round(x, digits = 2))) |> rename(MB = `Mean Bias`, RMSE = `RMS Error`)
 
-nls_coefs_error <- data.frame(
-  Plot = c('PWL', 'FT'),
-  Asym = c(pwl_nls_coefs['Asym'], ft_nls_coefs['Asym']),
-  xmid = c(pwl_nls_coefs['xmid'], ft_nls_coefs['xmid']),
-  scal = c(pwl_nls_coefs['scal'], ft_nls_coefs['scal'])
-)
+lca_mod_error$`Mean Bias`[lca_mod_error$Plot == 'PWL' & lca_mod_error$Model == 'nls']
 
 ft_wp_pars <- readRDS(
   'data/wind-profile-data/forest_tower_wind_profile_params_clean_ec_events.rds'

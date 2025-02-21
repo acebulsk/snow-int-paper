@@ -169,15 +169,10 @@ ft_cc_nadir <- ft_cc_nadir_025 |>
 
 # Calculate the resulting increase in leaf contact area based on trajectory angle ----
 
-ft_lca_inc <- logistic_origin(x = ft_event_ta,
-                              Asym = ft_nls_coefs['Asym'],
-                              xmid = ft_nls_coefs['xmid'],
-                              scal = ft_nls_coefs['scal'])  |> as.numeric()
+ft_lca_inc <- sine_fn(ft_event_ta, cp_sine_model_coef[['b']], ft_cc_nadir)
 
-pwl_lca_inc <- logistic_origin(x = pwl_event_ta,
-                              Asym = pwl_nls_coefs['Asym'],
-                              xmid = pwl_nls_coefs['xmid'],
-                              scal = pwl_nls_coefs['scal']) |> as.numeric()
+
+pwl_lca_inc <- sine_fn(pwl_event_ta, cp_sine_model_coef[['b']], pwl_cc_nadir)
 
 # Calculate the leaf contact area for the event adjusted by trajectory angle
 
@@ -268,7 +263,8 @@ tf_df <- errors |>
 ggplot(tf_df, aes(plot, value, fill = name)) +
   geom_bar(stat = "identity", position = 'dodge') +
   labs(
-    y = '𝚫SWE (kg m⁻²)',
+    y = '𝚫SWE (mm)',
+    # y = '𝚫SWE (kg m⁻²)',
     x = element_blank(),
     fill = 'Event Throughfall'
   ) +

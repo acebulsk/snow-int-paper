@@ -90,7 +90,7 @@ lidar_data_model_files <- list.files('../../analysis/lidar-processing/data/model
                                      full.names = T)
 lidar_data_models_path <- 'data/lidar-data/models/'
 file.copy(from = lidar_data_model_files,
-          to = lidar_data_modles_path,
+          to = lidar_data_models_path,
           recursive = F,
           overwrite = F,
           copy.date = T)

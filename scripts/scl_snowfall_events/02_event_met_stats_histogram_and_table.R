@@ -90,8 +90,8 @@ pretty_names_vect <- c(
   "Snowfall Rate (mm/hr)",
   "Canopy Load (mm)",
   "Interception Efficiency (-)",
-  "Cumulative Snowfall (kg m⁻²)",
-  "Initial Canopy Snow Load (kg m⁻²)"
+  "Cumulative Snowfall (mm)",
+  "Initial Canopy Snow Load (mm)"
 )
 
 var_name_dict <-
@@ -190,7 +190,7 @@ pretty_table <- event_avgs_maxmin |>
     columns = ends_with("_IP_troughs")
   ) |>
   tab_spanner(
-    label = md("Snowfall (kg $\\text{m}^{-2}$)"),
+    label = md("Snowfall (mm)"),
     columns = total_snowfall
   ) |>
   # tab_options(

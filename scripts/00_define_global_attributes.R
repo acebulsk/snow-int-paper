@@ -55,8 +55,8 @@ pwl_sf <- readRDS('../../analysis/met-data-processing/data/pluvio-qaqc/pwl_pluvi
 pwl_wind <- readRDS('../../analysis/met-data-processing/data/pwl_met_qaqc.rds') |>
   select(
     datetime,
-    wind_speed = WindSpeed_S_WVT,
-    wind_dir_true = WindDir_D1_WVT # keir confirmed junction box is pointed at 180 deg south (true) as per spec
+    wind_speed = u_rm_young,
+    wind_dir_true = u_dir_rm_young # keir confirmed junction box is pointed at 180 deg south (true) as per spec
     # sd_wind_dir = WindDir_SD1_WVT
   )
 
@@ -80,7 +80,7 @@ diam_ax_lab <- 'Hydrometeor Diameter (mm)'
 vel_ax_lab <- 'Hydrometeor Velocity (m/s)'
 le_ax_lab <- 'Leaf Area Index (-)'
 cc_ax_lab <- 'Canopy Coverage (-)'
-w_tree_ax_lab <- "Initial Canopy Snow Load (kg m⁻²)"
+w_tree_ax_lab <- "Initial Canopy Snow Load (mm)"
 
 label_bin_fn <- function(bins){
   (bins[-1] + bins[-length(bins)]) / 2
@@ -123,3 +123,18 @@ get_traj_time <- function(file, fin = T){
   return(time_out)
 }
 
+
+# based on the idea that the increase in snow-leaf contact area is equal to the
+# void space multiplied by the increase in leaf contact area with snowfall
+# trajectory angle represented by sin(theta)
+# see /home/alex/local-usask/working-papers/snow-int-paper/figs/examples/contact_area_reasoning.qmd for reasoning behind this model
+sine_fn <- function(traj_angle, b,  cc){
+  # traj_angle is the inclination angle from zenith of snowfall (degrees)
+  # cc is the canopy coverage viewed from nadir (-)
+  theta <- traj_angle * (pi/180)
+
+  # 1-cc sets the max potential increase based on the initial void space
+  # sin(theta)^2 is the increase in surface area snow can contact
+  cp_inc <- b*((1-cc)*sin(theta)^2)#*1/(cos(theta))
+  return(cp_inc)
+}

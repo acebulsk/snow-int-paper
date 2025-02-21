@@ -49,8 +49,10 @@ event_df_sep_troughs |>
   # facet_grid(~name) +
   # annotate("text", label = paste("y =", round(coef(lm)[[1]], 2), "*x"), color = "blue", parse = TRUE) +
   labs(
-    y = expression("Canopy Snow Load (kg m"^"-2"~")"),  # y-axis label with units in kg m^-2
-    x = expression("Event Cumulative Snowfall (kg m"^"-2"~")")  # x-axis label with units in kg m^-2
+    # y = expression("Canopy Snow Load (kg m"^"-2"~")"),  # y-axis label with units in kg m^-2
+    # x = expression("Event Cumulative Snowfall (kg m"^"-2"~")")  # x-axis label with units in kg m^-2
+    y = "Canopy Snow Load (mm)",  # y-axis label with units in kg m^-2
+    x = "Event Cumulative Snowfall (mm)"  # x-axis label with units in kg m^-2
   ) +
   labs(colour = 'SCL\nCanopy\nCoverage (-)') +
   # theme(legend.position = 'none') +

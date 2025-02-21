@@ -181,7 +181,8 @@ w_ip <- met_intercept |>
   geom_errorbar(data = w_ip_smry, aes(x = tree_labs, ymax = sd_hi, ymin = sd_low), width = .5)  +
   geom_point(data = w_ip_smry, aes(x = tree_labs, y = IP_avg), colour = 'black', shape = 1, size = 4) +
   ylab(ip_y_ax_lab) +
-  xlab(expression("Initial Canopy Snow Load (kg" ~ m^{-2} * ")"))+
+  xlab("Initial Canopy Snow Load (mm)")+
+  # xlab(expression("Initial Canopy Snow Load (kg" ~ m^{-2} * ")"))+
   ylim(ip_y_lims)+
   theme(plot.margin = margin(0.5, 0.5, 0.5, .75, "cm")) +
   facet_grid(~scl_names_new) #+
