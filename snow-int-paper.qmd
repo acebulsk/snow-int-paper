@@ -264,11 +264,12 @@ Interception efficiency showed no association (*R*^2^ < 0.05, *p* > 0.2) with th
 lysimeter_15min_mod_smry |> 
   select(-r.squared) |> 
   mutate(across(where(is.numeric), round, 3),
-         cc = round(cc, 2),
-         pretty_name = ifelse(
-           pretty_name == 'Initial Canopy Snow Load (kg m⁻²)',
-           'Initial Canopy Snow Load ($\\text{kg m}^{-2}$)',
-           pretty_name)) |>
+         cc = round(cc, 2)#,
+         # pretty_name = ifelse(
+         #   pretty_name == 'Initial Canopy Snow Load (kg m⁻²)',
+         #   'Initial Canopy Snow Load ($\\text{kg m}^{-2}$)',
+         #   pretty_name)
+         ) |>
   knitr::kable(
     col.names = c(
     "Dependent Variable",
@@ -291,7 +292,7 @@ UAV-lidar measurements of throughfall and canopy structure provide insights on h
 
 Throughfall depth measured by UAV-lidar was close to the 28 in-situ manual measurements with a mean bias of -0.001 m and RMSE of 0.024 m. More details on the accuracy of UAV-lidar snowdepth measurements are provided in the supporting information section. @fig-lidar-tf-ip shows the spatial distribution of throughfall and interception efficiency at the PWL and FT forest plots. Reduced throughfall and greater interception efficiency was observed on the north (lee) side of individual trees, which may be due to non-vertical hydrometeor trajectories caused by the steady southerly winds observed over this event. Transparent areas within the forest plots in @fig-lidar-tf-ip represent grid cells that did not have any lidar ground returns (i.e., under dense canopy proximal to tree trunks) or were masked due to disturbance (i.e., walking paths in clearings). Visual observations on March 13^th^ and 14^th^ confirmed non-vertical hydrometeor trajectories and increased canopy snow loads were observed on the windward side of individual trees. This effect is shown in @fig-lidar-tf-ip to be more apparent in the PWL forest plot than the FT forest plot. This may be attributed to the taller trees and higher canopy coverage of the PWL forest plot compared to the FT forest plot, as for the same trajectory angle a taller tree will produce a larger downwind footprint.
 
-![UAV-lidar measurements of the change in snow water equivalent, SWE (kg m^-2^) and interception efficiency, I/P (-), over the March 13, 2023 24-hour snowfall event for the FT and PWL forest plots at a 0.25 m resolution. See the location of the two forest plots in @fig-site-map.](figs/external_figures/facet_ft_pwl_23_072_23_073_v2.0.0_saswe_and_ip_normalised_resample_0.25.png){#fig-lidar-tf-ip}
+![UAV-lidar measurements of the change in snow water equivalent, SWE (mm) and interception efficiency, I/P (-), over the March 13, 2023 24-hour snowfall event for the FT and PWL forest plots at a 0.25 m resolution. See the location of the two forest plots in @fig-site-map.](figs/external_figures/facet_ft_pwl_23_072_23_073_v2.0.0_saswe_and_ip_normalised_resample_0.25.png){#fig-lidar-tf-ip}
 
 @fig-hemi-ip-cc shows a strong linear correlation between $C_p$ and interception efficiency towards the southern portion of the hemisphere, aligning with the average event wind direction. For the PWL forest plot, the upper 97.5^th^ percentile of the $\rho_p$ values shown in @fig-hemi-ip-cc, were found between azimuth angles of `r pwl_theta_from`°–`r pwl_theta_to`°. Similarly, for the FT forest plot, the upper 97.5^th^ percentile of $\rho_p$ was found between azimuth angles of `r ft_theta_from`°–`r ft_theta_to`°. The zenith angle found to have the highest correlation over this azimuth range was `r pwl_best_phi`° ($\rho_p$ = `r pwl_best_phi_rho`) and `r ft_best_phi`° ($\rho_p$ = `r ft_best_phi_rho`) for PWL and FT respectively. The high correlation coefficients found for non-vertical zenith angles for both PWL and FT are hypothesized to result from non-vertical hydrometeor trajectories.
 
@@ -341,55 +342,34 @@ mod_error |>
 
 <!-- These figures are generated under the lidar-processing project using scripts 11-13. Recently sped up the processing for these and can now be run locally. See https://github.com/acebulsk/lidar-processing -->
 
-![Plots showing the relationship between hydrometeor trajectory angle (left) and wind speed (right) with mean plot-wide snow-leaf contact area, $C_p$ (top row) and the increase in mean plot-wide $C_p$, i.e., $C_p - C_c$ (bottom row). The hydrometeor trajectory angle is simulated through VoxRS and is measured as degrees from zenith. Simulated wind speed was calculated as a function of hydrometeor trajectory angle by rearranging @eq-ta and an observed event hydrometeor velocity of 0.9 m s^-1^. The solid lines (VoxRS) represent the mean $C_p$ (top row) or increase in mean $C_p$ (bottom row) for a single zenith angle observed from VoxRS across all grid cells for each forest plot and across all azimuth angles. The shaded area represents 1 standard deviation above and below the observed VoxRS mean. The dashed lines (Fitted) represent predictions from @eq-lca-ac (top) and @eq-lca-inc (bottom). The dotted lines (HP98) represent the predictions from Equation 10 in @Hedstrom1998a. A forested downwind distance of 100 m was assumed for the HP98 calculation.](figs/external_figures/WITH_TREEWELLS_traj_angle_and_wind_phiby_1_thetaby_2_traj_angle_wind_speed_vs_cowplot_lca_and_inc_w_mods_mean_sd_23_072.png){#fig-lca-ht-ws}
+![Plots showing the relationship between hydrometeor trajectory angle (left column) and wind speed (right column) with mean plot-wide snow-leaf contact area, $C_p$ (top row) and the increase in mean plot-wide $C_p$, i.e., $C_p - C_c$ (bottom row). The simulated hydrometeor trajectory angle is measured as degrees from zenith. Simulated wind speed was calculated as a function of hydrometeor trajectory angle by rearranging @eq-ta and an observed event hydrometeor fall velocity of 0.9 m s^-1^. The solid lines (VoxRS) represent the mean $C_p$ (top row) or increase in mean $C_p$ (bottom row) for a single zenith angle observed from VoxRS across all grid cells for each forest plot and across all azimuth angles. The shaded area represents 1 standard deviation above and below the observed VoxRS mean. The dashed lines (Fitted) represent predictions from @eq-lca-ac (top row) and @eq-lca-inc (bottom row). The dotted lines (HP98) represent the predictions from Equation 10 in @Hedstrom1998a. A forested downwind distance of 100 m was assumed for the HP98 calculation.](figs/external_figures/WITH_TREEWELLS_traj_angle_and_wind_single_zenith_1_thetaby_1_traj_angle_wind_speed_vs_cowplot_lca_and_inc_w_mods_mean_sd_23_072.png){#fig-lca-ht-ws}
 
-A function is proposed here to calculate plot scale leaf contact area, $C_p$ (-):
+A function is proposed here to calculate plot-scale leaf contact area, $C_p$ (-):
 
 $$
-C_p = C_c + C_{inc}(\theta_h)
+C_p = C_c + C_{inc}(\theta_h, C_c)
 $${#eq-lca-ac}
 
-where, $C_{inc}$ is the increase in leaf contact area from $C_c$ which is a function of $\theta_h$. To estimate $C_{inc}$ a non-linear least squares regression using a logistic function forced through the origin was fit to the VoxRS measurements at FT and PWL for simulated hydrometeor trajectory angles (see dashed lines in bottom row of @fig-lca-ht-ws). A logistic function was selected to model this relationship, as its shape reflects the slow increase in observed $C_p$ at near vertical trajectory angles, followed by a rapid increase to represent increase canopy area in the middle and lower section of individual trees, and the gradual leveling off as $C_p$ approaches a value of 1.0. The logistic function used to predict $C_{inc}$ as a function of $\theta_h$ is:  
+where, $C_{inc}$ represents the increase in leaf contact area from $C_c$, and it is a function of $\theta_h$. To estimate $C_{inc}$ in the absence of detailed canopy structure measurements, the following function is proposed:
 
 $$
-C_{inc} = \left(
-\frac{C^{max}_{inc}}{1 + e ^ {\left(\frac{\theta_0 - \theta_h}{\text{k}}\right)}} - \frac{C^{max}_{inc}}{1 + e ^ {\left(\frac{\theta_0}{\text{k}}\right)}}
-\right)
+C_{inc} = (1-C_c)\cdot f(\theta_h)
 $${#eq-lca-inc}
 
-Revised model is:
+where $1-C_C$ represents the void space in the canopy, and $f(\theta_h)$ is a function describes the relative increase in canopy area as a function of $\theta_h$. Here, $f(\theta_h)$ is approximated here as:
 
 $$
-C_{p} = 1 - (V_f)^{\left(\frac{1}{\cos(\theta_h)}\right)^k}
-$$
-where $C_p$ is the is the plot scale leaf contact area (-), $V_f$ is the sky-view factor or gap fraction, $\theta_h$ is the trajectory angle of a hydrometeor, and k is calculated as:
+f(\theta_h) = b \cdot\text{sin}(\theta_h)^2
+$${#eq-f-theta}
 
-$$
-k = H_t\cdot w
-$$
+where $b$ is a fitting coefficient, estimated to be ~`r nls_sin_coefs[['b']]` through a non-linear least squares regression fit to the VoxRS measurements at both FT and PWL. The use of $\text{sin}(\theta_h)^2$ in @eq-f-theta reflects the relative increase in snow-leaf contact area, which also leads to a proportional decrease in the canopy void space ($1-C_c$). 
 
-where $H_t$ is the average canopy height (m) and $w$ is a scaling parameter found to be equal to 0.24 in this study. 
-
-where $C^{max}_{inc}$ is the maximum value of $C_{inc}$, $\theta_0$ is the x-value of the sigmoid midpoint and $k$ is the logistic growth rate or steepness of the curve. The coefficients resulting from the non-linear least squares regression fit of @eq-lca-inc to the VoxRS dataset are presented in @tbl-lca-coefs. Simulated $C_p$ using @eq-lca-ac is shown in the dashed lines in the top row of @fig-lca-ht-ws and follows the VoxRS-measured mean $C_p$ closely. Model error statistics shown in @tbl-lca-mod-err demonstrate that @eq-lca-inc performed well, with a mean bias and RMSE of 0.001 (-) and 0.0054 (-) respectively for PWL, and -0.0004 (-) and 0.0079 (-) for FT. In contrast, @tbl-lca-mod-err reveals that the @Hedstrom1998a method produced significantly less accurate estimates of $C_p$, with a mean bias and RMSE of -0.201 (-) and 0.233 (-) respectively for PWL, and -0.260 (-) and 0.324 (-) for FT.
-
-```{r tbl-lca-coefs, echo=FALSE}
-#| label: tbl-lca-coefs
-#| tbl-cap: "Coefficients derived from the non-linear least squares regression fit of @eq-lca-inc to the VoxRS dataset."
-
-nls_coefs_error |> knitr::kable(
-  col.names = c(
-    "Plot Names",
-    "$C^{max}_{inc}$",
-    "$\\theta_0$",
-    "$k$"
-  )
-)
-```
+Simulated $C_p$ using @eq-lca-ac is shown in the dashed lines in the top row of @fig-lca-ht-ws and follows the VoxRS-measured mean $C_p$ closely. Model error statistics shown in @tbl-lca-mod-err demonstrate that @eq-lca-inc performed well, with a mean bias and RMSE of `r pwl_errs_nls$MB` (-) and `r pwl_errs_nls$RMSE` (-) respectively for PWL, and `r ft_errs_nls$MB` (-) and `r ft_errs_nls$RMSE` (-) for FT. In contrast, @tbl-lca-mod-err reveals that the @Hedstrom1998a method produced significantly less accurate estimates of $C_p$, with a mean bias and RMSE of `r pwl_errs_hp$MB` (-) and `r pwl_errs_hp$RMSE` (-) respectively for PWL, and `r ft_errs_hp$MB` (-) and `r ft_errs_hp$RMSE` (-) for FT.
 
 <!-- These figures are generated under the lidar-processing project using scripts 11-13. The original version generated 100 of GB of ram but now has been optimised and can run locally.  -->
 ```{r tbl-lca-mod-err, echo=FALSE}
 #| label: tbl-lca-mod-err
-#| tbl-cap: "Model error statistics calculated for the prediction of leaf contact area from trajectory angle using @eq-lca-inc (nls) and Equation 10 from @Hedstrom1998a for the PWL and FT forest plots. Mean bias is the difference in the model and observed values, MAE is the mean of the absolute error, RMS Error is the root mean squared error and *R*^2^ is the coefficient of determination. The units for all metrics are dimensionless. A forested downwind distance of 100 m was used for the HP98 calculation."
+#| tbl-cap: "Model error statistics calculated for the prediction of leaf contact area from trajectory angle using @eq-lca-inc (Eq. 11) and Equation 10 from @Hedstrom1998a for the PWL and FT forest plots. Mean bias is the difference in the model and observed values, MAE is the mean of the absolute error, RMS Error is the root mean squared error and *R*^2^ is the coefficient of determination. The units for all metrics are dimensionless. A forested downwind distance of 100 m was used for the HP98 calculation."
 
 lca_mod_error |> 
   rename(`R^2` = `r^2`,
@@ -417,7 +397,7 @@ The performance of Equations 9, 10, and 11 in estimating event throughfall was a
 
 @fig-event-tf shows the vector-based model, computed using @eq-lca-ip with $C_p$ adjusted for estimated hydrometeor trajectory angle, closely matches UAV-lidar measurements of throughfall. Observed and modelled values of interception efficiency and $\Delta SWE_{tf}$ are presented in @tbl-vb-plot-err along with corresponding error statistics. Modelled throughfall from the vector-based model was `r pwl_vb_tf_mod` kg m^-2^ compared to the measured throughfall of `r pwl_vb_tf_obs` kg m^-2^ for PWL. For FT, the vector-based modelled throughfall was `r ft_vb_tf_mod` kg m^-2^, while the measured values where `r ft_vb_tf_obs` kg m^-2^. The vector-based model shows a lower mean bias of `r pwl_vb_bias` kg m^-2^ for PWL and a negative bias of `r ft_vb_bias` kg m^-2^ for FT, compared to the larger mean bias of `r pwl_nadir_bias` kg m^-2^ for PWL and `r ft_nadir_bias` kg m^-2^ for FT with the nadir-model (calculated using $C_c$ in place of $C_p$). This resulted in a large reduction in the percent error in predicted throughfall, from -9.4% with the nadir-model to -1.8% with the vector-based model for PWL. A smaller improvement was observed for FT, with the percent error in predicted throughfall declining from -3.6% with the nadir-model to -1.4% with the vector-based model.
 
-![Bar chart comparing the observed and modelled mean change in throughfall ($\Delta \text{SWE}$, kg m^-2^) over the March 13-14 snowfall event averaged over forest plots FT and PWL. The 'Nadir-model' used @eq-lca-ip not adjusted for trajectory angle (i.e., $C_c$) and the Vector-based 'VB-model' which uses @eq-lca-ip with $C_p$ adjusted for trajectory angle. 'UAV-lidar' corresponds to throughfall calculated using @eq-swe-tf incorporating UAV-lidar snow depth and snow density from in-situ snow pits. The black horizontal dashed line shows the accumulated SWE (kg m^-2^) over the snowfall event to the PWL station open clearing.](figs/lidar_periods/23_072_23_073_event_throughfall_totals_obs_vs_vb_vs_nadir.png){#fig-event-tf}
+![Bar chart comparing the observed and modelled mean change in throughfall ($\Delta \text{SWE}$, mm) over the March 13-14 snowfall event averaged over forest plots FT and PWL. The 'Nadir-model' used @eq-lca-ip not adjusted for trajectory angle (i.e., $C_c$) and the Vector-based 'VB-model' which uses @eq-lca-ip with $C_p$ adjusted for trajectory angle. 'UAV-lidar' corresponds to throughfall calculated using @eq-swe-tf incorporating UAV-lidar snow depth and snow density from in-situ snow pits. The black horizontal dashed line shows the accumulated SWE (mm) over the snowfall event to the PWL station open clearing.](figs/lidar_periods/23_072_23_073_event_throughfall_totals_obs_vs_vb_vs_nadir.png){#fig-event-tf}
 
 \pagebreak 
 
@@ -426,7 +406,8 @@ The performance of Equations 9, 10, and 11 in estimating event throughfall was a
 #| tbl-cap: "Model error statistics for model estimates of snow interception efficiency (I/P) and throughfall (TF) compared to measurements of I/P and TF using UAV-lidar averaged over the FT and PWL forest plots. Units for I/P are (-) and TF are (kg m^-2^). The vector-based model utilized @eq-lca-ip with $C_p$ adjusted for trajectory angle. The nadir model also utilized @eq-lca-ip but was not adjusted for trajectory angle and thus $C_c$ was used instead of $C_p$. The 'Obs. Value' column contains measurements from UAV-lidar while the 'Mod. Value' column contains the modelled values. The mean bias was calculated as observed minus modelled and percent error is the percent error between predicted and observed values."
 
 vb_plot_scale_err  |>
-  mutate(Units = ifelse(val_name == 'ip', '-', '$\\text{kg m}^{-2}$'),
+  # mutate(Units = ifelse(val_name == 'ip', '-', '$\\text{kg m}^{-2}$'),
+  mutate(Units = ifelse(val_name == 'ip', '-', 'mm'),
          val_name = ifelse(val_name == 'ip', 'I/P', 'TF')) |> 
   select(Plot = plot,
          `Model Type` = mod_type, 
