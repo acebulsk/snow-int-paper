@@ -1,106 +1,259 @@
 ---
 title: "Reasoning for Contact Area Model"
 author: "Alex Cebulski"
-format: pdf
+format: 
+  pdf:
+    fig-pos: H # makes figs appear in the location specified. without this they sometimes appear in the middle of a paragraph.
 editor: source
+editor_options: 
+  chunk_output_type: console
 ---
 
-The reasoning for using `sin` as a factor for increased contact area is as follows:
+```{r, include=FALSE}
+library(ggplot2)
+library(tidyr)
+```
+
+The goal is to calculate the snow-leaf contact area, $C_p$, for non-vertical snowfall compared to vertical. The contact area for vertical snowfall is equal to the canopy coverage $C_c$. For vertical snowfall, the width of canopy contacted is equal to the base width. As snow becomes non vertical this width increases as shown in @fig-tri.
+
+![Simplified diagram showing the contact area for non vertical snowfall hitting a triangle.](contact_area_triangle.png){#fig-tri height=55%}
 
 Let:
 
 -   $w_p$ be the contact width contributing to interception, i.e., a plane perpendicular to the snowfall that contacts the canopy as it moves through the canopy space
--   $h_c$ be the height of the canopy from the top down contacting snowfall 
--   $w_c$ be the width of the canopy at height $h_c$
--   $A_c$ be the area of the canopy in contact with snowfall
+-   $w_l$ be the component of $w_p$ for the left side of the canopy
+-   $w_r$ be the component of $w_p$ for the right side of the canopy
+-   $h_s$ be the tree side length
 -   $\theta_h$ be the snowfall trajectory angle from zenith
--   $h_t$ be the vertical height of the canopy 
--   $w_t$ be the base width of the canopy
+-   $w_b$ be the base width of the canopy
+-   $C_{inc}$ is the increase in contact area for non-vertical snowfall compared to vertical snowfall.
 
 Then:
 
 $$
-w_p = \text{sin}(\theta_h) * h_t
+C_p = C_{inc} + C_c
 $$
 
 $$
-h_c = \text{sin}(\theta_h) * w_p
+C_{inc} = \frac{w_p}{w_b}-1
 $$
 
 $$
-w_c = \frac{w_t}{h_t} * h_c
+w_p = w_l + w_r
 $$
 
 $$
-A_c = h_c*\frac{w_c}{2}*2
-$$
-
-A lightly more precise calculation of $w_p$ which takes into account the tilting of the contact plane would be:
-
-Let:
-
-  - $\theta_b$ be the angle of the bottom right of the tree from vertical. 
-  - $h_s$ be the length of the side of the tree aka hypotenuse 
-
-Then:
-
-$$
-\theta_b = \text{atan}(\frac{w_t}{h_t}/h_t)
+w_r = \text{sin}(\theta_b+\theta_h)h_s
 $$
 
 $$
-h_s = \sqrt{h_t^2 + (w_t/2)^2}
+w_l = \text{sin}(\theta_b-\theta_h)h_s
 $$
 
 $$
-w_p = \text{sin}(\theta_b+\theta_h)*h_s
+C_{inc} = \frac{h_s [\text{sin}(\theta_b+\theta_h)+\text{sin}(\theta_b-\theta_h)]}{w_b} -1
 $$
+
+\newpage
+
+### Define functions: 
 
 ```{r}
-# Load ggplot2 library
-library(ggplot2)
+contact_length <- function(theta_h, h_t, w_b){
+  theta_b <- atan((w_b/2) / h_t)
+  stopifnot(theta_b<(pi/4))
+  h_s <- sqrt(h_t^2 + (w_b/2)^2)
+  
+  w_r <- sin(theta_b + theta_h) * h_s
+  w_l <- sin(theta_b - theta_h) * h_s
+  w_l <- ifelse(w_l < 0, 0, w_l)
+  w_p <- w_r + w_l
+  
+  return(list(w_r = w_r, w_l = w_l, w_p = w_p))
+}
+
+make_triangles <- function(theta_h, w_r, w_l) {
+  # just for plotting
+  h_r <- sin(theta_h) * (w_r) # height of contact of the right side of the triangle
+  x_r <- h_r / tan(theta_h)
+  h_l <- sin(theta_h) * (w_l) # height of contact of the left side of the triangle
+  x_l <- h_l / tan(theta_h)
+  
+  # Define the points of the green triangle
+  triangle_data <- data.frame(
+    x = c(0, w_b, w_b / 2),
+    y = c(0, 0, h_t),
+    label = c("0", "w_c", "h_c")
+  )
+  
+  # Define the points of the blue triangle
+  triangle_data2 <- data.frame(
+    x = c(w_b / 2, w_b, (w_b / 2) + x_r),
+    y = c(h_t, 0, h_t - h_r),
+    label = c("0", "w_c", "h_c")
+  )
+  
+  # Define the points of the red triangle
+  triangle_data3 <- data.frame(
+    x = c(w_b / 2, 0, -x_l + (w_b / 2)),
+    y = c(h_t, 0, h_t + h_l),
+    label = c("0", "w_c", "h_c")
+  )
+  return(list(triangle_data, triangle_data2, triangle_data3))
+}
+```
+
+### Plot Some Examples
+
+Small trajectory angle example ($\theta_h$ == 5°)
+
+```{r, echo=FALSE, warning=FALSE}
 
 # Define parameters
 h_t <- 20
-w_t <- 5
-theta_h <- 5 * (pi/180)
+w_b <- 5
+traj_angle <- 5 # deg from zenith
+theta_h <- traj_angle * (pi/180)
 
-theta_b <- atan((w_t/2) / h_t)
-h_s <- sqrt(h_t^2 + (w_t/2)^2)
-w_p <- sin(theta_b + theta_h) * h_s
-h_c <- sin(theta_h) * (w_p)
-x <- h_c / tan(theta_h)
+ca_list <- contact_length(theta_h, h_t, w_b)
+tri_list <- make_triangles(theta_h, ca_list$w_r[1], ca_list$w_l[1])
 
-# Calculate w_b (the top side of the blue triangle)
-w_b <- sqrt((w_t / 2)^2 + h_t^2)  # Using Pythagoras to calculate the top side
-
-# Define the points of the green triangle
-triangle_data <- data.frame(
-  x = c(0, w_t, w_t / 2),
-  y = c(0, 0, h_t),
-  label = c("0", "w_c", "h_c")
-)
-
-# Define the points of the blue triangle
-triangle_data2 <- data.frame(
-  x = c(w_t / 2, w_t, (w_t / 2) + x),
-  y = c(h_t, 0, h_t - h_c),
-  label = c("0", "w_c", "h_c")
-)
-
-# Plot the triangle with labels
-ggplot(triangle_data, aes(x, y)) +
+# Plot the triangle with law_b = # Plot the triangle with labels
+ggplot(tri_list[[1]], aes(x, y)) +
   geom_polygon(fill = NA, color = "green", size = 1) +  # Create the green triangle
-  geom_polygon(data = triangle_data2, aes(x, y), colour = "blue", fill = NA) +  # Blue triangle
-  annotate("text", x = (w_t / 2 + (w_t / 2 + x)) / 2, y = h_t-1, label = "w_p", size = 4, color = "blue") +
+  geom_polygon(data = tri_list[[2]], aes(x, y), colour = "blue", fill = NA) +  # Blue triangle
+  geom_polygon(data = tri_list[[3]], aes(x, y), colour = "red", fill = NA) +  # Blue triangle
+  # annotate("text", x = (w_b / 2 + (w_b / 2 + x)) / 2, y = h_t-1, label = "w_p", size = 4, color = "blue") +
   labs(x = "Width (m)", y = "Height (m)") +
   coord_fixed(ratio = 1)  # Ensure the triangle's proportions are fixed
-
-
 ```
 
-For small $\theta_h$ we should also decrease $w_p$ as the increase on one side of the tree is balanced by the decrease in contacts on the right side:
+Medium trajectory angle example ($\theta_h$ == 25°)
 
-w_p_left <- sin(theta_b - theta_h)*hyp 
+```{r, echo=FALSE}
 
-which gives the contact length on the left side.
+# Define parameters
+h_t <- 20
+w_b <- 5
+traj_angle <- 25 # deg from zenith
+theta_h <- traj_angle * (pi/180)
+
+ca_list <- contact_length(theta_h, h_t, w_b)
+tri_list <- make_triangles(theta_h, ca_list$w_r[1], ca_list$w_l[1])
+
+# Plot the triangle with law_b = # Plot the triangle with labels
+ggplot(tri_list[[1]], aes(x, y)) +
+  geom_polygon(fill = NA, color = "green", size = 1) +  # Create the green triangle
+  geom_polygon(data = tri_list[[2]], aes(x, y), colour = "blue", fill = NA) +  # Blue triangle
+  geom_polygon(data = tri_list[[3]], aes(x, y), colour = "red", fill = NA) +  # Blue triangle
+  # annotate("text", x = (w_b / 2 + (w_b / 2 + x)) / 2, y = h_t-1, label = "w_p", size = 4, color = "blue") +
+  labs(x = "Width (m)", y = "Height (m)") +
+  coord_fixed(ratio = 1)  # Ensure the triangle's proportions are fixed
+```
+
+High trajectory angle example ($\theta_h$ == 50°)
+
+```{r, echo=FALSE}
+
+# Define parameters
+h_t <- 20
+w_b <- 5
+traj_angle <- 50 # deg from zenith
+theta_h <- traj_angle * (pi/180)
+
+ca_list <- contact_length(theta_h, h_t, w_b)
+tri_list <- make_triangles(theta_h, ca_list$w_r[1], ca_list$w_l[1])
+
+# Plot the triangle with law_b = # Plot the triangle with labels
+ggplot(tri_list[[1]], aes(x, y)) +
+  geom_polygon(fill = NA, color = "green", size = 1) +  # Create the green triangle
+  geom_polygon(data = tri_list[[2]], aes(x, y), colour = "blue", fill = NA) +  # Blue triangle
+  geom_polygon(data = tri_list[[3]], aes(x, y), colour = "red", fill = NA) +  # Blue triangle
+  # annotate("text", x = (w_b / 2 + (w_b / 2 + x)) / 2, y = h_t-1, label = "w_p", size = 4, color = "blue") +
+  labs(x = "Width (m)", y = "Height (m)") +
+  coord_fixed(ratio = 1)  # Ensure the triangle's proportions are fixed
+```
+
+### Relationship of $C_{inc}$ and $C_p$ with $\theta_h$:
+
+```{r, echo=FALSE}
+contact_length <- function(theta_h, h_t, w_b){
+  theta_b <- atan((w_b/2) / h_t)
+  stopifnot(theta_b<(pi/4))
+  h_s <- sqrt(h_t^2 + (w_b/2)^2)
+  
+  w_r <- sin(theta_b + theta_h) * h_s
+  w_l <- sin(theta_b - theta_h) * h_s
+  w_l <- ifelse(w_l < 0, 0, w_l)
+  w_p <- w_r + w_l
+  
+  return(w_p)
+}
+
+# Define parameters
+h_t <- c(7, 10)
+w_b <- c(2.5, 3)
+cc <- c(0.3, 0.5)
+
+site_pars <- data.frame(h_t, w_b, cc)
+traj_angle <- 1:90 # deg from zenith
+
+plot_df <- expand_grid(site_pars, traj_angle)
+plot_df$theta_h <- plot_df$traj_angle * (pi/180)
+
+plot_df$w_p <- contact_length(plot_df$theta_h, plot_df$h_t, plot_df$w_b)
+
+plot_df$c_inc <- plot_df$w_p/plot_df$w_b # increases too fast
+# plot_df$c_inc <- ((plot_df$w_p^2/plot_df$w_b^2)-1)*0.5*(1-plot_df$cc)
+
+# plot_df$c_inc <- 1+(plot_df$w_p/plot_df$w_b)^((1-plot_df$cc)*2)*0.1 # rate of increase relative to the void space available, which helpts even out the curves
+
+plot_df$cp <- plot_df$cc*plot_df$c_inc
+
+ggplot(plot_df, aes(traj_angle, c_inc, colour = cc, group = cc)) +
+  geom_line()
+
+plot_df$cp <- plot_df$cc+plot_df$c_inc
+
+ggplot(plot_df, aes(traj_angle, cp, colour = cc, group = cc)) +
+  geom_line()
+# ggplot(plot_df, aes(theta_h, sin(theta_h)^2)) +
+#   geom_line()
+```
+
+## Approximation
+
+The above examples show how snow-leaf contact area can increase with $\theta_h$. However these approximations do not match well to the VoxRS lidar measurements reported in this study, likely due to issues such as transmittance through the canopy and overlapping/shadowing of canopy elements. Therefore to better approximate this relationship a simplification of the equation above was used which is based on the increase in contact length as a function of $\text{sin}(\theta)$ which represents additional area contacting snowfall. Since the model predicts area $\text{sin}(\theta)$ is squared and used as a predictor of increased contact area. The increase in contact area as a function of $theta_h$ is a proportional to the void space available in the canopy and thus:
+
+$$
+C_{inc} = (1-C_c)f(\theta_h)
+$$
+
+where $1-C_C$ represents the void space in the canopy, and $f(\theta_h)$ is a function describes the relative increase in canopy area as a function of $\theta_h$. Here, $f(\theta_h)$ is approximated here as:
+
+$$
+f(\theta_h) = b \cdot\text{sin}(\theta_h)^2
+$${#eq-f-theta}
+
+where $b$ is a fitting coefficient, estimated to be ~0.91 through a non-linear least squares regression fit to the VoxRS measurements at both FT and PWL. The use of $\text{sin}(\theta_h)^2$ in @eq-f-theta reflects the relative increase in snow-leaf contact area, which also leads to a proportional decrease in the canopy void space ($1-C_c$). The assumptions of @eq-f-theta include its application to a forest with relatively uniform structure (e.g., without large clear cuts) and where the mean height of the canopy is greater than the mean width of individual trees.
+
+The form of this equation is:
+
+```{r, echo=FALSE}
+contact_area_inc <- function(theta_h, cc){
+  c_inc <- b * (1-cc) * sin(theta_h)^2
+  return(c_inc)
+}
+
+b <- 0.91 # estimated from VoxRS
+cc <- seq(0.1, 0.8, by = 0.1)
+traj_angle <- 1:90 # deg from zenith
+
+plot_df <- expand_grid(cc, traj_angle)
+plot_df$theta_h <- plot_df$traj_angle * (pi/180)
+plot_df$c_inc <- contact_area_inc(plot_df$theta_h, plot_df$cc)
+plot_df$cp <- plot_df$cc+plot_df$c_inc
+ggplot(plot_df |> pivot_longer(c(c_inc, cp)), aes(traj_angle, value, colour = cc, group = cc)) +
+  geom_line() + facet_wrap(~name)
+```
+
