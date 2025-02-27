@@ -1,15 +1,15 @@
 # plot time series of scl data and met for each selected interception event and
 # wind rose is below
 
-script('scripts/00_define_global_attributes.R')
-script('scripts/01_load_processed_data.R')
+source('scripts/00_define_global_attributes.R')
+source('scripts/01_load_processed_data.R')
 
 events <- met_intercept$storm_id |> unique()
 
 # plot event averages ----
 
 avg_event <- met_intercept |>
-  group_by(storm_id, name) |>
+  group_by(storm_id, trough_name) |>
   summarise(
     t_min = min(t),
     t_mean = mean(t),
@@ -24,17 +24,17 @@ avg_event <- met_intercept |>
     ip = del_i/del_sf
   )
 
-ggplot(avg_event, aes(t_mean, ip)) + geom_point() + facet_grid(~name)
+ggplot(avg_event, aes(t_mean, ip)) + geom_point() + facet_grid(~trough_name)
 ggsave('figs/supplement/event-avgs/event_avg_temp_vs_ip.png', width = 8, height = 4)
-ggplot(avg_event, aes(u_mean, ip)) + geom_point() + facet_grid(~name)
+ggplot(avg_event, aes(u_mean, ip)) + geom_point() + facet_grid(~trough_name)
 ggsave('figs/supplement/event-avgs/event_avg_u_vs_ip.png', width = 8, height = 4)
-ggplot(avg_event, aes(del_sf, ip)) + geom_point() + facet_grid(~name)
+ggplot(avg_event, aes(del_sf, ip)) + geom_point() + facet_grid(~trough_name)
 ggsave('figs/supplement/event-avgs/event_del_sf_vs_ip.png', width = 8, height = 4)
 
 # plot event time series ----
 
 alldfs_indiv_troughs <- met_intercept |>
-  select(datetime, storm_id, trough_name = name, t, u, q_sf, q_tf, tree_mm = weighed_tree_canopy_load_mm) |>
+  select(datetime, storm_id, trough_name, t, u, q_sf, q_tf, tree_mm = weighed_tree_canopy_load_mm) |>
   pivot_longer(t:tree_mm) |>
   mutate(group = ifelse(name %in% c('q_sf', 'q_tf'), 'rates', name))
 
@@ -46,32 +46,32 @@ alldfs_avg_trough <- alldfs_indiv_troughs |>
 
 
 
-for (i in 1:length(events)) {
-
-  alldfs_indiv_troughs |>
-    mutate(name = ifelse(name == 'q_tf', trough_name, name)) |>
-    filter(storm_id == events[i]) |>
-    ggplot(aes(datetime, value, colour = name)) +
-    geom_line() +
-    facet_grid(group~storm_id, scales = 'free')
-
-  ggsave(paste0('figs/supplement/scl-timeseries/', events[i], '_met_data.png'),
-         width = 8, height = 6)
-
-}
-
-for (i in 1:length(events)) {
-
-  alldfs_avg_trough |>
-    filter(storm_id == events[i]) |>
-    ggplot(aes(datetime, value, colour = name)) +
-    geom_line() +
-    facet_grid(group~storm_id, scales = 'free')
-
-  ggsave(paste0('figs/supplement/scl-timeseries-avgs/', events[i], '_met_data.png'),
-         width = 8, height = 6)
-
-}
+# for (i in 1:length(events)) {
+#
+#   alldfs_indiv_troughs |>
+#     mutate(name = ifelse(name == 'q_tf', trough_name, name)) |>
+#     filter(storm_id == events[i]) |>
+#     ggplot(aes(datetime, value, colour = name)) +
+#     geom_line() +
+#     facet_grid(group~storm_id, scales = 'free')
+#
+#   ggsave(paste0('figs/supplement/scl-timeseries/', events[i], '_met_data.png'),
+#          width = 8, height = 6)
+#
+# }
+#
+# for (i in 1:length(events)) {
+#
+#   alldfs_avg_trough |>
+#     filter(storm_id == events[i]) |>
+#     ggplot(aes(datetime, value, colour = name)) +
+#     geom_line() +
+#     facet_grid(group~storm_id, scales = 'free')
+#
+#   ggsave(paste0('figs/supplement/scl-timeseries-avgs/', events[i], '_met_data.png'),
+#          width = 8, height = 6)
+#
+# }
 
 # plot wind rose over all snowfall periods, main purpose here is to show
 # dominant wind direction influencing the diff relationship of wind speed with
@@ -88,6 +88,6 @@ p <- weatherdash::wind_rose(ffr_met_wnd,
                             spd_unit = 'm/s'
 )
 
-p
+# p
 
-plotly::save_image(p, paste0('figs/automated_snowfall_event_periods/ft_wind_rose_allevents_snowing.png'), width = 2, height = 5)
+# plotly::save_image(p, paste0('figs/automated_snowfall_event_periods/ft_wind_rose_allevents_snowing.png'), width = 2, height = 5)

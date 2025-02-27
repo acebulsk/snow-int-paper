@@ -4,13 +4,7 @@
 # LYSIMETER DATA ----
 
 # See github repo https://github.com/acebulsk/interception for creation of this dataset
-raw_lysimeter_data_path <- '../../analysis/interception/data/storm_analysis/continuous_throughfall_data_binned_met_select_events.rds'
-paper_lysimeter_data_path <- 'data/lysimeter-data/'
-file.copy(from = raw_lysimeter_data_path,
-          to = paper_lysimeter_data_path,
-          recursive = T,
-          overwrite = F,
-          copy.date = T)
+paper_lysimeter_data_path <- 'data/lysimeter-data/raw/'
 
 file.copy(from = '../../analysis/interception/data/select_storms_datetime_wide_independent_snow_surveys.csv',
           to = paper_lysimeter_data_path,
@@ -18,13 +12,32 @@ file.copy(from = '../../analysis/interception/data/select_storms_datetime_wide_i
           overwrite = F,
           copy.date = T)
 
+file.copy(from = '../../working-papers/ablation-paper/data/raw-data/snow_in_canopy_pre_and_post_snowfall.csv',
+          to = paper_lysimeter_data_path,
+          recursive = F,
+          overwrite = F,
+          copy.date = T)
+
+load_suffix <- 'fsd_cal_for_each_trough_vza_60' # calibrated tree to snow surveys selected to match canopy closure of each SCL at inclination angle up to 60
 file.copy(
-  from = '../../analysis/interception/data/loadcell/treefort_load_main_cal_plv_fsd_mm.rds',
+  from = paste0('../../analysis/interception/data/loadcell/treefort_weighed_tree_cal_kg_m2_plv_',
+                load_suffix,
+                '.rds'),
   to = paper_lysimeter_data_path,
   recursive = F,
   overwrite = F,
   copy.date = T
 )
+
+file.copy('../../analysis/interception/data/loadcell/treefort_scl_qaqc.rds',
+          to = paper_lysimeter_data_path,
+          overwrite = F,
+          copy.date = T)
+
+file.copy('../../analysis/interception/data/loadcell/treefort_scls_raw_kg.rds',
+          to = paper_lysimeter_data_path,
+          overwrite = F,
+          copy.date = T)
 
 # LIDAR DATA ----
 # See github repo https://github.com/acebulsk/lidar-processing for creation of this dataset
@@ -111,18 +124,29 @@ file.copy(from = '../../analysis/lidar-processing/data/hemi_stats/full_voxrs_not
 
 # HEMISPHERIC PHOTO DATA ----
 
-file.copy(from = '~/local-usask/analysis/interception/data/lai/scl_canopy_metrics.csv',
-          to = 'data/hemisphere-photo-data/',
-          recursive = F,
-          overwrite = F,
-          copy.date = T)
-
+# LAI measurements of the snow survey stns
 file.copy(
   from = '../../analysis/interception/data/lai/results/2023_compiled_lai_vza_15_60.csv',
   to = 'data/hemisphere-photo-data/',
   recursive = F,
   overwrite = F,
   copy.date = T)
+
+# this one has the LAI measurements of the troughs
+file.copy(
+  from = '../../analysis/interception/data/lai/lai_site_id_2022_08_31.csv',
+  to = 'data/hemisphere-photo-data/',
+  recursive = F,
+  overwrite = F,
+  copy.date = T)
+file.copy(
+  from = '../../analysis/interception/data/lai/results/2025_compiled_troughs_auto_th.csv',
+  to = 'data/hemisphere-photo-data/',
+  recursive = F,
+  overwrite = F,
+  copy.date = T)
+
+
 
 # WIND PROFILE COEFs ----
 
@@ -158,3 +182,5 @@ file.copy(
   recursive = F,
   overwrite = F,
   copy.date = T)
+
+

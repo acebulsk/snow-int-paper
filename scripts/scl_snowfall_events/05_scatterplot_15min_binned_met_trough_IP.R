@@ -3,25 +3,19 @@
 ip_y_lims <- c(0.05, 1)
 
 mean_ip_by_trough <- met_intercept |>
-  group_by(scl_names_new) |>
+  group_by(trough_name) |>
   summarise(IP = mean(IP))
 
 saveRDS(mean_ip_by_trough, 'data/mean_ip_by_trough.rds')
 
-# thresholds based on what was used in the stats script
-
-t_th <- -6
-u_th <- 1
-w_th <- 10
-
+met_intercept$trough_name <- paste0(toupper(substr(met_intercept$trough_name, 1, 1)), substr(met_intercept$trough_name, 2, nchar(met_intercept$trough_name)))
+met_intercept$trough_name <- factor(met_intercept$trough_name, levels = c('Sparse', 'Mixed', 'Closed'))
+scl_lai_cc_fltr$trough_name <- paste0(toupper(substr(scl_lai_cc_fltr$trough_name, 1, 1)), substr(scl_lai_cc_fltr$trough_name, 2, nchar(scl_lai_cc_fltr$trough_name)))
 # lysimeter data ----
 
 ## group the data ----
 
-# could show the boxplots on top but currently we reference the error bar/mean  dots so not going through with this for now
-met_intercept$t_group <- factor(ifelse(met_intercept$t < t_th, 'cold', 'warm'), levels = c('cold', 'warm'))
-met_intercept$u_group <- ifelse(met_intercept$u < u_th, 'calm', 'windy')
-met_intercept$w_group <- ifelse(met_intercept$weighed_tree_canopy_load_mm < w_th, 'low', 'high')
+
 
 ## plot select variables (air temp, wind, snow load) ----
 
@@ -33,7 +27,7 @@ y_col <- 'IP'
 
 # Add R-squared values to the dataset
 lm_nest <- met_intercept |>
-  group_by(scl_names_new) |>
+  group_by(trough_name) |>
   nest() |>
   mutate(model = map(data, ~lm(as.formula(paste(y_col, "~", x_col)), data = .x)),
          resids = map2(data, model, add_residuals),
@@ -44,7 +38,7 @@ at_model_summaries <- lm_nest |>
   unnest(glance) |>
   mutate(n = df.residual + 2,
          name = x_col) |>
-  select(scl_names_new,
+  select(trough_name,
          name,
          r.squared,
          adj.r.squared,
@@ -52,7 +46,7 @@ at_model_summaries <- lm_nest |>
          n)
 
 at_ip_smry <- met_intercept |>
-  group_by(temp_labs, scl_names_new) |>
+  group_by(temp_labs, trough_name) |>
   # filter(weighed_tree_canopy_load_mm <= 5) |>
   summarise(IP_avg = mean(IP, na.rm = T),
             sd = sd(IP, na.rm = T),
@@ -81,7 +75,7 @@ at_ip <- met_intercept |>
   #               label = sprintf("R² = %.3f\np = %.3e", adj.r.squared, p.value)),
   #           hjust = -0.1, vjust = 1.1, size = 3) +
   # stat_smooth(aes(x = .data[[x_col]], y = .data[[y_col]]), method = "lm", colour = 'red', linetype = 'dashed', se = F) +  # Add regression line
-  facet_grid(~scl_names_new) #+
+  facet_grid(~trough_name) #+
   # geom_text(data = at_model_summaries,
   #           aes(x = -Inf, y = Inf,
   #               label = sprintf("R² = %.3f%s",
@@ -98,7 +92,7 @@ y_col <- 'IP'
 
 # Add R-squared values to the dataset
 lm_nest <- met_intercept |>
-  group_by(scl_names_new) |>
+  group_by(trough_name) |>
   nest() |>
   mutate(model = map(data, ~lm(as.formula(paste(y_col, "~", x_col)), data = .x)),
          resids = map2(data, model, add_residuals),
@@ -108,10 +102,10 @@ lm_nest <- met_intercept |>
 u_model_summaries <- lm_nest |>
   unnest(glance) |>
   mutate(n = df.residual + 2, name = x_col) |>
-  select(scl_names_new, name, r.squared, adj.r.squared, p.value, n)
+  select(trough_name, name, r.squared, adj.r.squared, p.value, n)
 
 ws_ip_smry <- met_intercept |>
-  group_by(wind_labs, scl_names_new) |>
+  group_by(wind_labs, trough_name) |>
   # filter(weighed_tree_canopy_load_mm <= 5) |>
   summarise(IP_avg = mean(IP, na.rm = T),
             sd = sd(IP, na.rm = T),
@@ -131,7 +125,7 @@ ws_ip <- met_intercept |>
   xlab(wnd_bin_ax_lab)+
   ylim(ip_y_lims)+
   theme(plot.margin = margin(0.5, 0.5, 0.5, .75, "cm")) +
-  facet_grid(~scl_names_new) #+
+  facet_grid(~trough_name) #+
   # stat_smooth(aes(x = .data[[x_col]], y = .data[[y_col]]), method = "lm", colour = 'red', linetype = 'dashed', se = F) +  # Add regression line
   # geom_text(data = model_summaries,
   #           aes(x = -Inf, y = Inf,
@@ -153,7 +147,7 @@ y_col <- 'IP'
 
 # Add R-squared values to the dataset
 lm_nest <- met_intercept |>
-  group_by(scl_names_new) |>
+  group_by(trough_name) |>
   nest() |>
   mutate(model = map(data, ~lm(as.formula(paste(y_col, "~", x_col)), data = .x)),
          resids = map2(data, model, add_residuals),
@@ -162,10 +156,10 @@ lm_nest <- met_intercept |>
 w_model_summaries <- lm_nest |>
   unnest(glance)  |>
   mutate(n = df.residual + 2, name = x_col) |>
-  select(scl_names_new, name, r.squared, adj.r.squared, p.value, n)
+  select(trough_name, name, r.squared, adj.r.squared, p.value, n)
 
 w_ip_smry <- met_intercept |>
-  group_by(tree_labs, scl_names_new) |>
+  group_by(tree_labs, trough_name) |>
   # filter(u <= 2) |>
   summarise(IP_avg = mean(IP, na.rm = T),
             sd = sd(IP, na.rm = T),
@@ -185,7 +179,7 @@ w_ip <- met_intercept |>
   # xlab(expression("Initial Canopy Snow Load (kg" ~ m^{-2} * ")"))+
   ylim(ip_y_lims)+
   theme(plot.margin = margin(0.5, 0.5, 0.5, .75, "cm")) +
-  facet_grid(~scl_names_new) #+
+  facet_grid(~trough_name) #+
   # stat_smooth(aes(x = .data[[x_col]], y = .data[[y_col]]), method = "lm", colour = 'red', linetype = 'dashed', se = F) +  # Add regression line
 # geom_text(data = model_summaries,
 #           aes(x = -Inf, y = Inf,
@@ -213,20 +207,139 @@ model_summaries <- rbind(
   u_model_summaries,
   w_model_summaries
 ) |> left_join(var_name_dict) |>
-  left_join(scl_lai_cc, by = c('scl_names_new' = 'Name')) |>
+  left_join(scl_lai_cc_fltr) |>
   select(pretty_name,
-         scl_names_new,
+         trough_name,
          cc,
          r.squared,
          adj.r.squared, p.value, n)
 
 saveRDS(model_summaries,
-        'data/lysimeter-data/lysimter_15min_avg_regression_stats.rds')
+        'data/lysimeter-data/processed/lysimter_15min_avg_regression_stats.rds')
 
-# other plots not used currently ----
+# check interaction of variables ----
+
+ggplot(met_intercept, aes(x = wind_labs, y = temp_labs, fill = IP)) +
+  geom_tile() +
+  labs(fill='I/P') +
+  scale_fill_viridis_c(option = "A") +
+  facet_grid(~trough_name)
+
+ggplot(met_intercept, aes(x = tree_labs, y = temp_labs, fill = IP)) +
+  geom_tile() +
+  labs(fill='I/P') +
+  scale_fill_viridis_c(option = "A") +
+  facet_grid(~trough_name)
+
+ggplot(met_intercept, aes(x = tree_labs, y = wind_labs, fill = IP)) +
+  geom_tile() +
+  labs(fill='I/P') +
+  scale_fill_viridis_c(option = "A") +
+  facet_grid(~trough_name)
+
+# run stats on interaction ----
+# based on above showing higher IP for low temps and low wind or high temps and high wind
+# Define x and y column names
+x1_col <- 't'
+x2_col <- 'u'
+y_col <- 'IP'
+
+library(broom)
+lm_nest <- met_intercept |>
+  group_by(trough_name) |>
+  nest() |>
+  mutate(
+    # The formula below creates an interaction model: IP ~ t * wind. The formula
+    # t * wind in R expands to t + wind + t:wind, which includes both main
+    # effects and their interaction.
+    model = map(data, ~ lm(as.formula(
+      paste(y_col, "~", paste0(x1_col, "*", x2_col))
+    ), data = .x)),
+    resids = map2(data, model, add_residuals),
+    preds = map2(data, model, add_predictions),
+    glance = map(model, broom::glance)
+  )
+
+at_model_summaries <- lm_nest |>
+  unnest(glance) |>
+  mutate(n = df.residual + 2,
+         name = x_col) |>
+  select(trough_name,
+         name,
+         r.squared,
+         adj.r.squared,
+         p.value,
+         n)
+
+# Assuming lm_nest_interaction is your nested data frame with models including t * wind
+interaction_summary <- lm_nest %>%
+  mutate(tidy_model = map(model, broom::tidy)) %>%
+  unnest(tidy_model) %>%
+  filter(term == "t:u") %>%  # adjust the term name if your predictors have different names
+  select(trough_name, term, estimate, std.error, statistic, p.value)
+
+print(interaction_summary)
+
+# interaction term is not significant above !!!
+
+# Kruskal Wallis / Pairwise Wilcox ----
+# since or independent variables are not normally distributed maybe a
+# non-parameteric test is more appropriate
+
+# thresholds based on what was used in the stats script
+
+t_th <- -6
+u_th <- 2
+w_th <- 10
+
+met_intercept$t_group <- factor(ifelse(met_intercept$t < t_th, 'cold', 'warm'), levels = c('cold', 'warm'))
+met_intercept$u_group <- ifelse(met_intercept$u < u_th, 'calm', 'windy')
+met_intercept$w_group <- ifelse(met_intercept$weighed_tree_canopy_load_mm < w_th, 'low', 'high')
+
+met_intercept <- met_intercept %>%
+  mutate(
+    interaction_group = interaction(t_group, u_group)
+  )
+
+median_IPs <- met_intercept %>%
+  group_by(interaction_group, trough_name) %>%
+  summarise(median_IP = median(IP, na.rm = TRUE))
+
+print(median_IPs)
+
+## sparse trough ----
+sparse_data <- met_intercept |> filter(trough_name == 'Sparse')
+kruskal.test(IP ~ interaction_group, data = sparse_data)
+
+pairwise.wilcox.test(sparse_data$IP, sparse_data$interaction_group,
+                     p.adjust.method = "bonferroni")
+# above shows significantly greater I/P for cold calm compared to warm calm
+# storms and significantly greater IP for warm windy compared to cold calm
+# no difference between cold windy and warm windy
+median_IPs |> filter(trough_name == 'Sparse')
+
+## mixed trough ----
+mixed_data <- met_intercept |> filter(trough_name == 'Mixed')
+kruskal.test(IP ~ interaction_group, data = mixed_data)
+
+pairwise.wilcox.test(mixed_data$IP, mixed_data$interaction_group,
+                     p.adjust.method = "bonferroni")
+# above shows significantly greater I/P for cold calm compared to all types
+median_IPs |> filter(trough_name == 'Mixed')
+
+## closed trough ----
+closed_data <- met_intercept |> filter(trough_name == 'Closed') |>
+  filter(interaction_group != 'cold.windy') # not enough obs for cold windy
+kruskal.test(IP ~ interaction_group, data = closed_data)
+
+pairwise.wilcox.test(closed_data$IP, closed_data$interaction_group,
+                     p.adjust.method = "bonferroni")
+# above shows significantly greater I/P for both warm windy compared to cold calm and warm calm
+median_IPs |> filter(trough_name == 'Closed')
+
 #
 # sf_ip_smry <- met_intercept |>
-#   group_by(q_sf_labs, scl_names_new) |>
+#   group_by(q_sf_labs, trough_name) |>
 #   # filter(weighed_tree_canopy_load_mm <= 5) |>
 #   summarise(IP_avg = mean(IP, na.rm = T),
 #             sd = sd(IP, na.rm = T),
@@ -249,13 +362,13 @@ saveRDS(model_summaries,
 #   # ylim(ip_y_lims) +
 #   theme(legend.position = 'none',
 #         plot.margin = margin(0.5, 0.5, 0.5, .75, "cm")) +
-#   facet_grid(~scl_names_new)
+#   facet_grid(~trough_name)
 # sf_ip
 #
 #
 #
 # tice_ip_smry <- met_intercept |>
-#   group_by(t_ice_labs, scl_names_new) |>
+#   group_by(t_ice_labs, trough_name) |>
 #   # filter(weighed_tree_canopy_load_mm <= 5) |>
 #   summarise(IP_avg = mean(IP, na.rm = T),
 #             sd = sd(IP, na.rm = T),
@@ -278,11 +391,11 @@ saveRDS(model_summaries,
 #   # ylim(ip_y_lims) +
 #   theme(legend.position = 'none',
 #         plot.margin = margin(0.5, 0.5, 0.5, .75, "cm")) +
-#   facet_grid(~scl_names_new)
+#   facet_grid(~trough_name)
 # tice_ip
 #
 # tice_dep_ip_smry <- met_intercept |>
-#   group_by(t_ice_dep_labs, scl_names_new) |>
+#   group_by(t_ice_dep_labs, trough_name) |>
 #   # filter(weighed_tree_canopy_load_mm <= 5) |>
 #   summarise(IP_avg = mean(IP, na.rm = T),
 #             sd = sd(IP, na.rm = T),
@@ -305,11 +418,11 @@ saveRDS(model_summaries,
 #   # ylim(ip_y_lims) +
 #   theme(legend.position = 'none',
 #         plot.margin = margin(0.5, 0.5, 0.5, .75, "cm")) +
-#   facet_grid(~scl_names_new)
+#   facet_grid(~trough_name)
 # tice_ip
 #
 # rh_ip_smry <- met_intercept |>
-#   group_by(rh_labs, scl_names_new) |>
+#   group_by(rh_labs, trough_name) |>
 #   # filter(weighed_tree_canopy_load_mm <= 5) |>
 #   summarise(IP_avg = mean(IP, na.rm = T),
 #             sd = sd(IP, na.rm = T),
@@ -333,11 +446,11 @@ saveRDS(model_summaries,
 #   # ylim(ip_y_lims) +
 #   theme(legend.position = 'none',
 #         plot.margin = margin(0.5, 0.5, 0.5, .75, "cm")) +
-#   facet_grid(~scl_names_new)
+#   facet_grid(~trough_name)
 # rh_ip
 #
 # Qsi_ip_smry <- met_intercept |>
-#   group_by(Qsi_labs, scl_names_new) |>
+#   group_by(Qsi_labs, trough_name) |>
 #   # filter(weighed_tree_canopy_load_mm <= 5) |>
 #   summarise(IP_avg = mean(IP, na.rm = T),
 #             sd = sd(IP, na.rm = T),
@@ -361,5 +474,5 @@ saveRDS(model_summaries,
 #   # ylim(ip_y_lims) +
 #   theme(legend.position = 'none',
 #         plot.margin = margin(0.5, 0.5, 0.5, .75, "cm")) +
-#   facet_grid(~scl_names_new)
+#   facet_grid(~trough_name)
 # Qsi_ip

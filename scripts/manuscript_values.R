@@ -77,9 +77,9 @@ mean_ip_med <- mean_ip_by_trough$IP[mean_ip_by_trough == 'mixed'] |> round(2)
 mean_ip_dense <- mean_ip_by_trough$IP[mean_ip_by_trough == 'dense_forest'] |> round(2)
 
 lysimeter_event_mod_smry <-
-  readRDS('data/lysimeter-data/lysimter_event_avg_regression_stats.rds')
+  readRDS('data/lysimeter-data/processed/lysimter_event_avg_regression_stats.rds')
 lysimeter_15min_mod_smry <-
-  readRDS('data/lysimeter-data/lysimter_15min_avg_regression_stats.rds')
+  readRDS('data/lysimeter-data/processed/lysimter_15min_avg_regression_stats.rds')
 
 ### Influence of forest structure
 

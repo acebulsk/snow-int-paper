@@ -2,56 +2,6 @@
 
 wind_threshold <- 999 # m/s
 
-# get periods updated to not include times where troughs are unloading
-
-storm_dates_wide <- read.csv('../../analysis/interception/data/select_storms_datetime_wide_independent_snow_surveys.csv', skip = 1) |>
-  filter(quality < 4,
-         event_starts_late == F) |>
-  mutate(
-    from = as.POSIXct(from, tz = 'Etc/GMT+6'),
-    to = as.POSIXct(to, tz = 'Etc/GMT+6'),
-    storm_id = format(from, "%Y-%m-%d_%H")) |>
-  select(from, to, w_tree_event, storm_id, bad_troughs)
-
-to_long <- function(from, to, w_tree_event, storm_id, bad_troughs){
-  datetime <- seq(from, to, 900)
-
-  out <- data.frame(datetime, w_tree_event, storm_id, bad_troughs)
-
-  return(out)
-}
-
-storm_dates_long <- purrr::pmap_dfr(storm_dates_wide, to_long)
-
-# ggplot(load_df, aes(datetime, value)) +
-#   geom_line() +
-#   facet_grid(rows = vars(name), scales = 'free')
-#
-# plotly::ggplotly()
-
-q_int_tree <- load_df |>
-  pivot_wider() |> select(datetime, tree_mm) |>
-  mutate(q_int_tree = ifelse(is.na(lag(tree_mm)), 0, tree_mm - lag(tree_mm)),
-         q_int_tree = ifelse(q_int_tree<0, 0, q_int_tree))
-
-q_tf_scl <- load_df |>
-  filter(name != 'tree_mm')  |>
-  group_by(name) |>
-  mutate(q_tf = ifelse(is.na(lag(value)), 0, value - lag(value)),
-         q_tf = ifelse(q_tf<0, 0, q_tf)) |>
-  select(datetime, name, q_tf) |>
-  left_join(storm_dates_long) |>
-  mutate(row_flag = mapply(grepl, name, bad_troughs)) |> # remove troughs where only one is unloading, could also jsut use more reliable medium trough but would have to remove some events (see notes)
-  ungroup() |>
-  filter(row_flag == F,
-         is.na(q_tf) == F) |>
-  select(datetime, trough_name = name, q_tf) |>
-  ungroup()
-
-q_tf_scl_avg <- q_tf_scl |>
-  group_by(datetime) |>
-  summarise(q_tf = mean(q_tf, na.rm = T))
-
 # bad_events <- c('2022-03-23', '2022-02-14') |> as.Date()
 
 # good_events <- c('2022-06-13',
@@ -65,20 +15,19 @@ q_tf_scl_avg <- q_tf_scl |>
 #                  '2023-02-26',
 #                  '2023-03-13')
 
-event_df <- storm_dates_long |>
+event_df_avg_troughs <- throughfall_periods_long |>
   left_join(ffr_met) |>
-  left_join(q_int_tree) |>
   left_join(q_tf_scl_avg) |>
   group_by(w_tree_event) |>
-  filter(p > 0,
-         p > q_tf,
+  filter(q_sf > 0,
+         q_sf > q_tf,
          q_tf > 0) |>
-  mutate(cuml_snow = cumsum(p),
-         q_int_troughs = p - q_tf,
-         cuml_int_troughs = cumsum(q_int_troughs),
-         cuml_int_tree = cumsum(q_int_tree),
-         IP_tree = q_int_tree/p,
-         IP_troughs = q_int_troughs/p,
+  mutate(cuml_snow = cumsum(q_sf/4),
+         q_int_troughs = q_sf - q_tf,
+         cuml_int_troughs = cumsum(q_int_troughs/4),
+         # cuml_int_tree = cumsum(q_int_tree), # if adding tree back in need to consider tree cal matching
+         # IP_tree = q_int_tree/q_sf,
+         IP_troughs = q_int_troughs/q_sf,
          start_time = min(datetime),
          elapsed_hours = as.numeric(difftime(datetime, start_time, units = "hours"))
   )# |> filter(w_tree_event %in% good_events)
@@ -100,8 +49,7 @@ var_name_dict <-
     pretty_name = pretty_names_vect
   )
 
-event_df_long <- event_df |>
-  mutate(p = p * 4) |>  # mm/15min to mm/hr
+event_df_long <- event_df_avg_troughs |>
   pivot_longer(c(t:u, p, cuml_int_troughs, IP_troughs)) |>
   left_join(var_name_dict, by = 'name') |>
   mutate(pretty_name = factor(pretty_name, levels = c(pretty_names_vect))) |>
@@ -133,7 +81,7 @@ event_df_long |>
   ylab(element_blank()) +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))  # Rotate x-axis labels
 
-event_avgs <- event_df |>
+event_avgs <- event_df_avg_troughs |>
   group_by(w_tree_event) |>
   summarise(
     duration = max(elapsed_hours),
@@ -146,7 +94,7 @@ event_avgs <- event_df |>
 
 saveRDS(event_avgs, 'data/event_avgs.rds')
 
-event_avgs_maxmin <- event_df |>
+event_avgs_maxmin <- event_df_avg_troughs |>
   group_by(w_tree_event) |>
   summarise(
     duration = max(elapsed_hours),

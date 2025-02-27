@@ -1,6 +1,7 @@
 # run stats to determine if increase in i/p with wind and canopy snow load is
 # significant for the 15 minute interval measurements
 
+
 library(tidyverse)
 library(broom)
 library(modelr)
@@ -204,7 +205,7 @@ cat(paste(summaries, collapse = ""))
 ggplot(at_ip, aes(x = temp_binned, y = IP, fill = name)) +
   geom_boxplot() +
   facet_wrap(~name, scales = "free_y") +
-  labs(x = "Wind Speed Bin", y = "Y Value", title = "Y Value by Wind Speed Bin for Each Dataset") +
+  labs(x = "Temp Bin", y = "IP", title = "IP by Temp Bin for Each Dataset") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
 
@@ -680,3 +681,17 @@ w_test_2 <- tree_ip_ttest |>
   unnest(cols = c(w_test)) |>
   mutate(calm_greater_than_windy = ifelse(p.value > 0.05, TRUE, FALSE))
 
+# Kruskal-Wallis test ----
+# Similar non-parametric test as the wilcox test but
+# designed for determining if the median is significantly different between more
+# than two groups
+
+
+met_intercept <- met_intercept %>%
+  mutate(
+    Temp_group = ifelse(t > median(t, na.rm = TRUE), "high", "low"),
+    Wind_group = ifelse(wind > median(wind, na.rm = TRUE), "high", "low"),
+    group = interaction(Temp_group, Wind_group)
+  )
+
+kruskal.test(IP ~ group, data = met_intercept)

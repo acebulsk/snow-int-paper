@@ -1,28 +1,130 @@
 # Script to load processed data files used in manuscript. See
 # centralize_processed_data.R script for origin of files.
+paper_lysimeter_data_path <- 'data/lysimeter-data/raw/'
 
-scl_lai_cc <- read.csv('data/hemisphere-photo-data/scl_canopy_metrics.csv')
-scl_lai_cc$Name <- c('Mixed', 'Sparse', 'Closed')
+scl_names_dict2 <- data.frame(
+  note = c('Trough 1', 'Trough 2', 'Trough 3'),
+  new_name = c('Mixed', 'Sparse', 'Closed')
+)
+cc_troughs <- read.csv('data/hemisphere-photo-data/2025_compiled_troughs_auto_th.csv')
+scl_lai_cc <- read.csv('data/hemisphere-photo-data/lai_site_id_2022_08_31.csv') |>
+  # mutate(id = paste0('DSCN6', id, '.JPG')) |>
+  filter(grepl("Trough", note)) |> # just keep troughs
+  left_join(cc_troughs) |>
+  left_join(scl_names_dict2) |>
+  # filter(vza %in% c(10, 20, 30, 60, 90)) |>
+  select(trough_name = new_name, vza, Le, cc) |>
+  mutate(cc = round(cc, 2)) |>
+  filter(!is.na(cc))
 
-throughfall_periods <- read.csv('data/lysimeter-data/select_storms_datetime_wide_independent_snow_surveys.csv', skip = 1)
+throughfall_periods <- read.csv(paste0(paper_lysimeter_data_path,
+                                       'select_storms_datetime_wide_independent_snow_surveys.csv')
+                                , skip = 1)
 
-load_df <- readRDS('data/lysimeter-data/treefort_load_main_cal_plv_fsd_mm.rds')
+# get periods updated to not include times where troughs are unloading
 
-met_intercept <- readRDS(paste0(paper_lysimeter_data_path,
+throughfall_periods_wide <- throughfall_periods |>
+  filter(quality < 4,
+         event_starts_late == F) |>
+  mutate(
+    from = as.POSIXct(from, tz = 'Etc/GMT+6'),
+    to = as.POSIXct(to, tz = 'Etc/GMT+6'),
+    storm_id = format(from, "%Y-%m-%d_%H")) |>
+  select(from, to, w_tree_event, storm_id, bad_troughs)
+
+to_long <- function(from, to, w_tree_event, storm_id, bad_troughs){
+  datetime <- seq(from, to, 900)
+
+  out <- data.frame(datetime, w_tree_event, storm_id, bad_troughs)
+
+  return(out)
+}
+
+throughfall_periods_long <- purrr::pmap_dfr(throughfall_periods_wide, to_long)
+throughfall_periods_long$bad_troughs <- gsub('dense', 'closed', throughfall_periods_long$bad_troughs)
+# raw weighed tree data calibrated to snow survey stations that have average
+# canopy closure the same as the SCLs
+load_suffix <- 'fsd_cal_for_each_trough_vza_60' # calibrated tree to snow surveys selected to match canopy closure of each SCL at inclination angle up to 60
+
+w_tree_zrd <- readRDS(
+  paste0(
+    'data/lysimeter-data/processed/zero_weighed_tree_kg_m2_pre_post_cnpy_snow_',
+    load_suffix,
+    '.rds'
+  )
+) |> select(datetime, trough_name = tree_cal_trough_name, tree_cal_cc, weighed_tree_canopy_load_mm = value)
+
+w_tree_zrd <- readRDS(
+  paste0(
+    'data/lysimeter-data/processed/zero_weighed_tree_kg_m2_pre_post_cnpy_snow_',
+    load_suffix,
+    '.rds'
+  )
+) |> select(datetime, trough_name = tree_cal_trough_name, tree_cal_cc, weighed_tree_canopy_load_mm = value)
+
+ggplot(w_tree_zrd, aes(datetime, weighed_tree_canopy_load_mm)) +
+  geom_line() +
+  facet_grid(rows = vars(trough_name))
+
+q_int_tree <-
+  readRDS(
+    paste0(
+      'data/lysimeter-data/processed/zero_weighed_tree_kg_m2_pre_post_cnpy_snow_',
+      load_suffix,
+      '.rds'
+    )) |>
+  filter(!event_id %in% c('2022-01-17')) |>
+  group_by(tree_cal_trough_name, event_id) |>
+  mutate(d_int = ifelse(is.na(lag(value)), 0, value - lag(value)),
+         d_int = ifelse(d_int<0, 0, d_int),
+         q_int = d_int * 4) |> # mm/15 min to mm /hr
+  select(datetime, trough_name = tree_cal_trough_name, tree_cal_cc, value, q_int, d_int) |>
+  ungroup()
+
+ggplot(q_int_tree |> pivot_longer(c(value:d_int)), aes(datetime, value)) +
+  geom_line() +
+  facet_grid(rows = vars(name))
+
+scl_raw_kg <- readRDS(paste0(paper_lysimeter_data_path, 'treefort_scls_raw_kg.rds')) |> select(datetime, trough_name = name, scl_raw_kg = value)
+scl_raw <- readRDS(paste0(paper_lysimeter_data_path, 'treefort_scl_qaqc.rds'))
+
+q_tf_scl <- scl_raw |>
+  group_by(name) |>
+  mutate(d_tf = ifelse(is.na(lag(value)), 0, value - lag(value)),
+         d_tf = ifelse(d_tf<0, 0, d_tf),
+         q_tf = d_tf * 4) |> # mm/15 min to mm /hr
+  select(datetime, name, d_tf, q_tf) |>
+  left_join(throughfall_periods_long) |>
+  mutate(row_flag = mapply(grepl, name, bad_troughs)) |> # remove troughs where only one is unloading, could also jsut use more reliable medium trough but would have to remove some events (see notes)
+  ungroup() |>
+  filter(row_flag == F,
+         is.na(q_tf) == F) |>
+  select(datetime, trough_name = name, d_tf, q_tf) |>
+  ungroup()  |>
+  left_join(scl_raw_kg, by = c('datetime', 'trough_name')) |>
+  mutate(
+    scl_raw_kg = scl_raw_kg + 15, # raw_kg does not include weight of SCL so add estimate here based on diff of when the troughs were taken down in the spring/summer
+    absolute_accuracy = scl_raw_kg * 0.02)
+
+q_tf_scl_avg <- q_tf_scl |>
+  group_by(datetime) |>
+  summarise(q_tf = mean(q_tf, na.rm = T))
+
+met_intercept <- readRDS(paste0('data/lysimeter-data/processed/',
                                 '/continuous_throughfall_data_binned_met_select_events.rds')) |>
   filter(q_sf > 0,
-         d_tf > 0.01,
+         q_tf > 0.001,
          # u <= 2,
          q_sf > q_tf) |> # if troughs > q_sf may be some unloading
   mutate(
     q_int = q_sf - q_tf,
     IP = q_int / q_sf) |>
-  filter(IP < 1) |>
-  left_join(scl_names_dict)
+  filter(IP < 1)
 
 parsivel <- readRDS('data/parsivel-data/disdro_spectrum_processed_agg_15_min.RDS')
 
-ffr_met <- readRDS('data/met-data/ffr_crhm_modelling_obs.rds')
+ffr_met <- readRDS('data/met-data/ffr_crhm_modelling_obs.rds') |>
+  mutate(q_sf = p * 4) # mm/15min to mm/hr
 ffr_met_wnd <- readRDS('data/met-data/ffr_t_rh_u_qaqc_fill.rds')
 # not enough ec wind obs over the event
 ffr_ec <- readRDS('data/met-data/ec_high_tower_30_min_2021_2023_qc_rough.rds') |>

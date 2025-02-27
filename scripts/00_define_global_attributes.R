@@ -10,55 +10,14 @@ library(modelr)
 library(gt)
 
 # source('../../analysis/lidar-processing/scripts/voxrs/voxrs_helper_fns.R')
-source('../../analysis/disdrometer/scripts/00_source_functions.R')
+# source('../../analysis/disdrometer/scripts/00_source_functions.R')
 
 scl_names_dict <- data.frame(
   name = c('sparse_forest', 'medium_density_forest', 'dense_forest'),
   scl_names_new = factor(c('Sparse', 'Mixed', 'Closed'), levels = c(c('Sparse', 'Mixed', 'Closed')))
 )
 
-# See github repo https://github.com/acebulsk/interception for creation of this dataset
-raw_lysimeter_data_path <- '../../analysis/interception/data/storm_analysis/continuous_throughfall_data_binned_met_select_events.rds'
-paper_lysimeter_data_path <- 'data/lysimeter-data/'
-file.copy(from = raw_lysimeter_data_path,
-          to = paper_lysimeter_data_path,
-          recursive = T,
-          overwrite = F,
-          copy.date = T)
-
-met_intercept <- readRDS(paste0(paper_lysimeter_data_path,
-                                '/continuous_throughfall_data_binned_met_select_events.rds')) |>
-  filter(q_sf > 0,
-         d_tf > 0.01,
-    # u <= 2,
-    q_sf > q_tf) |> # if troughs > q_sf may be some unloading
-  mutate(
-    q_int = q_sf - q_tf,
-    IP = q_int / q_sf) |>
-  filter(IP < 1) |>
-  left_join(scl_names_dict)
-
 calg_mag_declination <- 13.5 # deg + east in 2020 https://www.ngdc.noaa.gov/geomag/magfield-wist/
-
-parsivel <- readRDS('../../analysis/disdrometer/data/disdro_spectrum_processed_agg_15_min.RDS')
-
-ffr_met <- readRDS('../../analysis/met-data-processing/data/ffr_crhm_modelling_obs.rds')
-ffr_met_wnd <- readRDS('../../analysis/met-data-processing/data/ffr_t_rh_u_qaqc_fill.rds')
-# not enough ec wind obs over the event
-ffr_ec <- readRDS('../../analysis/eddy-cov/data/high-tower/ec_high_tower_30_min_2021_2023_qc_rough.rds') |>
-  mutate(ec_wind_dir = wind_dir_mag - calg_mag_declination) |>
-  select(datetime, ec_wind_speed = wind_speed, ec_wind_dir)
-# ffr_ec <- readRDS('../../analysis/eddy-cov/data/low-tower/low_tower_15min_2021_2023_qc_rough.rds') |>
-#   mutate(ec_wind_dir = wind_dir_mag - calg_mag_declination) |>
-#   select(datetime, ec_wind_speed = wind_speed, ec_wind_dir)
-pwl_sf <- readRDS('../../analysis/met-data-processing/data/pluvio-qaqc/pwl_pluvio_15_min_qaqc_undercatch_corr_ac.rds')
-pwl_wind <- readRDS('../../analysis/met-data-processing/data/pwl_met_qaqc.rds') |>
-  select(
-    datetime,
-    wind_speed = u_rm_young,
-    wind_dir_true = u_dir_rm_young # keir confirmed junction box is pointed at 180 deg south (true) as per spec
-    # sd_wind_dir = WindDir_SD1_WVT
-  )
 
 # theme_bw(base_size = 14)
 options(ggplot2.discrete.colour= palette.colors(palette = "R4"))
@@ -137,4 +96,11 @@ sine_fn <- function(traj_angle, b,  cc){
   # sin(theta)^2 is the increase in surface area snow can contact
   cp_inc <- b*((1-cc)*sin(theta)^2)#*1/(cos(theta))
   return(cp_inc)
+}
+
+traj_angle_deg <- function(wind_speed, velocity){
+  slope <- wind_speed/velocity
+  angle_deg <- atan(slope) * 180 / pi
+
+  return(angle_deg)
 }
