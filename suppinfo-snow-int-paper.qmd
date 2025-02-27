@@ -12,7 +12,7 @@ format:
     toc: false
     fig-pos: H # makes figs appear in the location specified. without this they sometimes appear in the middle of a paragraph.
     linestretch: 1.5 # set inline instead
-editor: visual
+editor: source
 bibliography: ../../papers/bibtex/library.bib
 csl: '../../papers/bibtex/csl-styles/apa-disable-disambiguate-add-names.csl'
 
