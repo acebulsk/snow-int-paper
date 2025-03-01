@@ -1,70 +1,137 @@
 # this script compiles the precip and throughfall rates and computes average met
-# conditions within each timestep as in the ablation 00_load_data.R script
+# conditions within each timestep as in the ablation 00_load_data.R script the
+# fifteen minute interval measurements have high uncertainty so we bin here by
+# met conditions and then accumulate the SCL and pluvio measurements within
+# these bins which helps keep our relative error down while keeping stationarity
+# between certain met conditions
 
-hourly <- F # should we convert the 15 min raw data to hourly before processing?
+# currently have this as not aggregating here as it is handled in the 04_plot_avg_bin_met_scl.IP.R script
+scl_rel_accuracy <- 0.02/100 # rel accuracy is 0.02% as stated in the strain gauge manual
+pluvio_rel_accuracy <- 0.2/100 # relative accuracy, or 0.1 mm if absolute error is less than 0.1 mm so use ifelse to control for this, pluvio measures at 0.1 mm resolution
+
+agg_interval <- F # should we aggregate the 15 min raw data to hourly before processing?
+avg_period <- '1 hours'
 
 good_wind <- 'u' # this is the qc and gap filled wind from FFR ultrasonic/3cup/pwlrmyoung
 good_temp <- 't' # this is the mid tree FFR air temp
 
-if(hourly == T){
-  stop("need to update this to use new dfs.")
-  # start to hourly
-  q_tf <- q_tf_scl |>
-    # to hourly
-    mutate(datetime = format(datetime, '%Y-%m-%d %H:00:00')) |>
-    group_by(datetime, name) |>
-    summarise(q_tf = sum(d_tf, na.rm = T)) |>
-    mutate(datetime = as.POSIXct(datetime),
-           q_tf = q_tf)
-  # end to hourly
+tf_periods_scl_pcp <- throughfall_periods_long |>
+  left_join(ffr_met |> select(datetime, p, t, u)) |>
+  left_join(pwl_pluvio_raw |> select(datetime, pluvio_raw_mm = value)) |>
+  left_join(q_tf_scl) |>
+  left_join(scl_raw_kg, by = c('datetime', 'trough_name')) |>
+  left_join(scl_meta |> select(trough_name, surface_area), by = 'trough_name') |>
+  select(-c(storm_id, bad_troughs)) |>
+  mutate(
+    # SCL calcs
+    scl_raw_kg = scl_raw_kg + 15, # raw_kg does not include weight of SCL so add estimate here based on diff of when the troughs were taken down in the spring/summer
+    scl_abs_accuracy = scl_raw_kg * scl_rel_accuracy,
+    # Pluvio calcs
+    pluvio_abs_accuracy = pluvio_raw_mm * pluvio_rel_accuracy,
+    pluvio_abs_accuracy = ifelse(pluvio_abs_accuracy < 0.1, 0.1, pluvio_abs_accuracy)
+  )
+
+if(agg_interval == T){
+  print(paste0('Aggregating to met and precip data to ', avg_period))
+
+  q_tf <- tf_periods_scl_pcp |>
+    mutate(datetime = ceiling_date(datetime, unit = avg_period)) |> # ceiling ensures the timestamp corresponds to preeceeding records
+    group_by(datetime, trough_name) |>
+    summarise(p = sum(p),
+              t = mean(t),
+              u = mean(u),
+              scl_abs_accuracy2 = prop_err_sum(first(scl_abs_accuracy), last(scl_abs_accuracy)), # the sum of the interavl measuremenst below would be the same as takign the diff of the start/end of the new intervals which would have the associated uncertainty calculated here
+              pluvio_abs_accuracy2 = prop_err_sum(first(pluvio_abs_accuracy), last(pluvio_abs_accuracy)),
+              d_tf = sum(d_tf),
+              scl_raw_kg = last(scl_raw_kg),# take the last measurement of the interval
+              surface_area = mean(surface_area))|>
+    filter(p > 0,
+           p > d_tf,
+           d_tf > 0
+    ) |>
+    left_join(scl_lai_cc_fltr) |>
+    select(
+      datetime,
+      trough_name,
+      cc,
+      event_del_sf = p,
+      event_del_tf = d_tf,
+      surface_area,
+      scl_abs_accuracy,
+      pluvio_abs_accuracy
+    )
+
   # Gather met data
 
-  met <- ffr_met |>
-    left_join(weighed_tree_zeroed) |>
+  met <-
+    throughfall_periods_long |>
+    left_join(ffr_met) |>
     left_join(parsivel) |>
     # start to hourly
-    mutate(datetime = format(datetime, '%Y-%m-%d %H:00:00')) |>
+    mutate(datetime = ceiling_date(datetime, unit = avg_period)) |> # ceiling ensures the timestamp corresponds to preeceeding records
     group_by(datetime) |>
     summarise(
       t = mean(t, na.rm = T),
-      t_ice_bulb = mean(t_ice_bulb, na.rm = T),
+      rh = mean(rh, na.rm = T),
+      Qsi = mean(Qsi, na.rm = T),
+      # t_ice_bulb = mean(t_ice_bulb, na.rm = T),
       u = mean(u, na.rm = T),
-      p = sum(p, na.rm =T),
-      weighed_tree_canopy_load_mm = mean(weighed_tree_canopy_load_mm, na.rm =T),
+      # p = sum(p, na.rm =T), # handled with the tf df above
       part_diam = mean(part_diam, na.rm = T),
       part_vel = mean(part_vel, na.rm = T)
     ) |>
-    mutate(datetime = as.POSIXct(datetime, tz = 'Etc/GMT+6')) |>
     # end to hourly
-    inner_join(storms_long, by = 'datetime') |>  # limit to only periods where snow is in the canopy
-    select(datetime, storm_id, t, t_ice_bulb, u, p, weighed_tree_canopy_load_mm, part_diam, part_vel, precip_name)
-} else {
-  # keep at 15 min
-  q_tf <- q_tf_scl
-
-  met <- throughfall_periods_long |>
-    left_join(ffr_met) |> # join with the event datetimes so our bin sizes are appropriate for the events
-  select(
-    datetime,
-    t,
-    rh,
-    # t_ice_bulb,
-    u,
-    p,
-    Qsi,
-    # part_diam,
-    # part_vel,
-    # precip_name
-  )
+    select(
+      datetime,
+      t,
+      rh,
+      # t_ice_bulb,
+      u,
+      # p,
+      Qsi,
+      part_diam,
+      part_vel
+    )
 
   tree <- throughfall_periods_long |>
     left_join(w_tree_zrd) |>
+    mutate(datetime = ceiling_date(datetime, unit = avg_period)) |> # ceiling ensures the timestamp corresponds to preeceeding records
+    group_by(datetime, trough_name) |>
+    summarise(
+      weighed_tree_canopy_load_mm = last(weighed_tree_canopy_load_mm)) |>
     select(datetime, trough_name, weighed_tree_canopy_load_mm)
+
+    } else {
+      print(paste0('Keeping met and precip data at 15 min intervals.'))
+
+      # keep at 15 min
+      q_tf <- tf_periods_scl_pcp |>
+        filter(p > 0, p > d_tf, d_tf > 0) |>
+        left_join(scl_lai_cc_fltr) |>
+        select(
+          datetime,
+          trough_name,
+          cc,
+          event_del_sf = p,
+          event_del_tf = d_tf,
+          surface_area,
+          scl_abs_accuracy,
+          pluvio_abs_accuracy
+        )
+
+      met <- throughfall_periods_long |>
+        left_join(ffr_met) |> # join with the event datetimes so our bin sizes are appropriate for the events
+        left_join(parsivel) |>
+        select(datetime, t, rh, # t_ice_bulb,
+               u, Qsi, part_diam, part_vel)
+               # precip_name)
+
+      tree <- throughfall_periods_long |>
+        left_join(w_tree_zrd) |>
+        select(datetime, trough_name, weighed_tree_canopy_load_mm)
 }
 
 # met[,good_wind][met[,good_wind]==0] <- 0.001 # need to remove 0 wind speeds that breaks regression, safe to assume 0 wind no possible so assign a very low value
-
-met$q_sf <- met$p * 4 # mm per interval to mm per hour
 
 # Bin the met vars ----
 
@@ -305,83 +372,82 @@ tree$tree_labs <- cut(tree[,'weighed_tree_canopy_load_mm', drop = TRUE],
 
 ## bin particle velocity ----
 
-# min_vel <- round(min(met$part_vel, na.rm = T), 3)
-# #max_vel <- round(max(met$part_vel, na.rm = T), 3)
-# max_vel <- 1.4
-#
-# vel_step <- (max_vel-min_vel) / 11
-#
-# vel_breaks <- seq(
-#   min_vel,
-#   max_vel + vel_step,
-#   vel_step)
-#
-# vel_labs_seq <- label_bin_fn(bins = vel_breaks)
-#
-# stopifnot(tail(vel_breaks, 1) > max_vel)
-# stopifnot(length(vel_labs_seq) + 1 == length(vel_breaks))
-#
-# met$part_vel_binned <- cut(met[,'part_vel', drop = TRUE], vel_breaks, include.lowest = T)
-#
-# met$part_vel_labs <- cut(met[,'part_vel', drop = TRUE],
-#                          vel_breaks,
-#                          labels = vel_labs_seq, include.lowest = T
-# )
-#
-# ## bin particle diameter ----
-#
-# min_diam <- round(min(met$part_diam, na.rm = T), 3)
-# max_diam <- round(max(met$part_diam, na.rm = T), 3)
-# diam_step <- (max_diam-min_diam) / 15
-#
-# diam_breaks <- seq(
-#   min_diam,
-#   max_diam + diam_step,
-#   diam_step)
-#
-# diam_labs_seq <- label_bin_fn(bins = diam_breaks)
-#
-# stopifnot(tail(diam_breaks, 1) > max_diam)
-# stopifnot(length(diam_labs_seq) + 1 == length(diam_breaks))
-#
-# met$part_diam_binned <- cut(met[,'part_diam', drop = TRUE], diam_breaks, include.lowest = T)
-#
-# met$part_diam_labs <- cut(met[,'part_diam', drop = TRUE],
-#                           diam_breaks,
-#                           labels = diam_labs_seq, include.lowest = T
-# )
-#
+min_vel <- round(min(met$part_vel, na.rm = T), 3)
+#max_vel <- round(max(met$part_vel, na.rm = T), 3)
+max_vel <- 1.4
+
+vel_step <- (max_vel-min_vel) / 11
+
+vel_breaks <- seq(
+  min_vel,
+  max_vel + vel_step,
+  vel_step)
+
+vel_labs_seq <- label_bin_fn(bins = vel_breaks)
+
+stopifnot(tail(vel_breaks, 1) > max_vel)
+stopifnot(length(vel_labs_seq) + 1 == length(vel_breaks))
+
+met$part_vel_binned <- cut(met[,'part_vel', drop = TRUE], vel_breaks, include.lowest = T)
+
+met$part_vel_labs <- cut(met[,'part_vel', drop = TRUE],
+                         vel_breaks,
+                         labels = vel_labs_seq, include.lowest = T
+)
+
+## bin particle diameter ----
+
+min_diam <- round(min(met$part_diam, na.rm = T), 3)
+max_diam <- round(max(met$part_diam, na.rm = T), 3)
+diam_step <- (max_diam-min_diam) / 15
+
+diam_breaks <- seq(
+  min_diam,
+  max_diam + diam_step,
+  diam_step)
+
+diam_labs_seq <- label_bin_fn(bins = diam_breaks)
+
+stopifnot(tail(diam_breaks, 1) > max_diam)
+stopifnot(length(diam_labs_seq) + 1 == length(diam_breaks))
+
+met$part_diam_binned <- cut(met[,'part_diam', drop = TRUE], diam_breaks, include.lowest = T)
+
+met$part_diam_labs <- cut(met[,'part_diam', drop = TRUE],
+                          diam_breaks,
+                          labels = diam_labs_seq, include.lowest = T
+)
+
 ## bin snowfall rate ----
 
-min_sf <- round(min(met$q_sf, na.rm = T), 3)
-max_sf <- round(max(met$q_sf, na.rm = T), 3)
-sf_step <- 0.5
-
-sf_breaks <- seq(
-  min_sf,
-  max_sf + sf_step,
-  sf_step)
-
-sf_labs_seq <- label_bin_fn(bins = sf_breaks)
-
-stopifnot(tail(sf_breaks, 1) > max_sf)
-stopifnot(length(sf_labs_seq) + 1 == length(sf_breaks))
-
-met$q_sf_binned <- cut(met[,'q_sf', drop = TRUE], sf_breaks, include.lowest = T)
-
-met$q_sf_labs <- cut(met[,'q_sf', drop = TRUE],
-                     sf_breaks,
-                     labels = sf_labs_seq, include.lowest = T
-)
+# min_sf <- round(min(met$q_sf, na.rm = T), 3)
+# max_sf <- round(max(met$q_sf, na.rm = T), 3)
+# sf_step <- 0.5
+#
+# sf_breaks <- seq(
+#   min_sf,
+#   max_sf + sf_step,
+#   sf_step)
+#
+# sf_labs_seq <- label_bin_fn(bins = sf_breaks)
+#
+# stopifnot(tail(sf_breaks, 1) > max_sf)
+# stopifnot(length(sf_labs_seq) + 1 == length(sf_breaks))
+#
+# met$q_sf_binned <- cut(met[,'q_sf', drop = TRUE], sf_breaks, include.lowest = T)
+#
+# met$q_sf_labs <- cut(met[,'q_sf', drop = TRUE],
+#                      sf_breaks,
+#                      labels = sf_labs_seq, include.lowest = T
+# )
 
 # Combine met and load data at 15 min timestep
 
-met_intercept <- throughfall_periods_long |>
-  left_join(q_tf, by = c('datetime')) |>
+met_intercept <- q_tf |>
   left_join(tree, by = c('datetime', 'trough_name')) |>
   left_join(met, by = c('datetime')) |>
   mutate(
-    q_sf_labs = as.numeric(as.character(q_sf_labs)),
+    # q_sf_labs = as.numeric(as.character(q_sf_labs)),
     temp_labs = as.numeric(as.character(temp_labs)),
     # t_ice_labs = as.numeric(as.character(t_ice_labs)),
     # t_ice_dep_labs = as.numeric(as.character(t_ice_dep_labs)),
@@ -390,8 +456,8 @@ met_intercept <- throughfall_periods_long |>
     wind_labs = as.numeric(as.character(wind_labs)),
     # tau_mid_labs = as.numeric(as.character(tau_mid_labs)),
     tree_labs = as.numeric(as.character(tree_labs)),
-    # part_vel_labs = as.numeric(as.character(part_vel_labs)),
-    # part_diam_labs = as.numeric(as.character(part_diam_labs))
+    part_vel_labs = as.numeric(as.character(part_vel_labs)),
+    part_diam_labs = as.numeric(as.character(part_diam_labs))
   )
 
 saveRDS(met_intercept, 'data/lysimeter-data/processed/continuous_throughfall_data_binned_met_select_events.rds')
