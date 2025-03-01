@@ -3,43 +3,92 @@
 # look at trends in met avgs ----
 
 # avg over each event
-event_df_sep_troughs_avg <- throughfall_periods_long |>
-  left_join(ffr_met) |>
+scl_rel_accuracy <- 0.02/100 # rel accuracy is 0.02% as stated in the strain gauge manual
+pluvio_rel_accuracy <- 0.2/100 # relative accuracy, or 0.1 mm if absolute error is less than 0.1 mm so use ifelse to control for this, pluvio measures at 0.1 mm resolution
+
+avg_int <- 'event'
+error_th <- 100
+fig_tag <- paste0('_', avg_int, '_', err_th, 'perc')
+
+tf_periods_scl_pcp_15min <- throughfall_periods_long |>
+  left_join(ffr_met |> select(datetime, p, t, u)) |>
+  left_join(pwl_pluvio_raw |> select(datetime, pluvio_raw_mm = value)) |>
   left_join(q_tf_scl) |>
   left_join(scl_lai_cc_fltr) |>
-  group_by(w_tree_event, trough_name) |>
+  left_join(scl_raw_kg, by = c('datetime', 'trough_name')) |>
+  left_join(scl_meta |> select(trough_name, surface_area), by = 'trough_name') |>
+  select(-c(storm_id, bad_troughs))
+
+tf_periods_scl_pcp_event <- tf_periods_scl_pcp_15min |>
   filter(p > 0,
-         q_sf > q_tf,
-         q_tf > 0) |>
-  group_by(w_tree_event, trough_name) |>
-  summarise(event_del_sf = sum(p),
-            event_del_tf = sum(d_tf),
-            event_del_i = event_del_sf - event_del_tf,
-            IP = event_del_i/event_del_sf,
-            t = mean(t),
-            u = mean(u),
-            cc = first(cc)) |>
-  group_by(trough_name) |>
+         p > d_tf,
+         d_tf > 0
+  ) |>
+  group_by(w_tree_event, trough_name, cc) |>
+  summarise(
+    datetime = NA,
+    event_del_sf = sum(p),
+    t = mean(t),
+    u = mean(u),
+    pluvio_raw_mm = last(pluvio_raw_mm), # take the last measurement of the interval
+    event_del_tf = sum(d_tf),
+    scl_raw_kg = last(scl_raw_kg),# take the last measurement of the interval
+    surface_area = mean(surface_area))|>
+  mutate(
+    # SCL calcs
+    scl_raw_kg = scl_raw_kg + 15, # raw_kg does not include weight of SCL so add estimate here based on diff of when the troughs were taken down in the spring/summer
+    scl_abs_accuracy = scl_raw_kg * scl_rel_accuracy,
+    d_tf_kg = event_del_tf*surface_area,
+    # Pluvio calcs
+    pluvio_abs_accuracy = pluvio_raw_mm * pluvio_rel_accuracy,
+    pluvio_abs_accuracy = ifelse(pluvio_abs_accuracy < 0.1, 0.1, pluvio_abs_accuracy),
+    scl_rel_perc_error = (scl_abs_accuracy/d_tf_kg)*100,
+    pluvio_rel_perc_error = (pluvio_abs_accuracy/event_del_sf)*100,
+    scl_flag = ifelse(scl_rel_perc_error > error_th, T, F),
+    pluvio_flag = ifelse(pluvio_rel_perc_error > error_th, T, F),
+    event_del_i = event_del_sf - event_del_tf,
+         event_IP = event_del_i/event_del_sf,
+         sigma_event_del_i = prop_err_sum(scl_abs_accuracy, pluvio_abs_accuracy),
+         sigma_event_IP = prop_err_ratio(event_IP, event_del_i, event_del_i, sigma_event_del_i, pluvio_abs_accuracy),
+         sigma_event_IP_hi = event_IP+sigma_event_IP,
+         sigma_event_IP_hi = ifelse(sigma_event_IP_hi > 1, 1, sigma_event_IP_hi),
+         sigma_event_IP_lo = event_IP-sigma_event_IP,
+         sigma_event_IP_lo = ifelse(sigma_event_IP_lo<0,0,sigma_event_IP_lo)
+         )  |>
+  # filter(pluvio_rel_perc_error < error_th,
+  #        scl_rel_perc_error < error_th) |>
+  select(datetime,
+         w_tree_event,
+         trough_name,
+         cc,
+         event_IP,
+         sigma_event_IP_hi,
+         sigma_event_IP_lo,
+         event_del_sf,
+         t,
+         u) |>
   pivot_longer(c(event_del_sf, t, u)) |>
   left_join(var_name_dict) |>
-  select(-event_del_tf)
+  ungroup()
 
 # avg over all three troughs for each event
-event_df_avg_troughs_avg <- event_df_sep_troughs_avg |>
+tf_periods_scl_pcp_event_mean_scl <- tf_periods_scl_pcp_event |>
   mutate(trough_name = 'scl_mean',
          cc = mean(scl_lai_cc_fltr$cc)) |>
-  group_by(w_tree_event, trough_name, name, cc, pretty_name) |>
+  group_by(datetime, w_tree_event, trough_name, name, cc, pretty_name) |>
   summarise(
-    event_del_i = mean(event_del_i),
-    IP = mean(IP),
-    value = mean(value)) |>
-  select(names(event_df_sep_troughs_avg))
+    event_IP = mean(event_IP),
+    value = mean(value),
+    sigma_event_IP_hi = mean(sigma_event_IP_hi),
+    sigma_event_IP_lo = mean(sigma_event_IP_lo)
+    ) |>
+  select(names(tf_periods_scl_pcp_event))
 
-event_avg_bind <- rbind(event_df_sep_troughs_avg, event_df_avg_troughs_avg) |>
+event_avg_bind <- rbind(tf_periods_scl_pcp_event, tf_periods_scl_pcp_event_mean_scl) |>
   mutate(cc = factor(round(cc, 2), levels = sort(unique(round(cc, 2)))))
 
 # Add R-squared values to the dataset
-y_col <- 'IP'
+y_col <- 'event_IP'
 x_col <- 'value'
 
 lm_nest <- event_avg_bind  |>
@@ -67,19 +116,23 @@ model_summaries <- lm_nest |>
 
 saveRDS(model_summaries, 'data/lysimeter-data/processed/lysimter_event_avg_regression_stats.rds')
 
-event_df_sep_troughs_avg |>
+tf_periods_scl_pcp_event |>
   filter(trough_name != 'scl_mean') |>
   mutate(cc = factor(round(cc, 2), levels = sort(unique(round(cc, 2))))) |>
   ggplot() +
-  geom_point(aes(value, IP, colour = cc, group = cc)) +
-
+  geom_point(aes(value, event_IP, colour = cc, group = cc)) +
+  geom_errorbar(
+    aes(x = value, ymax = sigma_event_IP_hi, ymin = sigma_event_IP_lo),
+    width = 0,
+    alpha = 0.2
+  )  +
   # Conditionally add the smooth line where p.value < 0.05
   geom_smooth(
     data = event_df_sep_troughs_avg |>
       mutate(cc = factor(round(cc, 2), levels = sort(unique(round(cc, 2))))) |>
-      left_join(model_summaries, by = c('pretty_name', 'cc')) |>  # Join the summaries
+      left_join(model_summaries, by = c('pretty_name', 'cc', 'trough_name')) |>  # Join the summaries
       filter(p.value < 0.05),                   # Filter where p-value < 0.05
-    aes(value, IP, colour = cc, group = cc),
+    aes(value, IP, colour = cc, group = interaction(trough_name, cc)),
     method = 'lm', se = F, linetype = 'solid'
   ) +
 
@@ -87,8 +140,8 @@ event_df_sep_troughs_avg |>
   # xlab('Event Total Snowfall (mm)') +
   labs(colour = 'SCL\nCanopy\nCoverage (-)') +
   theme(legend.position = 'right') +
-  scale_color_manual(values = rev(cc_colours)) +
-  facet_wrap(~pretty_name, nrow = 3, scales = 'free') +
+  scale_color_manual(values = cc_colours) +
+  facet_wrap(~pretty_name+trough_name, nrow = 3, scales = 'free') +
   xlab(element_blank()) #+
   # ylim(c(NA, 1)) #+
   # show above model R2 and significance on the graph, decided to move to table
@@ -100,8 +153,13 @@ event_df_sep_troughs_avg |>
   #               colour = cc),
   #           hjust = -.1, vjust = 1.1, size = 3, fontface = 'bold')
 
-ggsave('figs/automated_snowfall_event_periods/event_avg_temp_wind_cuml_snow_vs_IP_colour_troughs.png',
-       width = 5, height = 7)
+ggsave(
+  paste0(
+    'figs/automated_snowfall_event_periods/event_avg_temp_wind_cuml_snow_vs_IP_colour_troughs',
+    fig_tag,
+    '.png'
+  ),
+  width = 5, height = 7)
 
 # event_df_sep_troughs_avg_wide <- event_df_sep_troughs |>
 #   group_by(w_tree_event, trough_name) |>
