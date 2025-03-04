@@ -10,7 +10,8 @@ library(modelr)
 library(gt)
 
 # source('../../analysis/lidar-processing/scripts/voxrs/voxrs_helper_fns.R')
-# source('../../analysis/disdrometer/scripts/00_source_functions.R')
+source('../../analysis/disdrometer/scripts/00_source_functions.R')
+perc_err_fltr <- 100 # percent error above which is unnacceptible to apply after accumulation period
 
 scl_names_dict <- data.frame(
   name = c('sparse_forest', 'medium_density_forest', 'dense_forest'),
@@ -103,4 +104,22 @@ traj_angle_deg <- function(wind_speed, velocity){
   angle_deg <- atan(slope) * 180 / pi
 
   return(angle_deg)
+}
+
+# rearrange to return wind speed given angle and velocity
+wind_speed <- function(traj_angle_deg, velocity){
+  angle_rad <- traj_angle_deg * pi / 180
+  wind_speed <- velocity * tan(angle_rad)
+
+  return(wind_speed)
+}
+
+prop_err_ratio <- function(ratio, x, y, sigma_x, sigma_y){
+  sigma_ratio <- ratio*sqrt((sigma_x/x)^2+(sigma_y/y)^2)
+  return(sigma_ratio)
+}
+
+prop_err_sum <- function(sigma_x, sigma_y){
+  sigma_sum <- sqrt(sigma_x^2 + sigma_y^2)
+  return(sigma_sum)
 }

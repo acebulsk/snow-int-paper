@@ -39,6 +39,11 @@ file.copy('../../analysis/interception/data/loadcell/treefort_scls_raw_kg.rds',
           overwrite = F,
           copy.date = T)
 
+file.copy('../../analysis/interception/data/loadcell/calibrations/load_cell_meta_ac_fortress.csv',
+          to = paper_lysimeter_data_path,
+          overwrite = F,
+          copy.date = T)
+
 # LIDAR DATA ----
 # See github repo https://github.com/acebulsk/lidar-processing for creation of this dataset
 
@@ -173,6 +178,7 @@ met_file_paths <- c(
   '../../analysis/met-data-processing/data/ffr_t_rh_u_qaqc_fill.rds',
   '../../analysis/eddy-cov/data/high-tower/ec_high_tower_30_min_2021_2023_qc_rough.rds',
   '../../analysis/met-data-processing/data/pluvio-qaqc/pwl_pluvio_15_min_qaqc_undercatch_corr_ac.rds',
+  '../../analysis/met-data-processing/data/pluvio-qaqc/pwl_pluvio_15_min_raw.rds',
   '../../analysis/met-data-processing/data/pwl_met_qaqc.rds'
 )
 

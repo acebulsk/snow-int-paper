@@ -112,12 +112,12 @@ parv_cionco_alpha <- function(n, m, u){
 }
 
 # mature site pars from parvi
-n = 2.43
-m = 3.46
+# n = 2.43
+# m = 3.46
 
 # regenerating site pars from parvi
-n = 2.97
-m = 3.2
+# n = 2.97
+# m = 3.2
 
 df_cionco <- data.frame(
   z_c = seq(0, 4.2, by = 0.1),
@@ -146,11 +146,11 @@ ggplot(aes(z_c, value, colour = name)) +
   geom_line() +
   ylab('Wind Speed (m/s)') +
   xlab('Height Above Ground (m)')
-
+plotly::ggplotly()
 df_cionco |>
   ggplot(aes(z_c, u_c_parv)) +
   geom_line() +
   ylab('Wind Speed (m/s)') +
   xlab('Height Above Ground (m)')
 
-ggsave('figs/examples/height_above_ground_vs_wind_speed.png', height = 3, width = 3)
+ggsave('figs/examples/height_above_ground_vs_cionco_parv_mod_wind_speed.png', height = 3, width = 3)

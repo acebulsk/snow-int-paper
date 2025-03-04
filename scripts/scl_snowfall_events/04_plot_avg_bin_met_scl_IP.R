@@ -75,7 +75,7 @@ at_ip <- met_intercept |>
 #                               ifelse(p.value < 0.05, "*", ""))),
 #           hjust = -0.1, vjust = 1.1, size = 3)
 at_ip
-
+plotly::ggplotly()
 ### wind speed ----
 
 # Define x and y column names
@@ -133,6 +133,7 @@ ws_ip <- met_intercept |>
 #                               ifelse(p.value < 0.05, "*", ""))),
 #           hjust = -0.1, vjust = 1.1, size = 3)
 ws_ip
+plotly::ggplotly()
 
 # canopy snow load ----
 

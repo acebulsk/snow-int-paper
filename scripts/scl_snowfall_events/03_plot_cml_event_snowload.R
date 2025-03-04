@@ -1,5 +1,7 @@
 # Plot cumulative canopy load over the snowfall periods using the SCLs
 
+# these dont start at 0 because we accumulate starting when precip/throughfall begins
+
 # plot cuml canopy load using the avg of the troughs ----
 
 event_df_avg_troughs |>
@@ -25,6 +27,7 @@ scl_lai_cc_fltr <- scl_lai_cc |>
   mutate(#cc = factor(round(cc, 2), levels = sort(unique(round(cc, 2)))),
          trough_name = tolower(trough_name))
 
+
 event_df_sep_troughs <- throughfall_periods_long |>
   left_join(ffr_met) |>
   left_join(q_tf_scl) |>
@@ -46,6 +49,7 @@ event_df_sep_troughs <- throughfall_periods_long |>
   select(datetime, w_tree_event, cuml_snow, cuml_int, cc, inst_type)
 
 event_df_sep_troughs |>
+  # filter(w_tree_event == '2021-12-23') |>
   ggplot(aes(cuml_snow, cuml_int, colour = cc, group = interaction(w_tree_event, cc))) +
   geom_line(alpha = 0.7) +
   # geom_smooth(method = 'lm', formula = y ~ x - 1, se = F, color = 'blue', linetype = 'dashed') +

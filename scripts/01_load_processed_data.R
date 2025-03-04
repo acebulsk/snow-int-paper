@@ -32,7 +32,7 @@ throughfall_periods_wide <- throughfall_periods |>
     storm_id = format(from, "%Y-%m-%d_%H")) |>
   select(from, to, w_tree_event, storm_id, bad_troughs)
 
-to_long <- function(from, to, w_tree_event, storm_id, bad_troughs){
+to_long_tf <- function(from, to, w_tree_event, storm_id, bad_troughs){
   datetime <- seq(from, to, 900)
 
   out <- data.frame(datetime, w_tree_event, storm_id, bad_troughs)
@@ -40,7 +40,7 @@ to_long <- function(from, to, w_tree_event, storm_id, bad_troughs){
   return(out)
 }
 
-throughfall_periods_long <- purrr::pmap_dfr(throughfall_periods_wide, to_long)
+throughfall_periods_long <- purrr::pmap_dfr(throughfall_periods_wide, to_long_tf)
 throughfall_periods_long$bad_troughs <- gsub('dense', 'closed', throughfall_periods_long$bad_troughs)
 # raw weighed tree data calibrated to snow survey stations that have average
 # canopy closure the same as the SCLs
@@ -87,6 +87,8 @@ ggplot(q_int_tree |> pivot_longer(c(value:d_int)), aes(datetime, value)) +
 
 scl_raw_kg <- readRDS(paste0(paper_lysimeter_data_path, 'treefort_scls_raw_kg.rds')) |> select(datetime, trough_name = name, scl_raw_kg = value)
 scl_raw <- readRDS(paste0(paper_lysimeter_data_path, 'treefort_scl_qaqc.rds'))
+scl_meta <- read.csv(paste0(paper_lysimeter_data_path, 'load_cell_meta_ac_fortress.csv')) # need surface area to bring interval measurements in kg/m2 back to kg
+scl_meta$trough_name <- c('mixed', 'sparse', 'closed')
 
 q_tf_scl <- scl_raw |>
   group_by(name) |>
@@ -100,26 +102,16 @@ q_tf_scl <- scl_raw |>
   filter(row_flag == F,
          is.na(q_tf) == F) |>
   select(datetime, trough_name = name, d_tf, q_tf) |>
-  ungroup()  |>
-  left_join(scl_raw_kg, by = c('datetime', 'trough_name')) |>
-  mutate(
-    scl_raw_kg = scl_raw_kg + 15, # raw_kg does not include weight of SCL so add estimate here based on diff of when the troughs were taken down in the spring/summer
-    absolute_accuracy = scl_raw_kg * 0.02)
+  ungroup()
 
 q_tf_scl_avg <- q_tf_scl |>
   group_by(datetime) |>
   summarise(q_tf = mean(q_tf, na.rm = T))
 
 met_intercept <- readRDS(paste0('data/lysimeter-data/processed/',
-                                '/continuous_throughfall_data_binned_met_select_events.rds')) |>
-  filter(q_sf > 0,
-         q_tf > 0.001,
-         # u <= 2,
-         q_sf > q_tf) |> # if troughs > q_sf may be some unloading
-  mutate(
-    q_int = q_sf - q_tf,
-    IP = q_int / q_sf) |>
-  filter(IP < 1)
+                                '/continuous_throughfall_data_binned_met_select_events.rds'))
+met_intercept$trough_name <- paste0(toupper(substr(met_intercept$trough_name, 1, 1)), substr(met_intercept$trough_name, 2, nchar(met_intercept$trough_name)))
+met_intercept$trough_name <- factor(met_intercept$trough_name, levels = c('Sparse', 'Mixed', 'Closed'))
 
 parsivel <- readRDS('data/parsivel-data/disdro_spectrum_processed_agg_15_min.RDS')
 
@@ -134,6 +126,7 @@ ffr_ec <- readRDS('data/met-data/ec_high_tower_30_min_2021_2023_qc_rough.rds') |
 #   mutate(ec_wind_dir = wind_dir_mag - calg_mag_declination) |>
 #   select(datetime, ec_wind_speed = wind_speed, ec_wind_dir)
 pwl_sf <- readRDS('data/met-data/pwl_pluvio_15_min_qaqc_undercatch_corr_ac.rds')
+pwl_pluvio_raw <- readRDS('data/met-data/pwl_pluvio_15_min_raw.rds')
 pwl_wind <- readRDS('data/met-data/pwl_met_qaqc.rds') |>
   select(
     datetime,
