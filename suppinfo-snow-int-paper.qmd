@@ -52,12 +52,6 @@ A comparison of UAV-liar and in-situ snow survey measurements over the March 13â
 
 @Kozak1995 noted, the default *R*^2^ value provided for least squares models forced through the origin by many statistical packages can be misleading. Therefore, these *R*^2^ values were adjusted using Equation 10 in @Kozak1995 and two statistical tests as described by @Kozak1995 were used to verify whether a no-intercept model (forced through the origin) was appropriate for this data compared to a with-intercept model. The first test evaluated if the intercept of the with-intercept was significantly different from zero using p-value provided by the 'summary' function from the 'stats' package in R [@R2024]. The second test examined if there was a significant difference between the no-intercept and with-intercept models by testing if the residual sum of squares was different between the no-intercept and full model, assessed via Equation 15 in @Kozak1995. If the first test indicated a significant difference, and the second did not, the no-intercept model could be deemed statistically justified [@Kozak1995]. 
 
-## Wind Speed Profile
-
-The displacement height ($d_0$, m) and roughness length of momentum ($z_0$, m) were estimated over five events where the anemometers were known to be clean of snow. The mean wind speed of each event for the three different anemometers is shown in @fig-ws-events.
-
-![Wind profiles showing the average wind speed at differing heights above the surface snowpack. Wind speeds were averaged for three anemometers over five events when the anemometers were known to be clean of snow.](figs/supplement/FFT_wind_profile_raw_obs.png){#fig-ws-events}
-
 \pagebreak
 
 ## References
