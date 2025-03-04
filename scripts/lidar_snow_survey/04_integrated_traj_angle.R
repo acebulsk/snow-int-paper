@@ -35,7 +35,7 @@ event_sd <- readRDS('../../analysis/met-data-processing/data/ffr_t_u_sd_qaqc_sho
 event_precip <-
   ffr_met_lidr_events_avg$`Cuml. Snowfall (mm)`[ffr_met_lidr_events_avg$event_id == sel_event]
 event_avg_wind <-
-  ffr_met_lidr_events_avg$`mean FT Wind Speed (m/s)`[ffr_met_lidr_events_avg$event_id == sel_event]
+  ffr_met_wnd_lidar_events_snowing$`mean FT Wind Speed (m/s)`[ffr_met_wnd_lidar_events_snowing$event_id == sel_event]
 
 # calculate the wind profile based on the wind speed observed over the event and
 # the roughness and displacement height measured over several events
@@ -89,8 +89,7 @@ ffr_met_wnd_lidar_events <- lidar_events_long_dt |>
   left_join(ffr_met_wnd)  |>
   left_join(parsivel, by = 'datetime') |>
   left_join(pwl_sf) |>
-  filter(event_id == select_event,
-         ppt > 0)
+  filter(event_id == select_event)
 
 mean_vel <- mean(ffr_met_wnd_lidar_events$part_vel, na.rm = T)
 
@@ -174,6 +173,10 @@ pwl_best_phi <- cor_smry$phi_at_peak_r2[cor_smry$plot_name == 'PWL' & cor_smry$g
 ft_best_phi <- cor_smry$phi_at_peak_r2[cor_smry$plot_name == 'FT' & cor_smry$group == 'Single Zenith']
 
 # ## PWL ----
+
+# trbtransfeR::fit_neutral_wind_helpr(c(event_avg_ustar, ft_wp_pars$z_0m*1.5, ft_wp_pars$d_0*1.5), 3.5)
+
+# pwl_select_wind <- wind_speed_function(3.5)
 
 pwl_select_wind <- wind_speed(pwl_best_phi, mean_vel)
 

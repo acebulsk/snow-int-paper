@@ -168,18 +168,37 @@ ft_cc_nadir <- ft_cc_nadir_025 |>
   mean(na.rm = T)
 
 # Calculate the resulting increase in leaf contact area based on trajectory angle ----
+site_mean_ht <- (pwl_e_mean_ht+ft_mean_ht)/2
+# mature site pars from parvi
+n = 2.43
+m = 3.46
 
-ft_lca_inc <- sine_fn(ft_event_ta, cp_sine_model_coef[['b']], ft_cc_nadir)
+# regenerating site pars from parvi
+# n = 2.97
+# m = 3.2
 
+a_parv <- parv_cionco_alpha(n, m, event_avg_wind)
 
-pwl_lca_inc <- sine_fn(pwl_event_ta, cp_sine_model_coef[['b']], pwl_cc_nadir)
+event_avg_wind_onethird <-
+  cionco_canopy_wind_flow(event_avg_wind,
+                          a_parv,
+                          (site_mean_ht/3)-event_sd,
+                          us_wind_height - event_sd)
 
-# Calculate the leaf contact area for the event adjusted by trajectory angle
+## FT ----
+ft_event_ta_estimate <- traj_angle_deg(event_avg_wind_onethird, mean_vel)
+
+ft_lca_inc <- sine_fn(ft_event_ta_estimate, cp_sine_model_coef[['b']], ft_cc_nadir)
 
 ft_lca <- ft_cc_nadir + ft_lca_inc
 
-pwl_lca <- pwl_cc_nadir + pwl_lca_inc
+## PWL ----
 
+pwl_event_ta_estimate <- traj_angle_deg(event_avg_wind_onethird, mean_vel)
+
+pwl_lca_inc <- sine_fn(pwl_event_ta_estimate, cp_sine_model_coef[['b']], pwl_cc_nadir)
+
+pwl_lca <- pwl_cc_nadir + pwl_lca_inc
 
 # Error Analysis
 
