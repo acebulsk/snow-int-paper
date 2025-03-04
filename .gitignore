@@ -9,3 +9,5 @@ revisions/
 *.html
 _extensions
 /.quarto/
+snow-int-paper.xdv
+snow-int-paper.fdb_latexmk
