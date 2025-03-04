@@ -14,7 +14,7 @@ library(ggplot2)
 library(tidyr)
 ```
 
-The goal is to calculate the snow-leaf contact area, $C_p$, for non-vertical snowfall compared to vertical. The contact area for vertical snowfall is equal to the canopy coverage $C_c$. For vertical snowfall, the width of canopy contacted is equal to the base width. As snow becomes non vertical this width increases as shown in @fig-tri.
+The goal is to calculate the snow-leaf contact area, $C_p$. For vertical snowfall the contact area is equal to the canopy coverage $C_c$. As snow becomes non vertical this width increases as shown in @fig-tri.
 
 ![Simplified diagram showing the contact area for non vertical snowfall hitting a triangle.](contact_area_triangle.png){#fig-tri height=55%}
 
