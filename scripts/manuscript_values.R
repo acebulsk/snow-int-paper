@@ -187,8 +187,8 @@ ft_frac_inc <- ft_inc / ft_nadir
 
 nls_sin_coefs <- readRDS('data/lidar-data/models/ta_vs_lca_nls_sin_fn_fit_both_ft_pwl_coefs.rds') |> round(2)
 lca_mod_error <- readRDS('data/lidar-data/models/lca_obs_mod_sin_fn_error_tbl.rds') |> mutate(Model = ifelse(Model == 'nls', 'Eq. 10', Model))
-pwl_errs_nls <- lca_mod_error |> filter(Model == 'nls', Plot == 'PWL') |> mutate(across(where(is.numeric), \(x) round(x, digits = 2))) |> rename(MB = `Mean Bias`, RMSE = `RMS Error`)
-ft_errs_nls <- lca_mod_error |> filter(Model == 'nls', Plot == 'FT') |> mutate(across(where(is.numeric), \(x) round(x, digits = 2))) |> rename(MB = `Mean Bias`, RMSE = `RMS Error`)
+pwl_errs_nls <- lca_mod_error |> filter(Model == 'Eq. 10', Plot == 'PWL') |> mutate(across(where(is.numeric), \(x) round(x, digits = 2))) |> rename(MB = `Mean Bias`, RMSE = `RMS Error`)
+ft_errs_nls <- lca_mod_error |> filter(Model == 'Eq. 10', Plot == 'FT') |> mutate(across(where(is.numeric), \(x) round(x, digits = 2))) |> rename(MB = `Mean Bias`, RMSE = `RMS Error`)
 pwl_errs_hp <- lca_mod_error |> filter(Model == 'HP98', Plot == 'PWL') |> mutate(across(where(is.numeric), \(x) round(x, digits = 2))) |> rename(MB = `Mean Bias`, RMSE = `RMS Error`)
 ft_errs_hp <- lca_mod_error |> filter(Model == 'HP98', Plot == 'FT') |> mutate(across(where(is.numeric), \(x) round(x, digits = 2))) |> rename(MB = `Mean Bias`, RMSE = `RMS Error`)
 

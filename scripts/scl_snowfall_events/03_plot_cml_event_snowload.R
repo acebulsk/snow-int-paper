@@ -125,7 +125,7 @@ rbind(event_df_sep_troughs, event_df_w_tree) |>
 # plot avg troughs alongside the tree ----
 
 event_df_avg_troughs_here <- event_df_avg_troughs |>
-  mutate(inst_type = 'SCL')|>
+  mutate(inst_type = 'Subcanopy Lysimeter Mean')|>
   select(datetime, w_tree_event, cuml_snow, cuml_int = cuml_int_troughs, inst_type)
 
 rbind(event_df_avg_troughs_here, event_df_w_tree |> select(-cc)) |>
