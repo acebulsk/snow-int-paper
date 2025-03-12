@@ -16,7 +16,12 @@ scl_lai_cc <- read.csv('data/hemisphere-photo-data/lai_site_id_2022_08_31.csv') 
   select(trough_name = new_name, vza, Le, cc) |>
   mutate(cc = round(cc, 2)) |>
   filter(!is.na(cc))
-
+scl_lai_cc_fltr <- scl_lai_cc |>
+  filter(vza == 60) |>
+  arrange(cc) |>
+  mutate(#cc = factor(round(cc, 2), levels = sort(unique(round(cc, 2)))),
+    trough_name = tolower(trough_name))
+scl_cc_mean <- scl_lai_cc_fltr$cc |> mean() |> round(2)
 throughfall_periods <- read.csv(paste0(paper_lysimeter_data_path,
                                        'select_storms_datetime_wide_independent_snow_surveys.csv')
                                 , skip = 1)

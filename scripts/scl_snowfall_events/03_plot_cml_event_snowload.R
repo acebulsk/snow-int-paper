@@ -21,12 +21,6 @@ ggsave('figs/automated_snowfall_event_periods/cuml_event_snowfall_canopy_storage
        width = 4, height = 4)
 
 # as above but separate out the troughs ----
-scl_lai_cc_fltr <- scl_lai_cc |>
-  filter(vza == 60) |>
-  arrange(cc) |>
-  mutate(#cc = factor(round(cc, 2), levels = sort(unique(round(cc, 2)))),
-         trough_name = tolower(trough_name))
-
 
 event_df_sep_troughs <- throughfall_periods_long |>
   left_join(ffr_met) |>

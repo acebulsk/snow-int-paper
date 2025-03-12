@@ -81,6 +81,11 @@ lysimeter_event_mod_smry <-
 lysimeter_15min_mod_smry <-
   readRDS('data/lysimeter-data/processed/lysimter_15min_avg_regression_stats.rds')
 
+scl_hourly_stats <- readRDS('data/lysimeter-data/processed/lysimter_hourly_avg_wilcox_stats.rds') |>
+  mutate(median_low = round(median_low, 2),
+         median_high = round(median_high, 2)) |>
+  select(-test_type)
+
 ### Influence of forest structure
 
 # MET
