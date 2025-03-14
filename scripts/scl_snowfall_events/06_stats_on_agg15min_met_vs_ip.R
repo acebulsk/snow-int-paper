@@ -360,7 +360,7 @@ lm_nest <- w_ip |>
 w_model_summaries <- lm_nest |>
   unnest(glance) |>
   mutate(n = df.residual + 2,
-         name = 'u') |>
+         name = 'weighed_tree_canopy_load_mm') |>
   select(trough_name,
          name,
          r.squared,
@@ -505,6 +505,32 @@ tree_wcox_test2 <- tree_ip_ttest |>
   select(test_type, trough_name, null_hypothesis, p.value, n_samples_low,
          n_samples_high, median_low, median_high, reject_null_hyp)
 
+
+# Visualize the data
+ggplot(tree_ip_ttest, aes(x = group, y = IP, fill = trough_name)) +
+  geom_boxplot() +
+  facet_wrap(~trough_name, scales = "free_y") +
+  labs(x = "Canopy Snow Load Bin (mm)", y = "IP") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+# OUTPUT STATS TBLS ----
+
+model_summaries <- rbind(
+  at_model_summaries,
+  wind_model_summaries,
+  w_model_summaries
+) |> left_join(var_name_dict2) |>
+  left_join(scl_lai_cc_fltr) |>
+  select(pretty_name,
+         trough_name,
+         cc,
+         r.squared,
+         adj.r.squared, p.value, n)
+
+saveRDS(model_summaries,
+        'data/lysimeter-data/processed/lysimter_hourly_avg_regression_stats.rds')
+
 wcox_tests_out <- rbind(at_wcox_test, wind_wcox_test, tree_wcox_test, tree_wcox_test2) |>
   mutate(
     p.value = case_when(
@@ -514,13 +540,6 @@ wcox_tests_out <- rbind(at_wcox_test, wind_wcox_test, tree_wcox_test, tree_wcox_
   )
 
 saveRDS(wcox_tests_out, 'data/lysimeter-data/processed/lysimter_hourly_avg_wilcox_stats.rds')
-# Visualize the data
-ggplot(tree_ip_ttest, aes(x = group, y = IP, fill = trough_name)) +
-  geom_boxplot() +
-  facet_wrap(~trough_name, scales = "free_y") +
-  labs(x = "Canopy Snow Load Bin (mm)", y = "IP") +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1))
 
 # Kruskal-Wallis test ----
 # Similar non-parametric test as the wilcox test but
