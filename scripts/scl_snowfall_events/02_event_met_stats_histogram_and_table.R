@@ -32,16 +32,6 @@ event_df_avg_troughs <- throughfall_periods_long |>
          elapsed_hours = as.numeric(difftime(datetime, start_time, units = "hours"))
   )# |> filter(w_tree_event %in% good_events)
 
-pretty_names_vect <- c(
-  temp_ax_lab,
-  "Relative Humidity (%)",
-  wind_ax_lab,
-  "Snowfall Rate (mm/hr)",
-  "Canopy Load (mm)",
-  "Interception Efficiency (-)",
-  "Cumulative Snowfall (mm)",
-  "Initial Canopy Snow Load (mm)"
-)
 
 var_name_dict <-
   data.frame(

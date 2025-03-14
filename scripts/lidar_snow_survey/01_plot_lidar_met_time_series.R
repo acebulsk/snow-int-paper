@@ -17,45 +17,6 @@ ffr_met_wnd_lidar_events <- lidar_events_long_dt |>
 
 # time series over each event
 
-var_name_dict <- data.frame(
-  var_lab = c(
-    'Air Temp. (°C)',
-    'Cuml. Snowfall (mm)',
-    'Snowfall (mm/hr)',
-    'RH (%)',
-    'Wind Dir. (°)',
-    'Wind Dir. (°)',
-    'Wind Speed (m/s)',
-    'Wind Speed (m/s)',
-    'Wind Speed (m/s)',
-    'Wind Dir. (°)'
-  ),
-  var_stn = c(
-    'FT',
-    'PWL',
-    'PWL',
-    'FT',
-    'FT',
-    'PWL',
-    'FT',
-    'PWL',
-    'FT EC 15 m',
-    'FT EC 15 m'
-  ),
-  name = c(
-    'air_temp',
-    'event_cml_sf',
-    'ppt',
-    'rh',
-    'ft_wind_dir',
-    'pwl_wind_dir',
-    'ft_wind_speed',
-    'pwl_wind_speed',
-    'ec_wind_speed',
-    'ec_wind_dir'
-  )
-)
-
 ffr_met_wnd_lidar_events_fltr <- ffr_met_wnd_lidar_events |>
   group_by(event_id) |>
   mutate(event_cml_sf = cumsum(ppt),

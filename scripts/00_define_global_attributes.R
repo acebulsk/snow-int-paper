@@ -229,3 +229,60 @@ compute_wilcoxon <- function(data, group_var, group_low, group_high, test_type, 
     ) %>%
     select(test_type, trough_name, null_hypothesis, p.value, n_samples, median_low, median_high, reject_null_hyp)
 }
+
+var_name_dict <- data.frame(
+  var_lab = c(
+    'Air Temp. (°C)',
+    'Cuml. Snowfall (mm)',
+    'Snowfall (mm/hr)',
+    'RH (%)',
+    'Wind Dir. (°)',
+    'Wind Dir. (°)',
+    'Wind Speed (m/s)',
+    'Wind Speed (m/s)',
+    'Wind Speed (m/s)',
+    'Wind Dir. (°)'
+  ),
+  var_stn = c(
+    'FT',
+    'PWL',
+    'PWL',
+    'FT',
+    'FT',
+    'PWL',
+    'FT',
+    'PWL',
+    'FT EC 15 m',
+    'FT EC 15 m'
+  ),
+  name = c(
+    'air_temp',
+    'event_cml_sf',
+    'ppt',
+    'rh',
+    'ft_wind_dir',
+    'pwl_wind_dir',
+    'ft_wind_speed',
+    'pwl_wind_speed',
+    'ec_wind_speed',
+    'ec_wind_dir'
+  )
+)
+
+pretty_names_vect <- c(
+  temp_ax_lab,
+  "Relative Humidity (%)",
+  wind_ax_lab,
+  "Snowfall Rate (mm/hr)",
+  "Canopy Load (mm)",
+  "Interception Efficiency (-)",
+  "Cumulative Snowfall (mm)",
+  "Initial Canopy Snow Load (mm)"
+)
+
+var_name_dict2 <-
+  data.frame(
+    name = c('t', 'rh', 'u', 'p', 'cuml_int_troughs', 'IP_troughs', 'event_del_sf', 'weighed_tree_canopy_load_mm'),
+    pretty_name = pretty_names_vect
+  )
+

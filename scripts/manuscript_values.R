@@ -76,10 +76,8 @@ mean_ip_sparse <- mean_ip_by_trough$IP[mean_ip_by_trough == 'sparse_forest'] |> 
 mean_ip_med <- mean_ip_by_trough$IP[mean_ip_by_trough == 'mixed'] |> round(2)
 mean_ip_dense <- mean_ip_by_trough$IP[mean_ip_by_trough == 'dense_forest'] |> round(2)
 
-lysimeter_event_mod_smry <-
-  readRDS('data/lysimeter-data/processed/lysimter_event_avg_regression_stats.rds')
-lysimeter_15min_mod_smry <-
-  readRDS('data/lysimeter-data/processed/lysimter_15min_avg_regression_stats.rds')
+lysimeter_hourly_mod_smry <-
+  readRDS('data/lysimeter-data/processed/lysimter_hourly_avg_regression_stats.rds')
 
 scl_hourly_stats <- readRDS('data/lysimeter-data/processed/lysimter_hourly_avg_wilcox_stats.rds') |>
   mutate(median_low = round(median_low, 2),
