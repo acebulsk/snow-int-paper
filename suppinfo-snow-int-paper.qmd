@@ -20,13 +20,13 @@ csl: '../../papers/bibtex/csl-styles/apa-disable-disambiguate-add-names.csl'
 
 **Authors:**
 
-A. Cebulski^1^ (ORCID ID - 0000-0001-7910-5056)
+Alex C. Cebulski^1^ (ORCID ID - 0000-0001-7910-5056)
 
-J.W. Pomeroy^1^ (ORCID ID - 0000-0002-4782-7457)
+John W. Pomeroy^1^ (ORCID ID - 0000-0002-4782-7457)
 
 ^1^Centre for Hydrology, University of Saskatchewan, Canmore, Canada
 
-**Corresponding Author:** A. Cebulski, alexcebulski@gmail.com
+**Corresponding Author:** A.C. Cebulski, alex.cebulski@usask.ca
 
 ```{r, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, message=FALSE, warning=FALSE, fig.align='center')

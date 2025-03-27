@@ -14,7 +14,7 @@ format:
   #   number-sections: true
   #   toc: false
   #   fig-pos: H # makes figs appear in the location specified. without this they sometimes appear in the middle of a paragraph.
-    # linestretch: 1.5 # set inline instead
+  #   linestretch: 1.5 # set inline instead
   # html:
   #   toc: false
   #   self-contained: true
