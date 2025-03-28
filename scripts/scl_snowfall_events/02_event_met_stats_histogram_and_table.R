@@ -82,7 +82,7 @@ event_avgs <- event_df_avg_troughs |>
     total_snowfall = sum(p, na.rm = TRUE)
   )
 
-saveRDS(event_avgs, 'data/event_avgs.rds')
+saveRDS(event_avgs, 'data/event_met/event_avgs.rds')
 
 event_avgs_maxmin <- event_df_avg_troughs |>
   group_by(w_tree_event) |>
@@ -103,7 +103,7 @@ event_avgs_maxmin <- event_df_avg_troughs |>
     total_snowfall = sum(p, na.rm = TRUE)
   )
 
-saveRDS(event_avgs_maxmin, 'data/event_avgs_maxmin.rds')
+saveRDS(event_avgs_maxmin, 'data/event_met/event_avgs_maxmin.rds')
 
 # pretty table of event met stats ----
 pretty_table <- event_avgs_maxmin |>
@@ -164,6 +164,6 @@ pretty_table <- event_avgs_maxmin |>
 
 pretty_table
 
-saveRDS(pretty_table, 'data/event_avgs_maxmin_pretty_gt_table.rds')
+saveRDS(pretty_table, 'data/event_met/event_avgs_maxmin_pretty_gt_table.rds')
 
 # gt::gtsave(pretty_table, 'figs/event_avgs_maxmin_pretty_gt_table.pdf')

@@ -6,7 +6,7 @@ mean_ip_by_trough <- met_intercept |>
   group_by(trough_name) |>
   summarise(IP = mean(IP))
 
-saveRDS(mean_ip_by_trough, 'data/mean_ip_by_trough.rds')
+saveRDS(mean_ip_by_trough, 'data/lysimeter-data/mean_ip_by_trough.rds')
 
 met_intercept$trough_name <- paste0(toupper(substr(met_intercept$trough_name, 1, 1)), substr(met_intercept$trough_name, 2, nchar(met_intercept$trough_name)))
 met_intercept$trough_name <- factor(met_intercept$trough_name, levels = c('Sparse', 'Mixed', 'Closed'))

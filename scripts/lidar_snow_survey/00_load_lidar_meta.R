@@ -39,7 +39,7 @@ fsd_meta <-
 
 # saveRDS(scan_dates, 'data/lidar_event_wide.rds')
 
-scan_dates <- readRDS('data/lidar_event_wide.rds')
+scan_dates <- readRDS('data/lidar-data/lidar_event_wide.rds')
 
 # currently set this so we have periods of snowfall
 # i.e., from is snowfall start time not takeoff time

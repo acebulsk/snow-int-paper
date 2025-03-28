@@ -53,7 +53,7 @@ ft_frac_cpy_height_off_ground <- ws_pars$frac_cpy_height_off_ground[ws_pars$plot
 event_sd <- ws_pars$event_mean_snow_depth |> mean() |> round(2)
 
 # met of the snowfall periods
-sf_event_avgs <- readRDS('data/event_avgs_maxmin.rds')
+sf_event_avgs <- readRDS('data/event_met/event_avgs_maxmin.rds')
 sf_event_t_range <- c(min(sf_event_avgs$min_t), max(sf_event_avgs$max_t)) |> round(1)
 sf_event_u_range <- c(min(sf_event_avgs$min_u), max(sf_event_avgs$max_u)) |> round(1)
 # sf_event_ip_range <- c(min(sf_event_avgs$min_IP_troughs), max(sf_event_avgs$max_IP_troughs))
@@ -70,7 +70,7 @@ lai_range <- paste(round(min(lai_measurements$Le), 2), '–', round(max(lai_meas
 
 ### Influence of meteorology
 
-mean_ip_by_trough <- readRDS('data/mean_ip_by_trough.rds')
+mean_ip_by_trough <- readRDS('data/lysimeter-data/mean_ip_by_trough.rds')
 
 mean_ip_sparse <- mean_ip_by_trough$IP[mean_ip_by_trough == 'sparse_forest'] |> round(2)
 mean_ip_med <- mean_ip_by_trough$IP[mean_ip_by_trough == 'mixed'] |> round(2)
@@ -166,11 +166,6 @@ ft_a_val_nadir <- mod_error$`Model Slope`[mod_error$`Plot Name` == 'FT' & mod_er
 pwl_r2_val_nadir <- mod_error$R2_adj[mod_error$`Plot Name` == 'PWL' & mod_error$`Canopy Metrics` == 'Nadir'] |> round(2)
 ft_r2_val_nadir <- mod_error$R2_adj[mod_error$`Plot Name` == 'FT' & mod_error$`Canopy Metrics` == 'Nadir'] |> round(2)
 
-ft_10m_example <- readRDS('data/event_met/ft_20230313_wind_speed_traj_angle_10m.rds')
-ft_2m_example <- readRDS('data/event_met/ft_20230313_wind_speed_traj_angle_2m.rds')
-ft_mean_wind_prof_integral <- readRDS('data/event_met/ft_20230313_mean_integral_wind_profile_and_traj.rds')
-ft_mean_wind_speed_prof_integral <- ft_mean_wind_prof_integral$wind_speed |> round(1)
-
 ### Combined effects ----
 
 hemi_stats <- readRDS('data/lidar-data/stats/full_voxrs_not_filtered_to_swe_traj_angle_w_lca_23_072.rds') |>
@@ -203,7 +198,7 @@ ft_wp_pars <- readRDS(
 
 ### Throughfall model performance ----
 
-vb_plot_scale_err <- readRDS('figs/lidar_periods/23_072_23_073_plot_scale_vb_model_error.rds') |>
+vb_plot_scale_err <- readRDS('data/lidar-data/models/23_072_23_073_plot_scale_vb_model_error.rds') |>
   select(plot,
          val_name = name,
          mod_type,
